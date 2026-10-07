@@ -1,0 +1,31 @@
+# MATLAB / Simulink
+*.asv
+*.autosave
+*.slxc
+*.slx.r20*
+slprj/
+codegen/
+*.mex*
+
+# PLECS
+*.plecs~
+
+# Office temp/lock files
+~$*
+*.tmp
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.nav
+*.snm
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
