@@ -25,6 +25,9 @@ codegen/
 *.nav
 *.snm
 
+# Local-only files (instructor's slides, syllabus, course admin): never pushed
+private/
+
 # OS
 Thumbs.db
 desktop.ini
