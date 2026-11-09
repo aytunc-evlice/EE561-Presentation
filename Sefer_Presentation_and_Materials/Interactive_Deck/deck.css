@@ -146,6 +146,8 @@ a { color: #1a56b5; }
 /* build steps */
 [data-step] { transition: opacity .3s ease; }
 [data-step]:not(.shown) { opacity: 0; pointer-events: none; }
+[data-until] { transition: opacity .3s ease; }
+[data-until].gone { opacity: 0; pointer-events: none; }
 
 /* footer */
 .sf { position: absolute; left: 64px; right: 64px; bottom: 18px; display: flex; justify-content: space-between; font: 500 15px/1 var(--font); color: var(--muted); }
@@ -157,6 +159,48 @@ table.tb { border-collapse: collapse; width: 100%; font-size: 20px; color: var(-
 .tb tr.hl td { background: var(--accent-soft); color: var(--ink); }
 .tb td.c, .tb th.c { text-align: center; }
 .tb.nocase th { font-size: 16px; }
+
+/* Part I slides (.p1): fewer words, larger type */
+.p1 p, .p1 li { font-size: 29px; line-height: 1.38; }
+.p1 .small, .p1 .small li { font-size: 25px; }
+.p1 .eq { font-size: 34px; }
+.p1 .callout { font-size: 26px; line-height: 1.35; }
+.p1 .strip .callout { font-size: 25px; line-height: 1.3; padding: 12px 18px; }
+.p1 .fig figcaption { font-size: 22px; line-height: 1.3; }
+.p1 table.tb { font-size: 27px; }
+.p1 .tb th { font-size: 20px; }
+.p1 .steps > li { grid-template-columns: 112px 1fr; font-size: 29px; }
+.p1 .idea svg text { font-size: 21px; }
+.p1 .statetab { font-size: 18px; }
+.p1 .statetab th { font-size: 16px; }
+.p1 .idea svg { height: 360px; }
+/* one-line definitions under the title, and labels under equation terms */
+.terms { font: 400 21px/1.35 var(--font); color: var(--muted); margin-top: 10px; }
+.terms b { color: var(--ink2); }
+.ub { display: inline-flex; flex-direction: column; align-items: center; }
+.ub > small { font: 600 15px/1.25 var(--font); font-style: normal; color: var(--accent); border-top: 2px solid var(--accent); width: 100%; text-align: center; margin-top: 2px; }
+/* equation slides: one size up, vertically centred */
+.p1 .xl .eq { font-size: 42px; }
+.p1 .xl p, .p1 .xl li { font-size: 32px; }
+.p1 .xl table.tb { font-size: 32px; }
+.p1 .xl .tb th { font-size: 24px; }
+.p1 .xl .tb td { padding: 14px 12px; }
+.p1 .xl .steps > li { font-size: 31px; grid-template-columns: 124px 1fr; gap: 18px; }
+.p1 .xl .steps { gap: 22px; }
+.p1 .xl > .stack, .p1 .xl > .steps { align-self: center; }
+
+.p1 table.devtab { font-size: 21px; }
+.p1 table.devtab td, .p1 table.devtab th { padding: 7px 10px; }
+.p1 table.mini { font-size: 26px; width: auto; }
+.p1 table.mini td, .p1 table.mini th { padding: 6px 18px; }
+
+/* photo cards (real devices) */
+.photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-height: 0; }
+.photo { margin: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.photo img { width: 100%; height: 400px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+.photo figcaption { font-size: 24px; line-height: 1.3; color: var(--ink2); }
+.photo figcaption b { color: var(--ink); }
+.photo .credit { font: 400 13px/1.3 var(--font); color: var(--muted); }
 
 /* ---------- controls ---------- */
 .ctl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -192,11 +236,19 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 .sch .dev .arrow { fill: var(--off); stroke: none; transition: fill .15s; }
 .sch .dev .dio { stroke: var(--off); stroke-width: 2.2; fill: none; stroke-linejoin: round; }
 .sch .dev .dtri { fill: var(--panel); stroke: var(--off); stroke-width: 2.2; stroke-linejoin: round; }
-.sch .dev.on .body { stroke: var(--on); }
-.sch .dev.on .arrow { fill: var(--on); }
+.sch .dev.csw .body { stroke: var(--on); }
+.sch .dev.csw .arrow { fill: var(--on); }
 .sch .dev .gate { fill: var(--panel); stroke: var(--off); stroke-width: 2; transition: fill .15s; }
 .sch .dev.on .gate { fill: var(--good); stroke: var(--good); }
-.sch .dev.diode .dio, .sch .dev.diode .dtri { stroke: var(--ink2); }
+.sch .dev.cd .dio, .sch .dev.cd .dtri { stroke: var(--on); stroke-width: 3; }
+/* legend under schematics: gate signal vs conduction */
+.schleg { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; font: 600 15px/1.2 var(--font); color: var(--muted); }
+.schleg span { display: inline-flex; align-items: center; gap: 7px; }
+.schleg i { display: inline-block; }
+.schleg .lg-gate { width: 12px; height: 12px; border-radius: 50%; background: var(--good); }
+.schleg .lg-cond { width: 24px; height: 4px; background: var(--on); }
+.schleg .lg-idle { width: 24px; height: 4px; background: var(--off); }
+.schleg .lg-flow { width: 24px; border-top: 5px dotted var(--flow); }
 .sch .cap { stroke: var(--ink2); stroke-width: 2.4; fill: none; }
 .sch .cap .plate { stroke-width: 4; }
 .sch .lbl { fill: var(--ink); font: 700 17px var(--font); }

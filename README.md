@@ -1,6 +1,6 @@
 # EE561 – Multilevel Converters (Student-Led Module)
 
-METU EE561, Fall 2026 · Presenters: **Sefer** and **Aytunç**
+METU EE561, Fall 2026 · Presenters: **Sefer İdacı**, **Mustafa Aytunç Evlice** and **Elif Topaloğlu Kurmaç**
 
 ## Repository layout
 
@@ -9,20 +9,21 @@ METU EE561, Fall 2026 · Presenters: **Sefer** and **Aytunç**
 | `notes/` | Outline, presenter split, meeting notes, rehearsal feedback |
 | `references/` | `references.md` (citation list) and `papers/` (PDFs) |
 | `simulations/` | `plecs/` and `simulink/` models shared with the class |
-| `slides/` | Presentation slides (working + final versions); `Interactive_Deck/` is the HTML deck for both parts |
+| `slides/` | Presentation slides (working + final versions) |
 | `lab-demo/` | Lab demo plan, setup photos, measurements |
-| `quiz/` | Printed 15-min quiz, answer key and potential final questions (PDFs; HTML sources in `quiz/src/`) |
+| `quiz/` | Post-presentation quiz and exam questions |
+| `Sefer_Presentation_and_Materials/` | Sefer’s part: interactive HTML deck, printed quiz and potential final questions, reference paper (see its [README](Sefer_Presentation_and_Materials/README.md)) |
 | `private/` | Local only, git-ignored: instructor's slides, syllabus, course admin |
 
 See [`notes/outline.md`](notes/outline.md) for the topic breakdown and
 [`notes/deliverables.md`](notes/deliverables.md) for the syllabus checklist.
 
-## Interactive deck
+## Sefer’s interactive deck
 
-Open [`slides/Interactive_Deck/index.html`](slides/Interactive_Deck/index.html) in Chrome or Edge
-(offline, live simulations; keys and slide outline in its [README](slides/Interactive_Deck/README.md)).
+Open [`Sefer_Presentation_and_Materials/Interactive_Deck/index.html`](Sefer_Presentation_and_Materials/Interactive_Deck/index.html) in Chrome or Edge
+(offline, live simulations; keys and slide outline in its [README](Sefer_Presentation_and_Materials/Interactive_Deck/README.md)).
 With GitHub Pages enabled (Settings → Pages → `main`, `/ (root)`), it is online at
-<https://aytunc-evlice.github.io/EE561-Presentation/slides/Interactive_Deck/>.
+<https://aytunc-evlice.github.io/EE561-Presentation/Sefer_Presentation_and_Materials/Interactive_Deck/>.
 
 ## Workflow
 

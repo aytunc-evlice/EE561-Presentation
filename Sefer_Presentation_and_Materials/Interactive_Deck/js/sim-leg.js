@@ -376,9 +376,14 @@
       const sg = sign >= 0 ? 'pos' : 'neg';
       const el = sign === 0 ? [] : st._el[sg];
       const cond = new Set(el.map((e) => e.id));
+      const how = new Map(el.map((e) => [e.id, e.how]));
       for (const d of T.devs) {
         const r = devEls[d.id];
+        // gate signal (green dot) is separate from conduction: a gated switch may carry no current,
+        // or its antiparallel diode may carry it
         r.g.classList.toggle('on', !!st.g[d.id]);
+        r.g.classList.toggle('csw', how.get(d.id) === 'sw');
+        r.g.classList.toggle('cd', how.get(d.id) === 'd');
         let txt = '';
         if (!cond.has(d.id)) {
           const vb = (pot[d.top] || 0) - (pot[d.bot] || 0);
@@ -404,13 +409,19 @@
   }
 
   const devName = (e) => (e.how === 'sw' || e.d.kind === 'd' ? e.d.lab : e.d.lab.replace('S', 'D'));
+  const schLegend = () => h('div', { class: 'schleg', html:
+    '<span><i class="lg-gate"></i>gate signal on</span><span><i class="lg-cond"></i>carries current</span>' +
+    '<span><i class="lg-idle"></i>no current</span><span><i class="lg-flow"></i>current path</span>' });
 
   // Static figures: one or more frozen schematics with captions (mode-by-mode analysis slides).
+  // cfg.cols wraps the figures into rows (default: all in one row).
   SIMS.legfig = function (host, cfg) {
     const T = TOPO[cfg.topo];
     const V = Object.assign({ v1: 400, v2: 400, vf: T.fcNom || 0 }, cfg.v || {});
+    const cols = cfg.cols || cfg.figs.length;
     host.classList.add('figrow');
-    host.style.gridTemplateColumns = `repeat(${cfg.figs.length}, 1fr)`;
+    host.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    host.style.gridTemplateRows = `repeat(${Math.ceil(cfg.figs.length / cols)}, minmax(0, 1fr))`;
     for (const f of cfg.figs) {
       const st = T.st[f.state];
       if (!st) throw new Error('legfig: unknown state ' + f.state);
@@ -419,6 +430,12 @@
       const cell = h('figure', { class: 'fig' }, sch.svg, h('figcaption', { html: f.cap || '' }));
       if (f.step != null) cell.setAttribute('data-step', f.step);
       host.append(cell);
+    }
+    if (cfg.legend != null && cfg.legend !== false) {
+      const lg = schLegend();
+      lg.style.gridColumn = '1 / -1';
+      if (typeof cfg.legend === 'number') lg.setAttribute('data-step', cfg.legend);
+      host.append(lg);
     }
     return {};
   };
@@ -448,7 +465,7 @@
       host.classList.add('sim');
       host.style.gridTemplateColumns = (cfg.schW || 600) + 'px 1fr';
       sch = Schematic(T);
-      const left = h('div', { class: 'sim-col', style: { justifyContent: 'center' } }, sch.svg);
+      const left = h('div', { class: 'sim-col', style: { justifyContent: 'center' } }, sch.svg, schLegend());
       const right = h('div', { class: 'sim-col' });
       const hdr = h('div', { class: 'row' });
       if (topos.length > 1) hdr.append(K.seg({ options: topos.map((k) => [k, TOPO[k].short]), value: P.topo, onChange: (v) => { P.topo = v; P.state = null; build(); } }).el);
