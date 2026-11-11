@@ -67,24 +67,30 @@
 <section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: modulation index and frequency ratio">
   <div class="sh"><div><div class="kicker"><b>Basics</b> · m<sub>a</sub>, m<sub>f</sub> and the PWM spectrum · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Basics: modulation index and frequency ratio</h2></div></div>
   <div class="body" style="grid-template-columns: 560px 1fr">
-    <div class="stack" style="gap:18px">
-      <p class="small"><b><span class="m">m</span><sub>a</sub></b>: sine peak / carrier peak. &nbsp; <b><span class="m">m</span><sub>f</sub></b>: carrier frequency / output frequency.</p>
-      <div data-step="1"><h3 style="font-size:22px">Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3>
-        <p class="small">The average over each switching period follows the reference (last slide), scaled to ±<span class="m">V</span><sub>dc</sub>/2. So the average is a sine of peak <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2. The switching only adds harmonics far above it.</p></div>
-      <div data-step="2"><h3 style="font-size:22px">Overmodulation, <span class="m">m</span><sub>a</sub> &gt; 1</h3>
-        <p class="small">Near the peak the sine is above the carrier: no pulses, the output sticks at +<span class="m">V</span><sub>dc</sub>/2. The tops are clipped, so the fundamental grows more slowly than <span class="m">m</span><sub>a</sub> (at most 1.27 · <span class="m">V</span><sub>dc</sub>/2, a square wave) and harmonics 3, 5, 7 appear.</p></div>
-      <div data-step="3"><h3 style="font-size:22px">Where the harmonics are</h3>
-        <p class="small">In groups around <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … A higher <span class="m">m</span><sub>f</sub> moves them further away: easier to filter. With <span class="m">m</span><sub>f</sub> a multiple of 3, the harmonic at <span class="m">m</span><sub>f</sub> cancels in the line voltage.</p></div>
+    <div class="stack" style="gap:10px">
+      <p class="small"><b><span class="m">m</span><sub>a</sub></b> = sine peak / carrier peak &nbsp;·&nbsp; <b><span class="m">m</span><sub>f</sub></b> = carrier frequency / output frequency</p>
+      <h3 style="font-size:22px; margin:6px 0 0" data-step="1">Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3>
+      <p class="small" data-step="1">Look at one switching period. The sine hardly moves, so call its value <span class="m">r</span>. The carrier rises evenly from −1 to +1, so the switch is on for</p>
+      <div class="eq" data-step="1" style="font-size:25px">① &nbsp;<span class="m">d</span> = (1 + <span class="m">r</span>) / 2</div>
+      <p class="small" data-step="2">On: +<span class="m">V</span><sub>dc</sub>/2. Off: −<span class="m">V</span><sub>dc</sub>/2. The average over the period:</p>
+      <div class="eq" data-step="2" style="font-size:25px">② &nbsp;⟨<span class="m">v</span>⟩ = <span class="m">d</span> · <span class="m">V</span><sub>dc</sub>/2 − (1 − <span class="m">d</span>) · <span class="m">V</span><sub>dc</sub>/2 = <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</div>
+      <p class="small" data-step="3">This holds in every period, and <span class="m">r</span> = <span class="m">m</span><sub>a</sub> sin ω<span class="m">t</span>:</p>
+      <div class="eq" data-step="3" style="font-size:25px">③ &nbsp;⟨<span class="m">v</span>⟩ = <span class="m">m</span><sub>a</sub> · (<span class="m">V</span><sub>dc</sub>/2) · sin ω<span class="m">t</span> &nbsp;→&nbsp; <span class="eq box" style="font-size:25px; padding:2px 12px"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span></div>
+      <p class="small muted" data-step="3">Example: 800 V link, <span class="m">m</span><sub>a</sub> = 0.8 → 0.8 × 400 V = 320 V peak.</p>
+      <p class="small" data-step="4" style="margin-top:6px"><b><span class="m">m</span><sub>a</sub> &gt; 1:</b> <span class="m">d</span> cannot go above 1. Near the peak the switch just stays on, the tops are cut off: less fundamental than ③, plus harmonics 3, 5, 7.</p>
+      <p class="small" data-step="5"><b>The rest:</b> the pulses add harmonics only around <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … far above the fundamental, so a filter removes them.</p>
     </div>
     <div data-sim="mindex" data-config='{"m":0.8,"mf":15}'></div>
   </div>
   <aside class="notes">
-    <p><b>2.5 min.</b> One idea per click.</p>
+    <p><b>2.5 min.</b> One step per click; do the algebra on the slide, slowly.</p>
     <ul>
-      <li><b>Fundamental:</b> point at the blue average on the last slide. The average over one switching period is the reference times V<sub>dc</sub>/2; for a sine reference that average is a sine of peak m<sub>a</sub>·V<sub>dc</sub>/2. The pulses add only high-frequency content around m<sub>f</sub> and its multiples, so nothing else lands on the fundamental. Show it in the simulation: at m<sub>a</sub> = 0.8 the red dot sits on the straight line (0.8 × 400 V = 320 V).</li>
-      <li><b>Overmodulation:</b> sweep m<sub>a</sub> from 0.8 to 3. Above 1 the pulses near the peak disappear, the dot leaves the line and creeps up to 4/π ≈ 1.27, and the 3rd, 5th and 7th appear in the spectrum. Why: a flat-topped sine is a sine plus odd low-order harmonics, and clipping removes area from the peaks, so the fundamental is less than m<sub>a</sub> would predict.</li>
-      <li><b>Harmonics:</b> back to m<sub>a</sub> = 0.8: nothing below the first group. Change m<sub>f</sub> and the groups move with it. Switch pole ↔ line-to-line: the harmonic exactly at h = m<sub>f</sub> = 15 disappears, because it is the same in all three phases; its neighbours (13, 17) stay. Choosing m<sub>f</sub> odd also avoids even harmonics (Mohan's rule for small m<sub>f</sub>; above about 21 it matters little).</li>
-      <li>In three-phase, min-max injection extends the linear range to 2/√3 ≈ 1.155 (min-max slide, three slides later).</li>
+      <li><b>① On-time:</b> draw it on the zoom of slide 3 if needed. The carrier goes from −1 to +1 in half a period, evenly; it is below r for the fraction (r − (−1))/2 = (1 + r)/2. Check: r = 0 → 50 %, r = 1 → 100 %, r = −1 → 0 %.</li>
+      <li><b>② Average:</b> on-time at +V<sub>dc</sub>/2, off-time at −V<sub>dc</sub>/2; substitute ①: (2d − 1)·V<sub>dc</sub>/2 = r·V<sub>dc</sub>/2. The leg reproduces the reference, scaled by V<sub>dc</sub>/2.</li>
+      <li><b>③ Fundamental:</b> the averages of all periods together form a sine of peak m<sub>a</sub>·V<sub>dc</sub>/2. In the simulation: m<sub>a</sub> = 0.8, the readout shows 320 V and the red dot sits on the straight line.</li>
+      <li><b>m<sub>a</sub> &gt; 1:</b> sweep m<sub>a</sub> up to 3. The dot leaves the line and flattens towards 4/π ≈ 1.27 (square wave); 3rd, 5th, 7th appear in the spectrum because a flat-topped sine is no longer a pure sine.</li>
+      <li><b>The rest:</b> back to 0.8: nothing in the spectrum until the group at m<sub>f</sub> = 15. Change m<sub>f</sub>: the groups move with it. If asked: with m<sub>f</sub> a multiple of 3 the harmonic exactly at m<sub>f</sub> cancels in the line-to-line voltage (pole ↔ line-to-line button); m<sub>f</sub> odd avoids even harmonics.</li>
+      <li>Three-phase min-max injection extends the linear range to 1.155: three slides later.</li>
     </ul>
   </aside>
 </section>
