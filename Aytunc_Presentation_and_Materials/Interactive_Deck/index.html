@@ -31,8 +31,8 @@
     <p class="lead">After this talk you should be able to:</p>
     <ol style="gap:12px">
       <li>Define carrier, reference, m<sub>a</sub> and m<sub>f</sub>, and predict the fundamental and the harmonic clusters of sine-triangle PWM.</li>
-      <li>Generate the level sequence of a multilevel leg with carriers (PD, POD, APOD, phase-shifted).</li>
       <li>Compute the min-max offset and the linear limit, and explain why it is the space-vector modulator in carrier form.</li>
+      <li>Generate the level sequence of a multilevel leg with carriers (PD, POD, APOD, phase-shifted).</li>
       <li>Explain why the split DC link drifts, and design an offset-based balancing loop, including its limits.</li>
       <li>Choose flying-capacitor states and MMC submodules in closed loop, and explain why an MMC needs circulating-current control.</li>
       <li>Place modulation and balancing inside a grid current controller, and compare L and LCL filters for 2- and 3-level legs.</li>
@@ -57,7 +57,7 @@
     <p><b>2.5 min.</b> Build it click by click: carrier → DC reference → comparator → average (buck). Click 4 switches the same simulation to a sine reference. Press <b>P</b> to run time: in DC mode the pulses are all the same width; in sine mode the pulse width breathes with the sine and the zoom window follows the cursor. Drag on the top plot to place the cursor by hand.</p>
     <ul>
       <li>DC mode: move D and watch the average and the readout (on-time × 800 V). The output is measured from the negative rail, as in a buck converter.</li>
-      <li>Sine mode: the pole voltage is measured from the midpoint, so it swings ±400 V. Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the average clips at ±400 V (next slide).</li>
+      <li>Sine mode: the pole voltage is measured from the midpoint, so it swings ±400 V. Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the average clips at ±400 V (slides 5 and 6).</li>
       <li>Message: the modulator does not care what the reference is. DC gives a DC-DC converter, a sine gives an inverter, and the controller later on simply hands it whatever voltage it needs.</li>
       <li>Sefer used the same leg; the multilevel carrier lab generalizes the comparator to N − 1 carriers.</li>
     </ul>
@@ -154,7 +154,7 @@
       <li><b>⑦ “Why is the fundamental m<sub>a</sub>·V<sub>dc</sub>/2?”</b> Last slide gave the average per period; a sine of averages is a sine. In the simulation the readout shows 320 V and the red dot sits on the straight line. “Why does nothing else land on f<sub>1</sub>?” The remainder has zero area in every switching period, so it changes much faster than the sine: its frequencies are around the carrier and its multiples (red bars).</li>
       <li><b>⑧</b> Only show it here: sweep m<sub>a</sub> to 3, the dot leaves the line, 3rd/5th/7th appear. The why is the next slide.</li>
       <li><b>⑨ m<sub>f</sub>:</b> change it and watch the groups move. If asked: with m<sub>f</sub> a multiple of 3, the harmonic exactly at m<sub>f</sub> cancels in the line-to-line voltage (pole ↔ line-to-line button).</li>
-      <li>Three-phase min-max injection extends the linear range to 1.155: four slides later.</li>
+      <li>Three-phase min-max injection extends the linear range to 1.155: two slides later.</li>
     </ul>
   </aside>
 </section>
@@ -193,14 +193,60 @@
       <li><b>④ “Why is 453 V more than 400 V?”</b> The blue curve is everywhere at or above the grey 400 V sine. Same weight sin θ, more area, bigger fundamental. Clipping took area from the 520 V sine, but what is left still beats a 400 V sine.</li>
       <li><b>⑤ “What is the most we can get?”</b> Click: the sim shows the square wave, 509 V. Point at the table: the fundamental creeps towards 509 V, only as m<sub>a</sub> → ∞. Do not confuse the 1.27 here (fundamental / (V<sub>dc</sub>/2)) with an m<sub>a</sub> value. With real pulses the last thin pulses near the zero crossings vanish at a large but finite m<sub>a</sub>.</li>
       <li><b>⑥</b> Point at the harmonic bars: 3rd, 5th, 7th. Odd only, because the wave satisfies v(θ + π) = −v(θ). Formula behind the table, if asked: V̂<sub>1</sub>/(V<sub>dc</sub>/2) = (2/π)[m<sub>a</sub>·asin(1/m<sub>a</sub>) + √(1 − 1/m<sub>a</sub>²)].</li>
-      <li>Message: above m<sub>a</sub> = 1 you trade waveform quality for at most 27 % more voltage. Min-max injection (three slides later) gets 15 % of it for free, without these harmonics.</li>
+      <li>Message: above m<sub>a</sub> = 1 you trade waveform quality for at most 27 % more voltage. Min-max injection (next slide) gets 15 % of it for free, without these harmonics.</li>
     </ul>
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="1.5" data-title="From reference to gate signals">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b></div><h2>From a reference to gate signals</h2></div></div>
-  <div class="body" style="grid-template-rows: auto 1fr; gap:26px">
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Zero-sequence injection">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · zero-sequence injection · read: imperix, SPWM vs SVPWM</div><h2>15 % more voltage for free: min-max injection</h2></div></div>
+  <div class="body" data-sim="minmax" data-config='{"m":1.005}'></div>
+  <aside class="notes">
+    <p><b>3 min.</b> r<sub>0</sub> = −[max(r<sub>a</sub>,r<sub>b</sub>,r<sub>c</sub>) + min(…)]/2 is added to all three phases. A three-wire load cannot see a common-mode voltage: line-to-line voltages are unchanged (table column).</p>
+    <p>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</p>
+    <p><b>Worked example (on screen):</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub>.</p>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Min-max and space vectors">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Space-vector PWM: min-max seen on Sefer’s hexagon</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:14px">
+      <p class="small">Sefer’s map for a two-level converter: 8 switch states → 7 voltage vectors (6 active, 1 zero). A space-vector modulator builds <b>v</b>* from the <b>nearest vectors</b> (shaded triangle) and their time shares.</p>
+      <div class="callout" data-step="1" style="font-size:19px"><b>Same limit:</b> the dashed circle inscribed in the hexagon is |<b>v</b>*| = 2/√3 ≈ 1.155, the min-max limit of the last slide.</div>
+      <div class="callout" data-step="2" style="font-size:19px"><b>Same pulses:</b> centred two-level SVPWM is sine-triangle PWM plus the min-max offset. Two descriptions, one modulator.</div>
+      <div class="callout" data-step="3" style="font-size:19px"><b>More levels:</b> more dots, closer together; still the three nearest. PD carriers plus a slightly modified offset give the same sequence, so from here on we stay with carriers.</div>
+    </div>
+    <div data-sim="svm" data-config='{"n":2,"levelStep":3}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2 min.</b> No dwell-time algebra needed. Drag the tip of v* on the hexagon: the shaded triangle shows the nearest vectors and the bar their time shares.</p>
+    <ul>
+      <li>Starts two-level, right after min-max: push m to 1.1, still inside the dashed circle, still linear, exactly like min-max.</li>
+      <li>If asked how SVPWM computes the times: volt-second balance, d<sub>1</sub><b>V</b><sub>1</sub> + d<sub>2</sub><b>V</b><sub>2</sub> + d<sub>0</sub><b>V</b><sub>0</sub> = <b>v</b>*, d<sub>1</sub> + d<sub>2</sub> + d<sub>0</sub> = 1. Two-level equivalence with min-max: Zhou &amp; Wang 2002.</li>
+      <li>Click 3 switches the map to three levels: 19 vectors; inner dots have two states each (e.g. POO / ONN). Multilevel equivalence with PD carriers: McGrath, Holmes &amp; Lipo 2003. Keep the pairs in mind: they come back two slides later as the balancing knob.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="4.5" data-title="Carrier-based PWM lab">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · carrier-based PWM · read: Holmes &amp; Lipo</div><h2>Carrier lab: PD, POD, APOD, phase-shifted</h2></div></div>
+  <div class="body" data-sim="carrier" data-config='{"n":3,"arr":"PD"}'></div>
+  <aside class="notes">
+    <p><b>4.5 min.</b> Chain: compare reference with N−1 carriers → count how many it exceeds → that is the level k. Same m and f<sub>c</sub>/f<sub>1</sub> as on the basics slides.</p>
+    <ul>
+      <li><span class="say">Question: 5-level, PD vs POD — which gives lower line-to-line THD?</span> PD: its carrier-frequency harmonics are in phase in all three legs, so they cancel in v<sub>ab</sub>. Show v<sub>aO</sub> vs v<sub>ab</sub>.</li>
+      <li>For 3 levels POD and APOD are identical (only two carriers).</li>
+      <li>This is the module’s main treatment of carrier PWM: define PD/POD/APOD and phase-shifted here in full. Elif’s CHB talk builds on it (cell-by-cell phase shift, band rotation, PS vs LS on the CHB), so she can refer back to this slide.</li>
+      <li>Phase-shifted (flying-capacitor cells): the first carrier cluster appears near (N−1)·f<sub>c</sub>.</li>
+      <li>m &gt; 1 without injection: the reference clips → low-order harmonics. Turn on min-max → clean again up to m ≈ 1.155.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Two decisions: level, then state">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> → <b>Balance</b></div><h2>Two decisions: which level, then which state</h2></div></div>
+  <div class="body" style="grid-template-rows: auto 1fr auto; gap:20px">
     <svg class="bd" viewBox="0 0 1472 230" style="height:230px">
       <defs>
         <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker>
@@ -221,54 +267,9 @@
         <div class="callout" style="font-size:20px"><b>From Sefer’s talk:</b> ANPC zero → O<sub>U</sub> or O<sub>L</sub>. FC zero → 10 (charges C<sub>fc</sub> if i<sub>a</sub> &gt; 0) or 01 (discharges). 5L-ANPC +200 V → “a” or “b”.</div>
         <p class="small muted">Rule: decide the level from the reference, then the state from the capacitor error and the current sign.</p></div>
     </div>
+    <div class="callout" data-step="3" style="font-size:20px"><b>In the carrier world:</b> POO and ONN differ only by moving all three legs one level. Adding the same offset <span class="m">r</span><sub>0</sub> to all three references moves time between them without changing the line voltages, so <span class="m">r</span><sub>0</sub> is the balancing knob of the next slides.</div>
   </div>
-  <aside class="notes"><p><b>1.5 min.</b> The two-stage picture is the key idea of this talk: separate the output decision (level) from the internal decision (state). For a 2-level leg the first stage is exactly the SPWM comparator of the last two slides.</p></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="modulate" data-min="4.5" data-title="Carrier-based PWM lab">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · carrier-based PWM · read: Holmes &amp; Lipo</div><h2>Carrier lab: PD, POD, APOD, phase-shifted</h2></div></div>
-  <div class="body" data-sim="carrier" data-config='{"n":3,"arr":"PD"}'></div>
-  <aside class="notes">
-    <p><b>4.5 min.</b> Chain: compare reference with N−1 carriers → count how many it exceeds → that is the level k. Same m and f<sub>c</sub>/f<sub>1</sub> as on the basics slides.</p>
-    <ul>
-      <li><span class="say">Question: 5-level, PD vs POD — which gives lower line-to-line THD?</span> PD: its carrier-frequency harmonics are in phase in all three legs, so they cancel in v<sub>ab</sub>. Show v<sub>aO</sub> vs v<sub>ab</sub>.</li>
-      <li>For 3 levels POD and APOD are identical (only two carriers).</li>
-      <li>This is the module’s main treatment of carrier PWM: define PD/POD/APOD and phase-shifted here in full. Elif’s CHB talk builds on it (cell-by-cell phase shift, band rotation, PS vs LS on the CHB), so she can refer back to this slide.</li>
-      <li>Phase-shifted (flying-capacitor cells): the first carrier cluster appears near (N−1)·f<sub>c</sub>.</li>
-      <li>m &gt; 1 without injection: the reference clips → low-order harmonics. Turn on min-max → clean again up to m ≈ 1.155.</li>
-    </ul>
-  </aside>
-</section>
-
-<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Zero-sequence injection">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · zero-sequence injection · read: imperix, SPWM vs SVPWM</div><h2>15 % more voltage for free: min-max injection</h2></div></div>
-  <div class="body" data-sim="minmax" data-config='{"m":1.005}'></div>
-  <aside class="notes">
-    <p><b>3 min.</b> r<sub>0</sub> = −[max(r<sub>a</sub>,r<sub>b</sub>,r<sub>c</sub>) + min(…)]/2 is added to all three phases. A three-wire load cannot see a common-mode voltage: line-to-line voltages are unchanged (table column).</p>
-    <p>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</p>
-    <p><b>Worked example (on screen):</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub>.</p>
-  </aside>
-</section>
-
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Min-max and space vectors">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Min-max on Sefer’s hexagon: the same modulator</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
-    <div class="stack" style="gap:14px">
-      <p class="small">Sefer’s map: 27 states → 19 vectors. A space-vector modulator builds <b>v</b>* from the <b>three nearest vectors</b> (shaded triangle) and their time shares.</p>
-      <div class="callout" data-step="1" style="font-size:19px"><b>Same limit:</b> the dashed circle inscribed in the hexagon is |<b>v</b>*| = 2/√3 ≈ 1.155, the min-max limit of the last slide.</div>
-      <div class="callout" data-step="2" style="font-size:19px"><b>Same pulses:</b> two-level centred SVPWM is sine-triangle PWM plus the min-max offset. For more levels, PD carriers plus a slightly modified offset give the nearest-three-vector sequence.</div>
-      <div class="callout" data-step="3" style="font-size:19px"><b>Redundancy is the offset:</b> POO and ONN differ only by moving all three legs one level, a common-mode shift. Moving time between them is changing r<sub>0</sub>. So we balance with the offset, in the carrier world.</div>
-    </div>
-    <div data-sim="svm" data-config='{"n":3}'></div>
-  </div>
-  <aside class="notes">
-    <p><b>2 min.</b> No dwell-time algebra needed in this talk. Drag the tip of v* on the hexagon: the shaded triangle shows the three nearest vectors, the bar their time shares, and the table the midpoint current of each state (POO: −i<sub>a</sub>, ONN: +i<sub>a</sub>).</p>
-    <ul>
-      <li>Push m to 1.1: still inside the dashed circle, so still linear, exactly like min-max.</li>
-      <li>If asked how SVPWM computes the times: volt-second balance, d<sub>1</sub><b>V</b><sub>1</sub> + d<sub>2</sub><b>V</b><sub>2</sub> + d<sub>3</sub><b>V</b><sub>3</sub> = <b>v</b>*, d<sub>1</sub> + d<sub>2</sub> + d<sub>3</sub> = 1. The panel shows the result. Two-level equivalence: Zhou &amp; Wang 2002. Multilevel: McGrath, Holmes &amp; Lipo 2003 (PD carriers with a modified common-mode offset).</li>
-      <li>Why carriers here: one comparator per leg, and the offset r<sub>0</sub> is directly the balancing knob of the next slides.</li>
-    </ul>
-  </aside>
+  <aside class="notes"><p><b>2 min.</b> The two-stage picture is the key idea of this talk: separate the output decision (level) from the internal decision (state). For a 2-level leg the first stage is exactly the SPWM comparator of the basics slides; for more levels it is the carrier lab of the last slide.</p></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="balance" data-min="1" data-title="Why capacitors drift">

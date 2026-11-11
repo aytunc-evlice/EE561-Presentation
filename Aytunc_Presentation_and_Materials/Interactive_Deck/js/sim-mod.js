@@ -290,6 +290,10 @@
     function toggle() { P.play = !P.play; if (P.play) loop.start(); else loop.stop(); playB.innerHTML = P.play ? '❚❚ Pause' : '▶ Rotate v*'; }
     K.onTheme(draw);
     lat(); draw();
-    return { stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Rotate v*'; }, toggle };
+    const n0 = P.n, LS = cfg.levelStep;
+    return {
+      stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Rotate v*'; }, toggle,
+      step(k) { if (LS == null) return; const n = k >= LS ? 3 : n0; if (n !== P.n) { P.n = n; ctl[0].set(n); lat(); draw(); } },
+    };
   };
 })();

@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (24 slides, ≈ 52.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (24 slides, ≈ 53 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -33,10 +33,10 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 4 | ★ One switching period: two leg voltages, what r is, why the on-time is (1 + r)/2, why the average is r·V<sub>dc</sub>/2 (figure, built step by step) | 3 |
 | 5 | ★ From one period to the sine: m<sub>a</sub>, the fundamental m<sub>a</sub>·V<sub>dc</sub>/2, overmodulation, m<sub>f</sub> and the harmonics (simulation) | 2.5 |
 | 6 | ★ Overmodulation, step by step: on-time saturates, clipped sine, Fourier coefficient, why > 400 V, square-wave limit 4/π, harmonics 3/5/7 (simulation) | 3 |
-| 7 | Reference → level → state → gates | 1.5 |
-| 8 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
-| 9 | Min-max injection | 3 |
-| 10 | Min-max on Sefer’s hexagon: same limit, same pulses, redundancy = offset (new; replaces three SVM slides) | 2 |
+| 7 | Min-max injection | 3 |
+| 8 | Space-vector PWM: min-max seen on Sefer’s hexagon, two-level first, three-level on click 3 | 2 |
+| 9 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
+| 10 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
 | 11 | Why capacitors drift (recap of Sefer’s result) | 1 |
 | 12 | ★ Derivation: balancing authority ∝ cos φ | 3 |
 | 13 | Neutral-point balancing simulation | 3.5 |
