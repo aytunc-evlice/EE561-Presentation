@@ -40,6 +40,64 @@
   });
   const titleOf = (s) => s.dataset.title || (s.querySelector('h2, h1') || {}).textContent || 'Slide';
 
+  // ---------- figure zoom: click a figure to enlarge it over the slide (it stays live) ----------
+  // Plain figures open on click; interactive ones (drag cursors) get a ⤢ button on hover instead.
+  let zoomEl = null, zoomBg = null, zoomStyle = null;
+  const deckScale = () => deck.getBoundingClientRect().width / 1600;
+  const interactive = (f) => { const c = f.style && f.style.cursor; return !!c && c !== 'zoom-in' && c !== 'zoom-out'; };
+  function figOf(t) {
+    if (!t || !t.closest || !t.closest('.slide.active')) return null;
+    let f = t.closest('canvas, svg');
+    if (!f) return null;
+    while (f.tagName.toLowerCase() !== 'canvas' && f.ownerSVGElement) f = f.ownerSVGElement;
+    if (f.closest('.logos, .tlogos, button, .ctl, #navbtns, .figzoom-bg')) return null;
+    const r = f.getBoundingClientRect(), sc = deckScale();
+    if (r.width / sc < 120 || r.height / sc < 80) return null;
+    return f;
+  }
+  function openZoom(f) {
+    closeZoom();
+    const sc = deckScale(), r = f.getBoundingClientRect();
+    const w = r.width / sc, h = r.height / sc, z = Math.min(1500 / w, 780 / h);
+    const live = interactive(f);
+    zoomStyle = f.getAttribute('style');
+    zoomEl = f;
+    zoomBg = K.h('div', { class: 'figzoom-bg' },
+      K.h('div', { class: 'figzoom-hint' }, live ? 'Esc or ✕ to close · the figure stays live' : 'Click or Esc to close'),
+      K.btn('✕', () => closeZoom(), 'figzoom-x'));
+    zoomBg.addEventListener('click', (e) => { if (e.target === zoomBg) closeZoom(); });
+    f.closest('.slide').append(zoomBg);
+    Object.assign(f.style, {
+      position: 'fixed', left: '50%', top: '50%', width: w + 'px', height: h + 'px', margin: '0', maxWidth: 'none', maxHeight: 'none',
+      transform: 'translate(-50%, -50%) scale(' + z + ')', zIndex: '61', background: 'var(--paper)', cursor: live ? f.style.cursor : 'zoom-out',
+    });
+    zbtn.classList.remove('on');
+  }
+  function closeZoom() {
+    if (!zoomEl) return;
+    if (zoomStyle == null) zoomEl.removeAttribute('style'); else zoomEl.setAttribute('style', zoomStyle);
+    if (zoomBg) zoomBg.remove();
+    zoomEl = zoomBg = zoomStyle = null;
+  }
+  const zbtn = K.btn('⤢', () => { if (zbtn._f) openZoom(zbtn._f); }, 'figzoom-btn');
+  zbtn.title = 'Enlarge figure';
+  deck.append(zbtn);
+  deck.addEventListener('click', (e) => {
+    if (zoomEl) { if (!interactive(zoomEl) && zoomEl.contains(e.target)) closeZoom(); return; }
+    const f = figOf(e.target);
+    if (f && !interactive(f)) openZoom(f);
+  });
+  deck.addEventListener('pointerover', (e) => {
+    if (zoomEl || e.target === zbtn) return;
+    const f = figOf(e.target);
+    if (f && interactive(f)) {
+      const sc = deckScale(), dr = deck.getBoundingClientRect(), r = f.getBoundingClientRect();
+      zbtn.style.left = ((r.right - dr.left) / sc - 46) + 'px';
+      zbtn.style.top = ((r.top - dr.top) / sc + 6) + 'px';
+      zbtn._f = f; zbtn.classList.add('on');
+    } else zbtn.classList.remove('on');
+  });
+
   // ---------- scaling ----------
   const notes = document.getElementById('notes');
   function fit() {
@@ -78,6 +136,7 @@
     i = Math.max(0, Math.min(slides.length - 1, i | 0));
     const s = slides[i];
     if (i !== cur) {
+      closeZoom();
       if (cur >= 0) {
         const o = slides[cur];
         o.classList.remove('active');
@@ -158,6 +217,7 @@
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key;
     if (black.classList.contains('on') && !['b', 'B', '.'].includes(k)) { black.classList.remove('on'); e.preventDefault(); return; }
+    if (zoomEl && k === 'Escape') { closeZoom(); e.preventDefault(); return; }
     switch (k) {
       case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': next(); break;
       case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'Backspace': prev(); break;

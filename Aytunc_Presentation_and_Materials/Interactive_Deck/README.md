@@ -17,6 +17,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `F` | Fullscreen |
 | `D` | Dark or light theme; light is better for a lit room |
 | `B` | Black screen |
+| Click a figure | Enlarge it over the slide; click again or `Esc` to close. Draggable plots show a ⤢ button instead and stay live when enlarged |
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 

@@ -325,3 +325,11 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 #navbtns:hover, body.mouse #navbtns { opacity: .85; }
 @media (hover: none) { #navbtns { opacity: .85; } }
 #navbtns button { font: 600 14px var(--font); border: 0; border-radius: 4px; padding: 8px 12px; background: rgba(30, 30, 30, .85); color: #fff; cursor: pointer; }
+
+/* ---------- figure zoom (deck.js) ---------- */
+.slide .body canvas, .slide .body svg { cursor: zoom-in; }
+.figzoom-bg { position: fixed; inset: 0; z-index: 60; background: var(--paper); }
+.figzoom-hint { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); font: 600 15px var(--font); color: var(--muted); }
+.btn.figzoom-x { position: absolute; right: 24px; top: 20px; font-size: 20px; padding: 6px 14px; }
+.btn.figzoom-btn { position: absolute; z-index: 40; display: none; font-size: 20px; line-height: 1; padding: 6px 10px; opacity: .85; }
+.btn.figzoom-btn.on { display: block; }
