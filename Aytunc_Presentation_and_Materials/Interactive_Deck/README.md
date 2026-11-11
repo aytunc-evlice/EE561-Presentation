@@ -20,7 +20,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (23 slides, ≈ 49.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (24 slides, ≈ 52.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -31,33 +31,34 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 3 | ★ Basics: one comparator, from DC-DC to sine PWM: carrier, DC reference (buck), comparator, average, then a sine reference (inverter leg) | 2.5 |
 | 4 | ★ One switching period: two leg voltages, what r is, why the on-time is (1 + r)/2, why the average is r·V<sub>dc</sub>/2 (figure, built step by step) | 3 |
 | 5 | ★ From one period to the sine: m<sub>a</sub>, the fundamental m<sub>a</sub>·V<sub>dc</sub>/2, overmodulation, m<sub>f</sub> and the harmonics (simulation) | 2.5 |
-| 6 | Reference → level → state → gates | 1.5 |
-| 7 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
-| 8 | Min-max injection | 3 |
-| 9 | Min-max on Sefer’s hexagon: same limit, same pulses, redundancy = offset (new; replaces three SVM slides) | 2 |
-| 10 | Why capacitors drift (recap of Sefer’s result) | 1 |
-| 11 | ★ Derivation: balancing authority ∝ cos φ | 3 |
-| 12 | Neutral-point balancing simulation | 3.5 |
-| 13 | Flying-capacitor balancing | 2 |
-| 14 | ★ MMC: arms of half-bridge submodules, arm equations (new) | 2.5 |
-| 15 | MMC: submodule sorting simulation (new) | 3 |
-| 16 | ★ MMC: circulating current and its control (new) | 2.5 |
-| 17 | ★ Averaged model for control | 2 |
-| 18 | Control structure | 2 |
-| 19 | dq current control (simulation) | 2.5 |
-| 20 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
-| 21 | Where multilevel lives today | 1.5 |
-| 22 | Three things to remember, handover to Elif | 1 |
-| 23 | References | |
+| 6 | ★ Overmodulation, step by step: on-time saturates, clipped sine, Fourier coefficient, why > 400 V, square-wave limit 4/π, harmonics 3/5/7 (simulation) | 3 |
+| 7 | Reference → level → state → gates | 1.5 |
+| 8 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
+| 9 | Min-max injection | 3 |
+| 10 | Min-max on Sefer’s hexagon: same limit, same pulses, redundancy = offset (new; replaces three SVM slides) | 2 |
+| 11 | Why capacitors drift (recap of Sefer’s result) | 1 |
+| 12 | ★ Derivation: balancing authority ∝ cos φ | 3 |
+| 13 | Neutral-point balancing simulation | 3.5 |
+| 14 | Flying-capacitor balancing | 2 |
+| 15 | ★ MMC: arms of half-bridge submodules, arm equations (new) | 2.5 |
+| 16 | MMC: submodule sorting simulation (new) | 3 |
+| 17 | ★ MMC: circulating current and its control (new) | 2.5 |
+| 18 | ★ Averaged model for control | 2 |
+| 19 | Control structure | 2 |
+| 20 | dq current control (simulation) | 2.5 |
+| 21 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
+| 22 | Where multilevel lives today | 1.5 |
+| 23 | Three things to remember, handover to Elif | 1 |
+| 24 | References | |
 
 ## Simulation models: what to say if asked
 
 - **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
-- **Neutral-point balancing (slide 12):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 11 (τ ≈ 33 ms at unity PF).
-- **Flying-capacitor balancing (slide 13):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
-- **dq control (slide 19):** an L-filter average model with a voltage limit and an optional one-sample delay.
-- **MMC sorting (slide 15):** one upper arm, 6 kV DC, N SMs of 3 mF, 200 A peak AC, nearest-level modulation every 100 µs. The arm current is imposed (circulating current assumed suppressed); a slow arm-energy loop sets its DC part. Modes: fixed order, full sort every period, or sort only on level changes with a ±5 % tolerance band.
-- **Grid filter (slide 20):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
+- **Neutral-point balancing (slide 13):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 12 (τ ≈ 33 ms at unity PF).
+- **Flying-capacitor balancing (slide 14):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
+- **dq control (slide 20):** an L-filter average model with a voltage limit and an optional one-sample delay.
+- **MMC sorting (slide 16):** one upper arm, 6 kV DC, N SMs of 3 mF, 200 A peak AC, nearest-level modulation every 100 µs. The arm current is imposed (circulating current assumed suppressed); a slow arm-energy loop sets its DC part. Modes: fixed order, full sort every period, or sort only on level changes with a ±5 % tolerance band.
+- **Grid filter (slide 21):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
 
 ## Printed handouts (`../quiz/`)
 
@@ -75,4 +76,4 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 
 - **Slides:** each slide is a `<section class="slide">` in `index.html`. Speaker notes are in its `<aside class="notes">`, and the time slot is in `data-min`.
 - **Build steps:** elements with `data-step="k"` appear on the k-th click.
-- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing, dq control), `js/sim-mmc.js` (MMC sorting, L/LCL filter), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.
+- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing, dq control), `js/sim-mmc.js` (MMC sorting, L/LCL filter), `js/sim-om.js` (overmodulation), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.

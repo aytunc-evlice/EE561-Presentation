@@ -142,7 +142,7 @@
       <div data-step="1"><h3 style="font-size:21px;margin:0">⑦ Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3><p class="small" style="font-size:19px">Every switching period gives its own average <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2 (last slide). Put the periods side by side: the averages trace <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2 · sin ω<span class="m">t</span>, the blue curve.</p>
         <div><span class="eq box" style="font-size:24px"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span> &nbsp;<span class="small muted" style="font-size:18px">800 V, <span class="m">m</span><sub>a</sub> = 0.8 → 320 V peak</span></div>
         <p class="small" style="font-size:19px">What is left (pulses minus their average) averages to zero in every period, so it only holds fast frequencies: the red groups in the spectrum, near <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … Nothing lands on the fundamental.</p></div>
-      <div data-step="2"><h3 style="font-size:21px;margin:0">⑧ What happens when <span class="m">m</span><sub>a</sub> &gt; 1</h3><p class="small" style="font-size:19px">Near its peak the sine is above the carrier’s top (1), so it is above the carrier all period: the upper switch never turns off (on-time cannot exceed 100 %). The average is cut flat at +<span class="m">V</span><sub>dc</sub>/2. A flat-topped wave holds less fundamental than <span class="m">m</span><sub>a</sub> predicts (the curve bends), plus harmonics 3, 5, 7. Limit: a square wave, 1.27 · <span class="m">V</span><sub>dc</sub>/2.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">⑧ What happens when <span class="m">m</span><sub>a</sub> &gt; 1</h3><p class="small" style="font-size:19px">Sweep <span class="m">m</span><sub>a</sub> above 1: the red dot leaves the straight line, the curve bends towards 1.27, and harmonics 3, 5, 7 appear. Next slide: why.</p></div>
       <div data-step="3"><h3 style="font-size:21px;margin:0">⑨ <span class="m">m</span><sub>f</sub>: carrier periods per sine cycle</h3><p class="small" style="font-size:19px">Bigger <span class="m">m</span><sub>f</sub>: the red groups move higher (easier to filter), and “<span class="m">r</span> is constant within a period” is more accurate.</p></div>
     </div>
     <div data-sim="mindex" data-config='{"m":0.8,"mf":15}'></div>
@@ -152,9 +152,48 @@
     <ul>
       <li><b>⑥ “What is m<sub>a</sub>?”</b> The size of the sine relative to the carrier. m<sub>a</sub> = 1: the sine just touches the carrier’s peaks.</li>
       <li><b>⑦ “Why is the fundamental m<sub>a</sub>·V<sub>dc</sub>/2?”</b> Last slide gave the average per period; a sine of averages is a sine. In the simulation the readout shows 320 V and the red dot sits on the straight line. “Why does nothing else land on f<sub>1</sub>?” The remainder has zero area in every switching period, so it changes much faster than the sine: its frequencies are around the carrier and its multiples (red bars).</li>
-      <li><b>⑧ “Why does it bend above 1?”</b> Sweep m<sub>a</sub> to 3. The on-time saturates at 100 %, the tops go flat, the dot leaves the line. Why 3, 5, 7: a flat-topped wave is not a sine; positive and negative halves are mirror images, so only odd harmonics. Why 1.27: the fundamental of a square wave of height V<sub>dc</sub>/2 is (4/π)·V<sub>dc</sub>/2 (Fourier series).</li>
+      <li><b>⑧</b> Only show it here: sweep m<sub>a</sub> to 3, the dot leaves the line, 3rd/5th/7th appear. The why is the next slide.</li>
       <li><b>⑨ m<sub>f</sub>:</b> change it and watch the groups move. If asked: with m<sub>f</sub> a multiple of 3, the harmonic exactly at m<sub>f</sub> cancels in the line-to-line voltage (pole ↔ line-to-line button).</li>
-      <li>Three-phase min-max injection extends the linear range to 1.155: three slides later.</li>
+      <li>Three-phase min-max injection extends the linear range to 1.155: four slides later.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Overmodulation, step by step">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · overmodulation in the average picture · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Overmodulation: why the fundamental bends, and where it stops</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 700px; gap:28px">
+    <div class="stack" style="gap:9px">
+      <div><h3 style="font-size:21px;margin:0">① The on-time cannot exceed 100 %</h3><p class="small" style="font-size:19px">When <span class="m">r</span> &gt; 1 the reference is above the whole carrier, so the switch stays on for the whole period. The average stays at +<span class="m">V</span><sub>dc</sub>/2 = 400 V, not <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② So the average is a clipped sine</h3><p class="small" style="font-size:19px"><span class="m">m</span><sub>a</sub> = 1.3 asks for 520 V peak. Below 400 V the average follows the sine; around the peak it is held flat at 400 V (blue).</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ How much fundamental is in a wave?</h3><p class="small" style="font-size:19px">Multiply the wave by a sine and add up the area:</p>
+        <div class="eq" style="font-size:23px"><span class="m">V̂</span><sub>1</sub> = (1/π) ∫<sub>0</sub><sup>2π</sup> <span class="m">v</span>(θ) · sin θ dθ</div>
+        <p class="small muted" style="font-size:17px">Check: a pure sine of peak <span class="m">V</span> gives (1/π) ∫ <span class="m">V</span> sin²θ dθ = <span class="m">V</span>.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Why the clipped wave gives more than 400 V</h3><p class="small" style="font-size:19px">Compare it with a 400 V sine (grey), point by point over the positive half:</p>
+        <ul class="small" style="font-size:19px; gap:2px"><li>flanks: <span class="m">m</span><sub>a</sub> · 400 sin θ &gt; 400 sin θ, because <span class="m">m</span><sub>a</sub> &gt; 1</li><li>flat top: 400 ≥ 400 sin θ, because sin θ ≤ 1</li></ul>
+        <p class="small" style="font-size:19px">It is never below the grey sine (the negative half mirrors this), so in ③ its area is larger: <b><span class="m">V̂</span><sub>1</sub> &gt; 400 V</b>. At 1.3: 453 V, less than the 520 V asked for.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The limit is a square wave</h3>
+        <div class="eq" style="font-size:22px">(1/π) [ ∫<sub>0</sub><sup>π</sup> 400 sin θ dθ − ∫<sub>π</sub><sup>2π</sup> 400 sin θ dθ ] = 1600/π ≈ 509 V</div>
+        <p class="small" style="font-size:19px">= (4/π) · <span class="m">V</span><sub>dc</sub>/2 = 1.27 · <span class="m">V</span><sub>dc</sub>/2: the most this leg can give, because it is already at ±400 V all the time. It is reached only as <span class="m">m</span><sub>a</sub> → ∞; <span class="m">m</span><sub>a</sub> = 1.27 gives just 450 V.</p></div>
+      <div data-step="5"><h3 style="font-size:21px;margin:0">⑥ The price: harmonics 3, 5, 7</h3><p class="small" style="font-size:19px">The clipped wave is not a sine. Its two halves are mirror images, so only odd multiples appear: 150, 250, 350 Hz, too close to 50 Hz to filter.</p></div>
+    </div>
+    <div class="stack" style="gap:10px">
+      <div data-sim="overmod" data-config='{"m":1.3}'></div>
+      <table class="tb nocase" style="font-size:17px" data-step="4">
+        <tr><th><span class="m">m</span><sub>a</sub></th><td class="c">1</td><td class="c">1.27</td><td class="c">1.5</td><td class="c">2</td><td class="c">3</td><td class="c">10</td><td class="c">∞</td></tr>
+        <tr><th><span class="m">V̂</span><sub>1</sub></th><td class="c">400 V</td><td class="c">450 V</td><td class="c">469 V</td><td class="c">487 V</td><td class="c">500 V</td><td class="c">508 V</td><td class="c">509 V</td></tr>
+      </table>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> One question per click, asked out loud.</p>
+    <ul>
+      <li><b>① “What happens to (1 + r)/2 when r = 1.2?”</b> It says 110 %: impossible. The switch is simply on all period.</li>
+      <li><b>② “So what does the average look like?”</b> The sim at m<sub>a</sub> = 1.3: red dashed is what we asked for, blue is what we get.</li>
+      <li><b>③ “How do we measure the fundamental of a non-sine?”</b> The Fourier coefficient. The check with a pure sine shows it gives back the peak.</li>
+      <li><b>④ “Why is 453 V more than 400 V?”</b> The blue curve is everywhere at or above the grey 400 V sine. Same weight sin θ, more area, bigger fundamental. Clipping took area from the 520 V sine, but what is left still beats a 400 V sine.</li>
+      <li><b>⑤ “What is the most we can get?”</b> Click: the sim shows the square wave, 509 V. Point at the table: the fundamental creeps towards 509 V, only as m<sub>a</sub> → ∞. Do not confuse the 1.27 here (fundamental / (V<sub>dc</sub>/2)) with an m<sub>a</sub> value. With real pulses the last thin pulses near the zero crossings vanish at a large but finite m<sub>a</sub>.</li>
+      <li><b>⑥</b> Point at the harmonic bars: 3rd, 5th, 7th. Odd only, because the wave satisfies v(θ + π) = −v(θ). Formula behind the table, if asked: V̂<sub>1</sub>/(V<sub>dc</sub>/2) = (2/π)[m<sub>a</sub>·asin(1/m<sub>a</sub>) + √(1 − 1/m<sub>a</sub>²)].</li>
+      <li>Message: above m<sub>a</sub> = 1 you trade waveform quality for at most 27 % more voltage. Min-max injection (three slides later) gets 15 % of it for free, without these harmonics.</li>
     </ul>
   </aside>
 </section>
@@ -599,6 +638,7 @@
 <script src="js/sim-mod.js"></script>
 <script src="js/sim-ctl.js"></script>
 <script src="js/sim-mmc.js"></script>
+<script src="js/sim-om.js"></script>
 <script src="js/deck.js"></script>
 </body>
 </html>
