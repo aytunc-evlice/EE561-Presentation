@@ -106,9 +106,10 @@
 
   // ---------- zero-sequence (min-max) explorer ----------
   SIMS.minmax = function (host, cfg) {
-    const P = { m: cfg.m || 1.1, on: false, th: 10, vdc: 650, play: false };
-    const cv = K.canvas(880, 420);
-    const tbl = h('table', { class: 'tb nocase', style: { fontSize: '19px' } });
+    const P = { m: cfg.m || 1.1, on: !!cfg.on, th: cfg.th != null ? cfg.th : 10, vdc: 650, play: false };
+    const CW = cfg.w || 880, CH = cfg.h || 420;
+    const cv = K.canvas(CW, CH);
+    const tbl = h('table', { class: 'tb nocase', style: { fontSize: CW < 800 ? '16px' : '19px' } });
     const roLin = K.readout('Peak |reference|', 'big'), roV = K.readout('Max V<sub>LL,rms</sub> without clipping');
     const ctl = [
       K.slider({ label: 'm', min: 0, max: 1.3, step: 0.005, value: P.m, fmt: (v) => v.toFixed(3), onInput: (v) => { P.m = v; draw(); } }),
@@ -119,7 +120,7 @@
     const thS = ctl[2];
     const playB = K.btn('▶ Sweep θ', () => toggle());
     host.classList.add('sim');
-    host.style.gridTemplateColumns = '880px 1fr';
+    host.style.gridTemplateColumns = CW + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el, tbl),
       h('div', { class: 'sim-col' }, ctl.map((c) => c.el), h('div', { class: 'row' }, playB), roLin.el, roV.el,
         h('div', { class: 'tiny', html: 'm = V<sub>1,phase,peak</sub> / (V<sub>dc</sub>/2). Linear limit: 1 for sine PWM, 2/√3 ≈ 1.155 with min-max injection (balanced three-wire load).' })));
@@ -148,7 +149,7 @@
         xticks: [0, 60, 120, 180, 240, 300, 360].map((v) => [v, v + '°']),
         bands: [{ y0: 1, y1: 1.35, color: 'rgba(192,57,43,.10)' }, { y0: -1.35, y1: -1, color: 'rgba(192,57,43,.10)' }],
         hlines: [{ v: 1, color: K.css('--bad'), dash: [4, 4], label: 'carrier limit' }, { v: -1, color: K.css('--bad'), dash: [4, 4] }],
-        series, cursor: P.th, title: P.on ? 'Modified references r′ = r + r₀ (bold), originals (faint), r₀ (dashed)' : 'Sine references r_a, r_b, r_c',
+        series, cursor: P.th, title: P.on ? 'r′ = r + r₀ (bold) · r (faint)' : 'Sine references r_a, r_b, r_c',
         legend: [['a', c1], ['b', c2], ['c', c3]].concat(P.on ? [['r₀', acc, [6, 5]]] : []),
       });
       const r = refs((P.th * Math.PI) / 180), f = (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
@@ -164,7 +165,11 @@
     function toggle() { P.play = !P.play; if (P.play) loop.start(); else loop.stop(); playB.innerHTML = P.play ? '❚❚ Pause' : '▶ Sweep θ'; }
     K.onTheme(draw);
     draw();
-    return { stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Sweep θ'; }, toggle };
+    const OS = cfg.onStep;
+    return {
+      stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Sweep θ'; }, toggle,
+      step(k) { if (OS == null) return; const on = k >= OS; if (on !== P.on) { P.on = on; ctl[1].set(on); draw(); } },
+    };
   };
 
   // ---------- space-vector hexagon ----------

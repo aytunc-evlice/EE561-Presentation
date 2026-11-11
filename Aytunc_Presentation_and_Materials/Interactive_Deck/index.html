@@ -199,12 +199,30 @@
 </section>
 
 <section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Zero-sequence injection">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · zero-sequence injection · read: imperix, SPWM vs SVPWM</div><h2>15 % more voltage for free: min-max injection</h2></div></div>
-  <div class="body" data-sim="minmax" data-config='{"m":1.005}'></div>
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · three phases, zero-sequence injection · read: imperix, SPWM vs SVPWM</div><h2>15 % more voltage for free: min-max injection</h2></div></div>
+  <div class="body" style="grid-template-columns: 470px 1fr; gap:24px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:21px;margin:0">① Three legs, three references</h3><p class="small" style="font-size:19px"><span class="m">r</span><sub>a</sub>, <span class="m">r</span><sub>b</sub>, <span class="m">r</span><sub>c</sub>: three sines 120° apart. Each leg follows its own reference (slide 4), measured from the DC midpoint O.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② The load only sees differences</h3><p class="small" style="font-size:19px">A three-wire load is connected between the legs, so it only sees <span class="m">v</span><sub>ab</sub> = <span class="m">v</span><sub>aO</sub> − <span class="m">v</span><sub>bO</sub>, and so on. Adding the <b>same number</b> to all three references cancels in every difference.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ That number is <span class="m">r</span><sub>0</sub></h3><p class="small" style="font-size:19px"><span class="m">r</span><sub>0</sub> is a common offset (zero-sequence) added to all three: <span class="m">r</span>′<sub>x</sub> = <span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>. The load does not see it; only the legs’ limit of ±1 does. So we can use it to keep all three inside ±1.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Min-max: centre the three</h3><p class="small" style="font-size:19px">Shift so the highest and lowest are equal and opposite:</p>
+        <div class="eq" style="font-size:23px"><span class="m">r</span><sub>0</sub> = −(max + min) / 2</div>
+        <p class="small muted" style="font-size:17px"><span class="m">m</span> = 1.1, θ = 0: <span class="m">r</span> = (1.10, −0.55, −0.55) clips. <span class="m">r</span><sub>0</sub> = −0.275 → (0.825, −0.825, −0.825): inside ±1, same differences (table).</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The gain: 1.155, or 15 %</h3><p class="small" style="font-size:19px">Worst instant: two phases equal and opposite, ±0.866 <span class="m">m</span>. Inside ±1 while <span class="m">m</span> ≤ 1/0.866 = 2/√3 ≈ 1.155. Up to there, no clipping and no 3rd, 5th, 7th.</p></div>
+    </div>
+    <div data-sim="minmax" data-config='{"m":1.1,"th":0,"w":620,"h":400,"onStep":3}'></div>
+  </div>
   <aside class="notes">
-    <p><b>3 min.</b> r<sub>0</sub> = −[max(r<sub>a</sub>,r<sub>b</sub>,r<sub>c</sub>) + min(…)]/2 is added to all three phases. A three-wire load cannot see a common-mode voltage: line-to-line voltages are unchanged (table column).</p>
-    <p>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</p>
-    <p><b>Worked example (on screen):</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub>.</p>
+    <p><b>3 min.</b> One question per click.</p>
+    <ul>
+      <li><b>① “What changes with three phases?”</b> Nothing per leg: each leg still follows its own reference.</li>
+      <li><b>② “What does the load see?”</b> Only line-to-line voltages. Show the table: the last column r′<sub>a</sub> − r′<sub>b</sub> is the same with and without injection.</li>
+      <li><b>③ “What is r<sub>0</sub>?”</b> One number, added to all three references at each instant. It moves the DC-midpoint-to-load-neutral voltage, which a three-wire load cannot see. It is free, as long as no reference leaves ±1.</li>
+      <li><b>④</b> Click switches injection on at m = 1.1, θ = 0: the numbers on the slide appear in the table. Press “Sweep θ”: the bold curves stay inside the band; the dashed r<sub>0</sub> is a triangle-like wave at 3f<sub>1</sub>.</li>
+      <li><b>⑤ “Why 1.155?”</b> At θ = 30° two references are ±0.866 m and the third is 0: min-max cannot help there, so 0.866 m ≤ 1. Move θ to 30° and m to 1.155 to show it.</li>
+      <li><b>Worked example:</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub> (readout, change V<sub>dc</sub>).</li>
+      <li>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</li>
+    </ul>
   </aside>
 </section>
 
