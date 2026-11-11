@@ -34,7 +34,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 5 | ★ From one period to the sine: m<sub>a</sub>, the fundamental m<sub>a</sub>·V<sub>dc</sub>/2, overmodulation, m<sub>f</sub> and the harmonics (simulation) | 2.5 |
 | 6 | ★ Overmodulation, step by step: on-time saturates, clipped sine, Fourier coefficient, why > 400 V, square-wave limit 4/π, harmonics 3/5/7 (simulation) | 3 |
 | 7 | Min-max injection | 3 |
-| 8 | Space-vector PWM: min-max seen on Sefer’s hexagon, two-level first, three-level on click 3 | 2 |
+| 8 | Space-vector PWM = sine PWM + the min-max offset (Sefer’s hexagon, two-level first, three-level on click 3) | 2 |
 | 9 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
 | 10 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
 | 11 | Why capacitors drift (recap of Sefer’s result) | 1 |

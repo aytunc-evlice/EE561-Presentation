@@ -209,6 +209,7 @@
         <div class="eq" style="font-size:23px"><span class="m">r</span><sub>0</sub> = −(max + min) / 2</div>
         <p class="small muted" style="font-size:17px"><span class="m">m</span> = 1.1, θ = 0: <span class="m">r</span> = (1.10, −0.55, −0.55) clips. <span class="m">r</span><sub>0</sub> = −0.275 → (0.825, −0.825, −0.825): inside ±1, same differences (table).</p></div>
       <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The gain: 1.155, or 15 %</h3><p class="small" style="font-size:19px">Worst instant: two phases equal and opposite, ±0.866 <span class="m">m</span>. Inside ±1 while <span class="m">m</span> ≤ 1/0.866 = 2/√3 ≈ 1.155. Up to there, no clipping and no 3rd, 5th, 7th.</p></div>
+      <div class="callout" data-step="5" style="font-size:19px"><b>This offset is space-vector PWM.</b> Sine PWM plus the min-max offset gives exactly the pulses of a space-vector modulator. Next slide: why.</div>
     </div>
     <div data-sim="minmax" data-config='{"m":1.1,"th":0,"w":620,"h":400,"onStep":3}'></div>
   </div>
@@ -222,17 +223,18 @@
       <li><b>⑤ “Why 1.155?”</b> At θ = 30° two references are ±0.866 m and the third is 0: min-max cannot help there, so 0.866 m ≤ 1. Move θ to 30° and m to 1.155 to show it.</li>
       <li><b>Worked example:</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub> (readout, change V<sub>dc</sub>).</li>
       <li>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</li>
+      <li><b>Click 5, transition:</b> “What we just did by hand, adding r<sub>0</sub>, is what a space-vector modulator does automatically.” Careful with the wording: it is the <i>min-max</i> offset that gives exactly the SVPWM pulses. A pure third harmonic (m/6) reaches the same 1.155 limit, but its pulses are slightly different; it is a close cousin, not SVPWM itself.</li>
     </ul>
   </aside>
 </section>
 
 <section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Min-max and space vectors">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Space-vector PWM: min-max seen on Sefer’s hexagon</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Space-vector PWM = sine PWM + the min-max offset</h2></div></div>
   <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
     <div class="stack" style="gap:14px">
-      <p class="small">Sefer’s map for a two-level converter: 8 switch states → 7 voltage vectors (6 active, 1 zero). A space-vector modulator builds <b>v</b>* from the <b>nearest vectors</b> (shaded triangle) and their time shares.</p>
+      <p class="small">The offset of the last slide is what a space-vector modulator does. Same two-level converter, drawn as Sefer’s map: 8 switch states → 7 voltage vectors (6 active, 1 zero: NNN or PPP). SVPWM builds <b>v</b>* from the <b>nearest vectors</b> (shaded triangle) and their time shares.</p>
       <div class="callout" data-step="1" style="font-size:19px"><b>Same limit:</b> the dashed circle inscribed in the hexagon is |<b>v</b>*| = 2/√3 ≈ 1.155, the min-max limit of the last slide.</div>
-      <div class="callout" data-step="2" style="font-size:19px"><b>Same pulses:</b> centred two-level SVPWM is sine-triangle PWM plus the min-max offset. Two descriptions, one modulator.</div>
+      <div class="callout" data-step="2" style="font-size:19px"><b>Same pulses:</b> centred SVPWM splits the zero time equally between NNN and PPP. That moves all three legs together, a common offset, and the equal split is exactly the min-max <span class="m">r</span><sub>0</sub>.</div>
       <div class="callout" data-step="3" style="font-size:19px"><b>More levels:</b> more dots, closer together; still the three nearest. PD carriers plus a slightly modified offset give the same sequence, so from here on we stay with carriers.</div>
     </div>
     <div data-sim="svm" data-config='{"n":2,"levelStep":3}'></div>
@@ -240,6 +242,7 @@
   <aside class="notes">
     <p><b>2 min.</b> No dwell-time algebra needed. Drag the tip of v* on the hexagon: the shaded triangle shows the nearest vectors and the bar their time shares.</p>
     <ul>
+      <li><b>Opening line:</b> “Last slide we added r<sub>0</sub> by hand. A space-vector modulator gets the same pulses from a different picture.” Then point at the hexagon.</li>
       <li>Starts two-level, right after min-max: push m to 1.1, still inside the dashed circle, still linear, exactly like min-max.</li>
       <li>If asked how SVPWM computes the times: volt-second balance, d<sub>1</sub><b>V</b><sub>1</sub> + d<sub>2</sub><b>V</b><sub>2</sub> + d<sub>0</sub><b>V</b><sub>0</sub> = <b>v</b>*, d<sub>1</sub> + d<sub>2</sub> + d<sub>0</sub> = 1. Two-level equivalence with min-max: Zhou &amp; Wang 2002.</li>
       <li>Click 3 switches the map to three levels: 19 vectors; inner dots have two states each (e.g. POO / ONN). Multilevel equivalence with PD carriers: McGrath, Holmes &amp; Lipo 2003. Keep the pairs in mind: they come back two slides later as the balancing knob.</li>
