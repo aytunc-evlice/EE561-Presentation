@@ -2,24 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>EE561 Multilevel Converters — Quiz</title>
+<title>EE561 Multilevel Converters: Building the Levels — Quiz</title>
 <link rel="stylesheet" href="handout.css">
 </head>
 <body>
 
-<!-- ============================== PAGE 1 ============================== -->
 <div class="page">
   <div class="top"><img class="odtu" src="../../Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="../../Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
   <div class="title">
     <div class="c1">EE561 Advanced Static Power Conversion</div>
-    <div class="c2">Multilevel Converters — Quiz</div>
-    <div class="c3">15 minutes · closed book · calculator allowed · prepared by Sefer İdacı and M. Aytunç Evlice</div>
+    <div class="c2">Multilevel Converters: Building the Levels — Quiz</div>
+    <div class="c3">about 8 minutes · closed book · calculator allowed · prepared by Sefer İdacı</div>
   </div>
   <div class="fields"><span>Name:</span><span>Student ID:</span><span>Date:</span></div>
-  <div class="instr">Answer all four questions in the space provided; show your reasoning. Each question is worth 25 points (total 100). Questions 1–2 cover Part I (topologies), questions 3–4 cover Part II (modulation and balancing). Useful relations are given at the bottom of page 2.</div>
+  <div class="instr">Answer both questions in the space provided; show your reasoning. Each question is worth 25 points (total 50). Both questions cover the topologies talk: device ratings, NPC and T-type legs.</div>
 
   <div class="q">
-    <div class="qh"><b>Question 1 · Device selection</b><span class="tag">Part I · numerical design</span><span class="pts">25 pts</span></div>
+    <div class="qh"><b>Question 1 · Device selection</b><span class="tag">numerical design</span><span class="pts">25 pts</span></div>
     <p>A PV string inverter has a DC link of <b>1100 V</b>. In steady state a switch may block at most <b>2/3 of its voltage rating</b>; the available classes are 650 V, 1200 V, 1700 V and 3300 V.</p>
     <ol class="parts" type="a">
       <li>Complete the table. <span class="pp">[15]</span></li>
@@ -38,7 +37,7 @@
   </div>
 
   <div class="q">
-    <div class="qh"><b>Question 2 · NPC leg in the zero state</b><span class="tag">Part I · concept and critique</span><span class="pts">25 pts</span></div>
+    <div class="qh"><b>Question 2 · NPC leg in the zero state</b><span class="tag">concept and critique</span><span class="pts">25 pts</span></div>
     <div class="figq">
       <div class="fig"><div id="npcfig"></div><div class="cap">3-level NPC leg, V<sub>dc</sub> = 800 V, state O (gated switches marked green).</div></div>
       <div>
@@ -53,43 +52,7 @@
       </div>
     </div>
   </div>
-  <div class="foot"><span>EE561 · Multilevel Converters · Quiz</span><span>Page 1 of 2</span></div>
-</div>
-
-<!-- ============================== PAGE 2 ============================== -->
-<div class="page">
-  <div class="q">
-    <div class="qh"><b>Question 3 · DC-bus utilization and min-max injection</b><span class="tag">Part II · numerical design</span><span class="pts">25 pts</span></div>
-    <p>A three-phase, 3-level NPC converter must supply <b>380 V line-to-line RMS</b> at 50 Hz to a three-wire grid from a <b>600 V</b> DC link.</p>
-    <ol class="parts" type="a">
-      <li>Calculate the required modulation index <span class="m">m</span> = <span class="m">V</span><sub>1,pk</sub> / (<span class="m">V</span><sub>dc</sub>/2). <span class="pp">[6]</span></li>
-      <li>Is this possible with sine PWM? With min-max (zero-sequence) injection? Justify. <span class="pp">[5]</span></li>
-      <li>At one instant the normalized references are <span class="m">r</span> = (0.98, −0.25, −0.73). Find the offset <span class="m">r</span><sub>0</sub> and the modified references <span class="m">r′</span>, and show that <span class="m">r′</span><sub>a</sub> − <span class="m">r′</span><sub>b</sub> = <span class="m">r</span><sub>a</sub> − <span class="m">r</span><sub>b</sub>. <span class="pp">[9]</span></li>
-      <li>What is the largest line-to-line RMS voltage this converter can produce without overmodulation when min-max injection is used? <span class="pp">[5]</span></li>
-    </ol>
-    <div class="space" style="height:72mm"></div>
-  </div>
-
-  <div class="q">
-    <div class="qh"><b>Question 4 · Neutral-point balancing</b><span class="tag">Part II · simulation what-if and critique</span><span class="pts">25 pts</span></div>
-    <p>In a 3-level NPC with carrier PWM, a common offset <span class="m">r</span><sub>0</sub> is added to all three references to balance the split DC link (Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>).</p>
-    <ol class="parts" type="a">
-      <li>Starting from the relation for ⟨<span class="m">i</span><sub>O</sub>⟩ below, show how a small <span class="m">r</span><sub>0</sub> changes the average midpoint current. <span class="pp">[8]</span></li>
-      <li>In the lecture simulation the loop restores Δ<span class="m">V</span> within a few cycles at φ = 0°. Predict what happens at φ = 90° (pure reactive current) and explain. <span class="pp">[8]</span></li>
-      <li>A team implements <span class="m">r</span><sub>0</sub> = +<span class="m">K</span>·Δ<span class="m">V</span>, tunes it on an inverter test bench, then ships the converter as an <b>active rectifier</b>. Critique this design and propose a fix. <span class="pp">[9]</span></li>
-    </ol>
-    <div class="space" style="height:62mm"></div>
-  </div>
-
-  <div class="rel">
-    <h4>Useful relations</h4>
-    <ul>
-      <li><span class="m">m</span> = <span class="m">V</span><sub>1,pk</sub> / (<span class="m">V</span><sub>dc</sub>/2); linear range <span class="m">m</span> ≤ 1 (sine PWM), <span class="m">m</span> ≤ 2/√3 ≈ 1.155 (min-max injection). &nbsp; <span class="m">V</span><sub>LL,rms</sub> = √3 · <span class="m">V</span><sub>1,pk</sub> / √2.</li>
-      <li>Min-max offset: <span class="m">r</span><sub>0</sub> = −[max(<span class="m">r</span><sub>a</sub>, <span class="m">r</span><sub>b</sub>, <span class="m">r</span><sub>c</sub>) + min(<span class="m">r</span><sub>a</sub>, <span class="m">r</span><sub>b</sub>, <span class="m">r</span><sub>c</sub>)] / 2, &nbsp; <span class="m">r′</span><sub>x</sub> = <span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>.</li>
-      <li>NPC with carrier PWM: ⟨<span class="m">i</span><sub>O</sub>⟩ = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub>|) <span class="m">i</span><sub>x</sub> (current drawn from O), &nbsp; <span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = <span class="m">i</span><sub>O</sub>.</li>
-    </ul>
-  </div>
-  <div class="foot"><span>EE561 · Multilevel Converters · Quiz</span><span>Page 2 of 2</span></div>
+  <div class="foot"><span>EE561 · Multilevel Converters · Building the Levels · Quiz</span><span>Sefer İdacı</span></div>
 </div>
 
 <script src="../../Interactive_Deck/js/kit.js"></script>

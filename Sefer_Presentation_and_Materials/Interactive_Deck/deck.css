@@ -188,16 +188,34 @@ table.tb { border-collapse: collapse; width: 100%; font-size: 20px; color: var(-
 .p1 .xl .steps > li { font-size: 31px; grid-template-columns: 124px 1fr; gap: 18px; }
 .p1 .xl .steps { gap: 22px; }
 .p1 .xl > .stack, .p1 .xl > .steps { align-self: center; }
+/* gains / costs: a big factor and a few words per line */
+.p1 .ledger { display: flex; flex-direction: column; gap: 26px; align-self: center; }
+.p1 .ledger .lh { font: 700 30px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; padding-bottom: 12px; border-bottom: 3px solid currentColor; }
+.p1 .ledger .li { display: grid; grid-template-columns: 128px 1fr; gap: 22px; align-items: baseline; font-size: 32px; line-height: 1.25; color: var(--ink); }
+.p1 .ledger .li > b:first-child { font: 700 62px/1 var(--font); text-align: right; }
+.p1 .ledger.gain .lh, .p1 .ledger.gain .li > b:first-child { color: var(--good); }
+.p1 .ledger.cost .lh, .p1 .ledger.cost .li > b:first-child { color: var(--bad); }
+.p1 table.gc { font-size: 30px; }
+.p1 table.gc th { font-size: 24px; }
+.p1 table.gc td { padding: 13px 12px; }
+.p1 table.gc th.g { color: var(--good); }
+.p1 table.gc th.b { color: var(--bad); }
+/* state slides */
+.p1 table.st td.hl { color: var(--accent); font-weight: 700; }
+.fig.redund { border: none; padding: 0; gap: 4px; }
+.fig.redund .stname { font: 700 50px/1 var(--font); letter-spacing: .12em; text-align: center; }
+.fig > svg.sch { flex: 1 1 0; min-height: 0; }
+.p1 .fig.redund figcaption { text-align: center; font-size: 26px; color: var(--ink2); }
+.sch .flow.still { animation: none; }
+.sch .lbl.io { font-size: 24px; }
 
-.p1 table.devtab { font-size: 21px; }
-.p1 table.devtab td, .p1 table.devtab th { padding: 7px 10px; }
 .p1 table.mini { font-size: 26px; width: auto; }
 .p1 table.mini td, .p1 table.mini th { padding: 6px 18px; }
 
 /* photo cards (real devices) */
 .photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-height: 0; }
 .photo { margin: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-.photo img { width: 100%; height: 400px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+.photo img { width: 100%; height: 480px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
 .photo figcaption { font-size: 24px; line-height: 1.3; color: var(--ink2); }
 .photo figcaption b { color: var(--ink); }
 .photo .credit { font: 400 13px/1.3 var(--font); color: var(--muted); }

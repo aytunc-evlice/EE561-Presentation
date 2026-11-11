@@ -188,7 +188,7 @@
         pos: [[70, 520], [330, 520], { S1p: 'd' }, { S2p: 'd' }, O3], neg: [O3, { S2p: 'sw' }, { S1p: 'sw' }, [330, 520], [70, 520]] },
     ],
     polLabel: 'Zero-level choice',
-    policies: [['bal', 'balance V<sub>fc</sub>'], ['alt', 'alternate'], ['10', 'always 10'], ['01', 'always 01']],
+    policies: [['alt', 'alternate'], ['10', 'always 10'], ['01', 'always 01']],
     pick(k, r, i, c, pol, V) { return k === 2 ? '11' : k === 0 ? '00' : red('10', '01', k, i, c, pol, V, 400); },
   });
 
@@ -249,7 +249,7 @@
       st5('l', '11', 'O', '0 b'), st5('l', '10', 'L', '−200 a'), st5('l', '01', 'L', '−200 b'), st5('l', '00', 'N', '−400'),
     ],
     polLabel: 'Redundant-state choice',
-    policies: [['bal', 'balance V<sub>fc</sub>'], ['alt', 'alternate'], ['10', 'always "a"']],
+    policies: [['alt', 'alternate'], ['10', 'always "a"']],
     pick(k, r, i, c, pol, V) {
       if (k === 4) return 'u11';
       if (k === 3) return red('u10', 'u01', k, i, c, pol, V, 200);
@@ -440,21 +440,58 @@
     return {};
   };
 
+  function lossLegend(ctx, lx, ly) {
+    ctx.font = '600 13px ' + K.font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ctx.fillStyle = K.css('--s1'); ctx.fillRect(lx, ly - 6, 12, 12); ctx.fillStyle = K.css('--muted'); ctx.fillText('conduction', lx + 17, ly);
+    ctx.fillStyle = K.css('--lvH'); ctx.fillRect(lx + 100, ly - 6, 12, 12); ctx.fillStyle = K.css('--muted'); ctx.fillText('switching', lx + 117, ly);
+  }
+
+  // Static loss comparison: one bar chart per operating point (10 kHz, 100 A peak), revealed by steps.
+  SIMS.lossbars = function (host, cfg) {
+    const W = cfg.w || 460, H = cfg.h || 400;
+    const cases = cfg.cases.map((c) => {
+      const T = TOPO[c.topo], res = lossesPol(T, cfg.m || 0.9, (c.phi * Math.PI) / 180, c.pol);
+      const cv = K.canvas(W, H), cell = h('figure', { class: 'fig' }, cv.el);
+      if (c.step != null) cell.setAttribute('data-step', c.step);
+      host.append(cell);
+      return Object.assign({ T, res, cv }, c);
+    });
+    host.classList.add('figrow');
+    host.style.gridTemplateColumns = `repeat(${cases.length}, 1fr)`;
+    function draw() {
+      for (const c of cases) {
+        const ctx = c.cv.ctx; c.cv.clear();
+        const ids = c.T.devs.map((d) => d.id);
+        const cv = ids.map((id) => c.res[id].c), sv = ids.map((id) => c.res[id].s), tot = ids.map((_, j) => cv[j] + sv[j]);
+        const max = Math.max(...tot), hot = c.T.devs.filter((_, j) => tot[j] > max - 0.5).map((d) => d.lab).join(', ');
+        K.bars(ctx, { x: 54, y: 62, w: W - 66, h: H - 100 }, {
+          n: ids.length, ylim: [0, cfg.ymax || 80], yticks: [0, 20, 40, 60, 80].map((v) => [v, v + ' W']),
+          labels: c.T.devs.map((d) => d.lab), top: tot.map((v) => Math.round(v) + ''), maxBar: 44,
+          stack: [{ values: cv, color: K.css('--s1') }, { values: sv, color: K.css('--lvH') }],
+          title: c.title + ' · hottest ' + hot,
+        });
+        lossLegend(ctx, 54, 18);
+      }
+    }
+    K.onTheme(draw);
+    draw();
+    return {};
+  };
+
   // ---------------- the sim ----------------
   SIMS.leg = function (host, cfg) {
     const P = {
-      topo: cfg.topo || 'npc', mode: cfg.mode || 'explore', state: cfg.state || null, sign: cfg.sign || 1, live: cfg.live != null ? cfg.live : null,
+      topo: cfg.topo || 'npc', mode: cfg.mode || 'explore', state: cfg.state || null, sign: cfg.sign || 1,
       m: cfg.m || 0.85, phi: cfg.phi || 0, mf: cfg.mf || 12, speed: cfg.speed || 0.25, pol: cfg.pol || null, playing: true,
     };
     const topos = cfg.topos || [P.topo];
-    const I_EXP = 20, C_DC = 2e-3, C_FC = 1e-3, SLOW = 1 / 1000;
-    const I_RUN = 50, C_FC_RUN = 2e-3, F1 = 50, NB = 1000;
-    let T, sch, ui = {}, V, simT = 0, lossRes = null, lastStep = -1;
-    const run = { th: 0, thTot: 0, c: { prevK: -1, alt: false }, vb: new Float32Array(NB), ib: new Float32Array(NB), fcR: new Float32Array(NB * 3), fcIdx: 0, st: null, sign: 1 };
+    // Capacitors are ideal throughout: the split link and the flying capacitor hold their nominal voltages.
+    const I_EXP = 20, I_RUN = 50, F1 = 50, NB = 1000;
+    let T, sch, ui = {}, V, lossRes = null, lastStep = -1;
+    const run = { th: 0, c: { prevK: -1, alt: false }, vb: new Float32Array(NB), ib: new Float32Array(NB), fc: new Float32Array(NB), st: null, sign: 1 };
     const loop = K.loop(tick);
 
-    function resetCaps() { V = { v1: 400, v2: 400, vf: T.fcNom ? (P.vf0 != null ? P.vf0 : T.fcNom) : 0 }; simT = 0; }
-    const live = () => (P.live != null ? P.live : !!T.fcNom);
+    function resetCaps() { V = { v1: 400, v2: 400, vf: T.fcNom || 0 }; }
 
     function build() {
       T = TOPO[P.topo];
@@ -481,16 +518,12 @@
     function buildExplore(right) {
       const hasNp = T.states.some((x) => x.np), hasFc = !!T.fcap;
       const stSeg = K.seg({
-        label: 'Switching state (click, or click a table row)',
+        label: 'Switching state',
         options: T.states.map((st) => [st.id, `<span class="lv${st.lv}">${st.name}</span>` + (T.key === 'anpc5' ? '' : ` <small>${K.fmtV(st.vnom)}</small>`)]),
         value: P.state, onChange: (v) => { P.state = v; refresh(); },
       });
       const iSeg = K.seg({ label: 'Phase current', options: [[1, 'i<sub>a</sub> &gt; 0 (out of leg)'], [-1, 'i<sub>a</sub> &lt; 0 (into leg)']], value: P.sign, onChange: (v) => { P.sign = v; refresh(); } });
       const row2 = h('div', { class: 'row', style: { alignItems: 'flex-end' } }, iSeg.el);
-      if (hasNp || hasFc) {
-        row2.append(K.seg({ label: 'Capacitors', options: [[false, 'ideal'], [true, 'real (charge moves)']], value: live(), onChange: (v) => { P.live = v; resetCaps(); refresh(); } }).el);
-        row2.append(K.btn('Reset', () => { resetCaps(); refresh(); }));
-      }
       ui.vo = K.readout('Pole voltage v<sub>aO</sub>', 'big');
       ui.cd = K.readout('Conducting devices');
       ui.cx = K.readout(hasFc ? 'Flying-capacitor current' : hasNp ? 'Midpoint current i<sub>O</sub>' : 'Blocking (off devices)');
@@ -506,11 +539,10 @@
         tr.addEventListener('click', () => { P.state = st.id; stSeg.set(st.id); refresh(); });
         ui.rows[st.id] = tr; tbody.append(tr);
       }
-      ui.clock = h('div', { class: 'tiny' });
       ui.stSeg = stSeg;
       right.append(stSeg.el, row2,
-        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '0.9fr 1.3fr 1.2fr' } }, ui.vo.el, ui.cd.el, ui.cx.el),
-        h('table', { class: 'statetab' }, h('thead', null, thead), tbody), ui.clock);
+        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '0.9fr 1.3fr 1.2fr' } }, ui.vo.el, ui.cd.el, ui.cx.el));
+      if (cfg.table !== false) right.append(h('table', { class: 'statetab' }, h('thead', null, thead), tbody));
     }
 
     // ----- run -----
@@ -528,7 +560,6 @@
       if (T.policies) row.append(K.seg({ label: T.polLabel, options: T.policies, value: P.pol, onChange: (v) => { P.pol = v; changed(); } }).el);
       ui.play = K.btn(P.playing ? '❚❚ Pause' : '▶ Play', toggle);
       row.append(ui.play);
-      if (T.fcap) row.append(K.btn('Disturb V<sub>fc</sub> −60 V', () => { V.vf = T.fcNom - 60; }));
       right.append(ui.cvA.el, ui.cvB.el);
       left.append(grid, row);
     }
@@ -537,35 +568,32 @@
       if (!T.fcap) lossRes = lossesPol(T, P.m, (P.phi * Math.PI) / 180, P.pol);
       draw();
     }
-    function stepRun(th, dtr, integ) {
+    function stepRun(th) {
       const r = P.m * Math.sin(th), i = I_RUN * Math.sin(th - (P.phi * Math.PI) / 180);
       const k = levelPD(r, (P.mf * th) / K.TAU, T.levels);
       const st = T.st[T.pick(k, r, i, run.c, P.pol, V)];
       run.c.prevK = k;
-      if (integ && st.fc) V.vf = K.clamp(V.vf + (st.fc * i * dtr) / C_FC_RUN, 0, 800);
       const idx = Math.min(NB - 1, Math.floor((th / K.TAU) * NB));
-      run.vb[idx] = st.pot(V).out; run.ib[idx] = i;
-      if (T.fcap) { const j = Math.floor((run.thTot / K.TAU) * NB) % (3 * NB); run.fcR[j] = V.vf; run.fcIdx = j; }
+      run.vb[idx] = st.pot(V).out; run.ib[idx] = i; run.fc[idx] = (st.fc || 0) * i;
       run.sign = i >= 0 ? 1 : -1;
       return st;
     }
     function presim() {
       run.c = { prevK: -1, alt: false };
       const n = NB * 2;
-      for (let j = 0; j < n; j++) stepRun((K.TAU * j) / n, 0, false);
-      run.fcR.fill(V.vf);
+      for (let j = 0; j < n; j++) stepRun((K.TAU * j) / n);
       run.th = 0;
     }
     function advanceRun(dt) {
       if (!P.playing) return;
       const dth = K.TAU * P.speed * dt;
       const maxStep = Math.min(K.TAU / (P.mf * 60), K.TAU / NB);
-      const n = Math.max(1, Math.ceil(dth / maxStep)), hh = dth / n, dtr = hh / (K.TAU * F1);
+      const n = Math.max(1, Math.ceil(dth / maxStep)), hh = dth / n;
       let st = run.st;
       for (let j = 0; j < n; j++) {
-        run.th += hh; run.thTot += hh;
+        run.th += hh;
         if (run.th >= K.TAU) run.th -= K.TAU;
-        st = stepRun(run.th, dtr, true);
+        st = stepRun(run.th);
       }
       run.st = st;
       sch.update(st, run.sign, V);
@@ -600,15 +628,13 @@
       const Bc = ui.cvB, bx = Bc.ctx;
       Bc.clear();
       if (T.fcap) {
-        const N3 = 3 * NB, y = new Float32Array(N3);
-        for (let q = 0; q < N3; q++) y[q] = run.fcR[(run.fcIdx + 1 + q) % N3];
-        const nom = T.fcNom;
+        let avg = 0;
+        for (let q = 0; q < NB; q++) avg += run.fc[q] / NB;
         K.plot(bx, { x: 56, y: 28, w: Bc.w - 72, h: Bc.h - 62 }, {
-          xlim: [0, N3], ylim: [nom - 110, nom + 110], yticks: [nom - 100, nom - 50, nom, nom + 50, nom + 100].map((v) => [v, String(v)]),
-          xticks: [[0, '−60 ms'], [NB, '−40 ms'], [2 * NB, '−20 ms'], [N3, 'now']],
-          hlines: [{ v: nom, color: K.css('--good'), dash: [6, 5], width: 1.5, label: 'target ' + nom + ' V' }],
-          series: [{ y, x0: 0, dx: 1, color: K.css('--s1'), width: 2.4 }],
-          title: 'Flying-capacitor voltage V_fc [V] — last three periods',
+          xlim: [0, K.TAU], ylim: [-I_RUN * 1.15, I_RUN * 1.15], yticks: [[-I_RUN, '−' + I_RUN], [0, '0'], [I_RUN, '+' + I_RUN]],
+          xticks: [[0, '0'], [K.TAU / 4, '5 ms'], [K.TAU / 2, '10 ms'], [(3 * K.TAU) / 4, '15 ms'], [K.TAU, '20 ms']],
+          series: [{ y: run.fc, x0: 0, dx: K.TAU / NB, color: K.css('--s1'), width: 2, step: true }], cursor: run.th,
+          title: `Flying-capacitor current i_fc [A] · period average ${avg.toFixed(1)} A · ideal C_fc held at ${T.fcNom} V`,
         });
       } else if (lossRes) {
         const ids = T.devs.map((d) => d.id);
@@ -626,10 +652,7 @@
           stack: [{ values: cv, color: K.css('--s1') }, { values: sv, color: K.css('--lvH') }],
           title: `Losses [W], 10 kHz, 100 A pk · ${modeTxt}, PF ${pf.toFixed(2)} · total ${Math.round(sum)} W · hottest ${T.devs[hot].lab}`,
         });
-        bx.font = '600 13px ' + K.font; bx.textBaseline = 'middle'; bx.textAlign = 'left';
-        const lx = Bc.w - 186, ly = 17;
-        bx.fillStyle = K.css('--s1'); bx.fillRect(lx, ly - 6, 12, 12); bx.fillStyle = K.css('--muted'); bx.fillText('conduction', lx + 17, ly);
-        bx.fillStyle = K.css('--lvH'); bx.fillRect(lx + 100, ly - 6, 12, 12); bx.fillStyle = K.css('--muted'); bx.fillText('switching', lx + 117, ly);
+        lossLegend(bx, Bc.w - 186, 17);
       }
     }
 
@@ -652,20 +675,9 @@
       }
       for (const id in ui.rows) ui.rows[id].classList.toggle('cur', id === P.state);
       if (ui.stSeg.get() !== P.state) ui.stSeg.set(P.state);
-      ui.clock.innerHTML = live() && (T.fcap || T.states.some((x) => x.np))
-        ? `Slow motion: 1 s on screen = 1 ms of converter time · |i<sub>a</sub>| = ${I_EXP} A · t = ${(simT * 1000).toFixed(2)} ms`
-        : 'Ideal capacitors: voltages held constant.';
     }
     function tick(dt) {
-      if (P.mode === 'run') { advanceRun(dt); return; }
-      if (!live()) return;
-      const st = T.st[P.state];
-      if (!st.fc && !st.np) return;
-      const dts = dt * SLOW, i = I_EXP * P.sign;
-      simT += dts;
-      if (st.fc) V.vf = K.clamp(V.vf + (st.fc * i * dts) / C_FC, 0, 800);
-      if (st.np) { V.v1 = K.clamp(V.v1 + (i * dts) / (2 * C_DC), 0, 800); V.v2 = 800 - V.v1; }
-      refresh();
+      if (P.mode === 'run') advanceRun(dt);
     }
     function toggle() {
       P.playing = !P.playing;

@@ -5,9 +5,9 @@ $src = $PSScriptRoot
 $out = Split-Path $src -Parent
 $prof = Join-Path $env:TEMP "ee561_pdf_profile"
 $jobs = @(
-  @{ html = "quiz.html";            pdf = "Multilevel Converters Quiz.pdf" },
-  @{ html = "quiz_key.html";        pdf = "Multilevel Converters Quiz - Answer Key.pdf" },
-  @{ html = "final_questions.html"; pdf = "Potential Final Questions.pdf" }
+  @{ html = "quiz.html";            pdf = "Quiz - Building the Levels.pdf" },
+  @{ html = "quiz_key.html";        pdf = "Quiz Answer Key - Building the Levels.pdf" },
+  @{ html = "final_questions.html"; pdf = "Potential Final Questions - Building the Levels.pdf" }
 )
 foreach ($j in $jobs) {
   $in = Join-Path $src $j.html

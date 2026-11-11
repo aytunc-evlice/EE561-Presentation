@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>EE561 Multilevel Converters — Quiz Answer Key</title>
+<title>EE561 Multilevel Converters: Building the Levels — Quiz Answer Key</title>
 <link rel="stylesheet" href="handout.css">
 <style>
   @page { size: A4; margin: 13mm 15mm 14mm; @bottom-right { content: "Answer key · page " counter(page) " of " counter(pages); font: 8pt Calibri, sans-serif; color: #666; } }
@@ -14,8 +14,8 @@
   <div class="top"><img class="odtu" src="../../Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="../../Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
   <div class="title">
     <div class="c1">EE561 Advanced Static Power Conversion</div>
-    <div class="c2">Multilevel Converters — Quiz Answer Key</div>
-    <div class="c3">For the presenters and the instructor · not for distribution to students</div>
+    <div class="c2">Multilevel Converters: Building the Levels — Quiz Answer Key</div>
+    <div class="c3">Sefer İdacı · for the presenter and the instructor · not for distribution to students</div>
   </div>
 
   <div class="qh"><b>Question 1 · Device selection</b><span class="pts">25 pts</span></div>
@@ -41,22 +41,6 @@
     <p class="mark">Marking: (a) path 4 + devices 3; (b) 5; (c) 3 + 3; (d) step size 3, voltage sharing 3, conclusion 1.</p>
   </div>
 
-  <div class="qh"><b>Question 3 · DC-bus utilization and min-max injection</b><span class="pts">25 pts</span></div>
-  <div class="sol">
-    <p><b>(a)</b> <span class="m">V</span><sub>1,pk</sub> = 380 · √2 / √3 = 310.3 V; &nbsp; <span class="m">m</span> = 310.3 / 300 = <b>1.034</b>.</p>
-    <p><b>(b)</b> Sine PWM: <b>no</b> — <span class="m">m</span> &gt; 1, the references exceed the carriers (overmodulation, low-order harmonics). Min-max: <b>yes</b> — 1.034 &lt; 2/√3 = 1.155.</p>
-    <p><b>(c)</b> max = 0.98, min = −0.73 → <span class="m">r</span><sub>0</sub> = −(0.98 − 0.73)/2 = <b>−0.125</b>; &nbsp; <span class="m">r′</span> = (0.855, −0.375, −0.855). &nbsp; <span class="m">r′</span><sub>a</sub> − <span class="m">r′</span><sub>b</sub> = 1.23 = <span class="m">r</span><sub>a</sub> − <span class="m">r</span><sub>b</sub>: the common offset cancels in every line-to-line difference.</p>
-    <p><b>(d)</b> <span class="m">V</span><sub>LL,max</sub> = √3 · (2/√3)(<span class="m">V</span><sub>dc</sub>/2) / √2 = <span class="m">V</span><sub>dc</sub>/√2 = <b>424 V</b> (sine PWM: 367 V).</p>
-    <p class="mark">Marking: (a) 6; (b) 2.5 + 2.5; (c) r<sub>0</sub> 3, r′ 3, check 3; (d) 5.</p>
-  </div>
-
-  <div class="qh"><b>Question 4 · Neutral-point balancing</b><span class="pts">25 pts</span></div>
-  <div class="sol">
-    <p><b>(a)</b> ⟨<span class="m">i</span><sub>O</sub>⟩ = Σ(1 − |<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>|) <span class="m">i</span><sub>x</sub>. For a small offset that does not change the sign of <span class="m">r</span><sub>x</sub>: |<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>| = |<span class="m">r</span><sub>x</sub>| + sign(<span class="m">r</span><sub>x</sub>) <span class="m">r</span><sub>0</sub>, so <b>Δ⟨<span class="m">i</span><sub>O</sub>⟩ = −<span class="m">r</span><sub>0</sub> Σ sign(<span class="m">r</span><sub>x</sub>) <span class="m">i</span><sub>x</sub></b>.</p>
-    <p><b>(b)</b> Averaged over a period, Σ sign(<span class="m">r</span><sub>x</sub>) <span class="m">i</span><sub>x</sub> = (6/π) <span class="m">Î</span> cos φ. At φ = 90° this is ≈ 0: the offset no longer changes the average midpoint current, so <b>ΔV is not restored</b> (only the 3f<sub>1</sub> ripple remains). Low power factor needs another method (redundant-vector selection, larger capacitors).</p>
-    <p><b>(c)</b> The sensitivity −(6/π) <span class="m">Î</span> cos φ <b>changes sign with the power direction</b>. In rectifier mode (cos φ &lt; 0) the loop tuned as negative feedback becomes <b>positive feedback</b>: ΔV runs away until the overvoltage protection trips. Fix: <span class="m">r</span><sub>0</sub> = sign(<span class="m">P</span>) · <span class="m">K</span> · ΔV (or a current-direction-aware state selection), and test both power directions.</p>
-    <p class="mark">Marking: (a) 8; (b) prediction 3, explanation via cos φ 5; (c) sign change 4, consequence 2, fix 3.</p>
-  </div>
 </div>
 <script src="keep_together.js"></script>
 </body>
