@@ -50,7 +50,6 @@
       <p class="small" data-step="2"><b>Comparator:</b> the switch is on while the reference is above the carrier. The output jumps between the two rails; only the pulse width changes.</p>
       <p class="small" data-step="3"><b>Average</b> over one switching period (blue) equals the reference: a reference of 0.6 gives 60 % on-time, and 480 V on an 800 V link. This is the DC-DC converter you already know.</p>
       <p class="small" data-step="4"><b>Now let the reference move:</b> a sine, slow compared with the carrier, and a carrier from −1 to +1 around the DC-link midpoint. Same comparator: the pulse width follows the sine and the local average reproduces it. That is an <b>inverter leg</b>. Everything else is harmonics near multiples of <span class="m">f</span><sub>c</sub>.</p>
-      <div class="callout" data-step="5" style="font-size:19px"><span class="qlabel">Question:</span> inverter leg on an 800 V link; at this instant the reference is +0.5, half way up the carrier. What are the on-time and the average pole voltage? <span class="ans" data-step="6">75 % on-time; +200 V from the midpoint.</span></div>
     </div>
     <div data-sim="spwm" data-config='{"m":0.8,"mf":9,"D":0.6,"mode":"dc","sineStep":4}'></div>
   </div>
@@ -60,30 +59,31 @@
       <li>DC mode: move D and watch the average and the readout (on-time × 800 V). The output is measured from the negative rail, as in a buck converter.</li>
       <li>Sine mode: the pole voltage is measured from the midpoint, so it swings ±400 V. Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the average clips at ±400 V (next slide).</li>
       <li>Message: the modulator does not care what the reference is. DC gives a DC-DC converter, a sine gives an inverter, and the controller later on simply hands it whatever voltage it needs.</li>
-      <li>Answer to the question: on-time = (1 + 0.5)/2 = 75 %, average = 0.75 · 400 + 0.25 · (−400) = +200 V. Sefer used the same leg; the multilevel carrier lab generalizes the comparator to N − 1 carriers.</li>
+      <li>Sefer used the same leg; the multilevel carrier lab generalizes the comparator to N − 1 carriers.</li>
     </ul>
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Basics: modulation index and frequency ratio">
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: modulation index and frequency ratio">
   <div class="sh"><div><div class="kicker"><b>Basics</b> · m<sub>a</sub>, m<sub>f</sub> and the PWM spectrum · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Basics: modulation index and frequency ratio</h2></div></div>
   <div class="body" style="grid-template-columns: 560px 1fr">
-    <div class="stack" style="gap:12px">
-      <div class="eq"><span class="m">m</span><sub>a</sub> = <span class="m">V̂</span><sub>r</sub> / <span class="m">V̂</span><sub>c</sub> &nbsp; <span class="small muted">amplitude modulation index</span></div>
-      <div class="eq"><span class="m">m</span><sub>f</sub> = <span class="m">f</span><sub>c</sub> / <span class="m">f</span><sub>1</sub> &nbsp; <span class="small muted">frequency modulation ratio</span></div>
-      <p class="small"><b>Linear range</b>, <span class="m">m</span><sub>a</sub> ≤ 1: the fundamental is exactly</p>
-      <div><span class="eq box"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span></div>
-      <p class="small" data-step="1"><b>Overmodulation</b>, <span class="m">m</span><sub>a</sub> &gt; 1: pulses drop out, <span class="m">V̂</span><sub>1</sub> grows more slowly than <span class="m">m</span><sub>a</sub>, and low-order harmonics (3, 5, 7) appear. The limit is the square wave, <span class="m">V̂</span><sub>1</sub> = (4/π) <span class="m">V</span><sub>dc</sub>/2.</p>
-      <p class="small" data-step="2"><b>Harmonics</b> sit in clusters at <span class="m">h</span> = <span class="m">j m</span><sub>f</sub> ± <span class="m">k</span> (<span class="m">j</span> odd: <span class="m">k</span> even; <span class="m">j</span> even: <span class="m">k</span> odd). Choose <span class="m">m</span><sub>f</sub> <b>odd</b> (no even harmonics) and a <b>multiple of 3</b> (the carrier harmonic is common mode and cancels in <span class="m">v</span><sub>ab</sub>).</p>
-      <div class="callout" data-step="3" style="font-size:19px"><span class="qlabel">Question:</span> <span class="m">f</span><sub>1</sub> = 50 Hz, <span class="m">m</span><sub>f</sub> = 15. Where is the first cluster, and what is left of it in <span class="m">v</span><sub>ab</sub>? <span class="ans" data-step="4">Around 750 Hz: h = 13, 15, 17. h = 15 is triplen and cancels in v<sub>ab</sub>; 650 Hz and 850 Hz remain.</span></div>
+    <div class="stack" style="gap:18px">
+      <p class="small"><b><span class="m">m</span><sub>a</sub></b>: sine peak / carrier peak. &nbsp; <b><span class="m">m</span><sub>f</sub></b>: carrier frequency / output frequency.</p>
+      <div data-step="1"><h3 style="font-size:22px">Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3>
+        <p class="small">The average over each switching period follows the reference (last slide), scaled to ±<span class="m">V</span><sub>dc</sub>/2. So the average is a sine of peak <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2. The switching only adds harmonics far above it.</p></div>
+      <div data-step="2"><h3 style="font-size:22px">Overmodulation, <span class="m">m</span><sub>a</sub> &gt; 1</h3>
+        <p class="small">Near the peak the sine is above the carrier: no pulses, the output sticks at +<span class="m">V</span><sub>dc</sub>/2. The tops are clipped, so the fundamental grows more slowly than <span class="m">m</span><sub>a</sub> (at most 1.27 · <span class="m">V</span><sub>dc</sub>/2, a square wave) and harmonics 3, 5, 7 appear.</p></div>
+      <div data-step="3"><h3 style="font-size:22px">Where the harmonics are</h3>
+        <p class="small">In groups around <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … A higher <span class="m">m</span><sub>f</sub> moves them further away: easier to filter. With <span class="m">m</span><sub>f</sub> a multiple of 3, the harmonic at <span class="m">m</span><sub>f</sub> cancels in the line voltage.</p></div>
     </div>
     <div data-sim="mindex" data-config='{"m":0.8,"mf":15}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> Sweep m<sub>a</sub> from 0.5 to 3: the red dot leaves the straight line at 1 and creeps up to 4/π. In the spectrum, nothing appears below the carrier cluster in the linear range; above 1, the 3rd, 5th and 7th appear.</p>
+    <p><b>2.5 min.</b> One idea per click.</p>
     <ul>
-      <li>m<sub>f</sub> 15 → 16: even harmonics appear (no half-wave symmetry). Then switch pole ↔ line-to-line: h = 15 disappears from v<sub>ab</sub>.</li>
-      <li>Rule of thumb (Mohan): for small m<sub>f</sub> keep it an odd integer and a multiple of 3 (synchronous PWM); above about 21 asynchronous PWM is acceptable.</li>
+      <li><b>Fundamental:</b> point at the blue average on the last slide. The average over one switching period is the reference times V<sub>dc</sub>/2; for a sine reference that average is a sine of peak m<sub>a</sub>·V<sub>dc</sub>/2. The pulses add only high-frequency content around m<sub>f</sub> and its multiples, so nothing else lands on the fundamental. Show it in the simulation: at m<sub>a</sub> = 0.8 the red dot sits on the straight line (0.8 × 400 V = 320 V).</li>
+      <li><b>Overmodulation:</b> sweep m<sub>a</sub> from 0.8 to 3. Above 1 the pulses near the peak disappear, the dot leaves the line and creeps up to 4/π ≈ 1.27, and the 3rd, 5th and 7th appear in the spectrum. Why: a flat-topped sine is a sine plus odd low-order harmonics, and clipping removes area from the peaks, so the fundamental is less than m<sub>a</sub> would predict.</li>
+      <li><b>Harmonics:</b> back to m<sub>a</sub> = 0.8: nothing below the first group. Change m<sub>f</sub> and the groups move with it. Switch pole ↔ line-to-line: the harmonic exactly at h = m<sub>f</sub> = 15 disappears, because it is the same in all three phases; its neighbours (13, 17) stay. Choosing m<sub>f</sub> odd also avoids even harmonics (Mohan's rule for small m<sub>f</sub>; above about 21 it matters little).</li>
       <li>In three-phase, min-max injection extends the linear range to 2/√3 ≈ 1.155 (min-max slide, three slides later).</li>
     </ul>
   </aside>

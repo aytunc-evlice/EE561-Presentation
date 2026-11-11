@@ -20,7 +20,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (22 slides, ≈ 46 min)
+## Outline: Running the levels: Modulate · Balance · Control (22 slides, ≈ 46.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -29,7 +29,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 1 | Title | 0.5 |
 | 2 | Learning objectives | 0.5 |
 | 3 | ★ Basics: one comparator, from DC-DC to sine PWM: carrier, DC reference (buck), comparator, average, then a sine reference (inverter leg) | 2.5 |
-| 4 | ★ Basics: modulation index m<sub>a</sub> and frequency ratio m<sub>f</sub>: linear range, overmodulation, sideband clusters | 2 |
+| 4 | ★ Basics: modulation index m<sub>a</sub> and frequency ratio m<sub>f</sub>: why the fundamental is m<sub>a</sub>·V<sub>dc</sub>/2, overmodulation, where the harmonics are | 2.5 |
 | 5 | Reference → level → state → gates | 1.5 |
 | 6 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
 | 7 | Min-max injection | 3 |
