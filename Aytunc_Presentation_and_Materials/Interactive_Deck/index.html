@@ -64,32 +64,96 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: modulation index and frequency ratio">
-  <div class="sh"><div><div class="kicker"><b>Basics</b> · m<sub>a</sub>, m<sub>f</sub> and the PWM spectrum · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Basics: modulation index and frequency ratio</h2></div></div>
-  <div class="body" style="grid-template-columns: 560px 1fr">
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="One switching period">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · one switching period, step by step · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>One switching period: why the average is <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 640px; gap:28px">
     <div class="stack" style="gap:10px">
-      <p class="small"><b><span class="m">m</span><sub>a</sub></b> = sine peak / carrier peak &nbsp;·&nbsp; <b><span class="m">m</span><sub>f</sub></b> = carrier frequency / output frequency</p>
-      <h3 style="font-size:22px; margin:6px 0 0" data-step="1">Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3>
-      <p class="small" data-step="1">Look at one switching period. The sine hardly moves, so call its value <span class="m">r</span>. The carrier rises evenly from −1 to +1, so the switch is on for</p>
-      <div class="eq" data-step="1" style="font-size:25px">① &nbsp;<span class="m">d</span> = (1 + <span class="m">r</span>) / 2</div>
-      <p class="small" data-step="2">On: +<span class="m">V</span><sub>dc</sub>/2. Off: −<span class="m">V</span><sub>dc</sub>/2. The average over the period:</p>
-      <div class="eq" data-step="2" style="font-size:25px">② &nbsp;⟨<span class="m">v</span>⟩ = <span class="m">d</span> · <span class="m">V</span><sub>dc</sub>/2 − (1 − <span class="m">d</span>) · <span class="m">V</span><sub>dc</sub>/2 = <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</div>
-      <p class="small" data-step="3">This holds in every period, and <span class="m">r</span> = <span class="m">m</span><sub>a</sub> sin ω<span class="m">t</span>:</p>
-      <div class="eq" data-step="3" style="font-size:25px">③ &nbsp;⟨<span class="m">v</span>⟩ = <span class="m">m</span><sub>a</sub> · (<span class="m">V</span><sub>dc</sub>/2) · sin ω<span class="m">t</span> &nbsp;→&nbsp; <span class="eq box" style="font-size:25px; padding:2px 12px"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span></div>
-      <p class="small muted" data-step="3">Example: 800 V link, <span class="m">m</span><sub>a</sub> = 0.8 → 0.8 × 400 V = 320 V peak.</p>
-      <p class="small" data-step="4" style="margin-top:6px"><b><span class="m">m</span><sub>a</sub> &gt; 1:</b> <span class="m">d</span> cannot go above 1. Near the peak the switch just stays on, the tops are cut off: less fundamental than ③, plus harmonics 3, 5, 7.</p>
-      <p class="small" data-step="5"><b>The rest:</b> the pulses add harmonics only around <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … far above the fundamental, so a filter removes them.</p>
+      <div><h3 style="font-size:21px;margin:0">① The leg makes only two voltages</h3><p class="small" style="font-size:19px">Measured from the DC-link midpoint O: upper switch on gives +<span class="m">V</span><sub>dc</sub>/2, lower switch on gives −<span class="m">V</span><sub>dc</sub>/2. Nothing in between.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② <span class="m">r</span> is the voltage we want</h3><p class="small" style="font-size:19px">Written as a fraction of <span class="m">V</span><sub>dc</sub>/2: <span class="m">r</span> = +1 means +<span class="m">V</span><sub>dc</sub>/2, <span class="m">r</span> = 0 means 0 V, <span class="m">r</span> = −1 means −<span class="m">V</span><sub>dc</sub>/2. Rule from the last slide: upper switch on while <span class="m">r</span> is above the carrier, lower switch on otherwise.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Inside one period, <span class="m">r</span> is a constant</h3><p class="small" style="font-size:19px">The carrier is much faster than the sine (e.g. 15 carrier periods per sine cycle), so during one carrier period the sine barely moves. Take <span class="m">r</span> = 0.5 for this period.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Why the switch is on for (1 + <span class="m">r</span>)/2 of the period</h3><p class="small" style="font-size:19px">The carrier is a straight line between −1 and +1, so it spends equal time at every height. The switch is on while the carrier is below <span class="m">r</span>: the stretch from −1 up to <span class="m">r</span>, which is 1 + <span class="m">r</span> out of a total height of 2.</p>
+        <div class="eq" style="font-size:24px"><span class="m">d</span> = (1 + <span class="m">r</span>)/2 &nbsp;<span class="small muted" style="font-size:18px;font-family:var(--font)"><span class="m">r</span> = 0.5 → 75 % · <span class="m">r</span> = 0 → 50 % · <span class="m">r</span> = 1 → 100 %</span></div></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The average is <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</h3><p class="small" style="font-size:19px">The load (an inductor, a motor) is too slow to follow the pulses; it responds to their average over the period:</p>
+        <div class="eq" style="font-size:24px"><span class="m">d</span> · (+<span class="m">V</span><sub>dc</sub>/2) + (1 − <span class="m">d</span>) · (−<span class="m">V</span><sub>dc</sub>/2) = (2<span class="m">d</span> − 1) · <span class="m">V</span><sub>dc</sub>/2 = <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</div>
+        <p class="small muted" style="font-size:18px">800 V link, <span class="m">r</span> = 0.5: 0.75 × 400 V − 0.25 × 400 V = +200 V.</p></div>
+    </div>
+    <div class="stack" style="gap:6px">
+      <svg viewBox="0 0 640 220" style="width:640px;height:220px" aria-label="One leg across a split DC link">
+        <style>.lg line,.lg path{stroke:var(--ink2);stroke-width:2.2;fill:none} .lg rect{fill:var(--panel);stroke:var(--ink2);stroke-width:2} .lg text{font:600 17px var(--font);fill:var(--ink);dominant-baseline:middle} .lg .mu{fill:var(--muted);font-size:15px} .lg circle.n{fill:var(--ink2)} .lg .hi{fill:var(--s2)}</style>
+        <g class="lg">
+          <line x1="40" y1="20" x2="330" y2="20"/><line x1="40" y1="200" x2="330" y2="200"/>
+          <text x="345" y="20">+V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text><text x="345" y="200">−V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
+          <line x1="80" y1="20" x2="80" y2="62"/><line x1="60" y1="62" x2="100" y2="62"/><line x1="60" y1="72" x2="100" y2="72"/><line x1="80" y1="72" x2="80" y2="148"/>
+          <line x1="60" y1="148" x2="100" y2="148"/><line x1="60" y1="158" x2="100" y2="158"/><line x1="80" y1="158" x2="80" y2="200"/>
+          <circle class="n" cx="80" cy="110" r="5"/><text x="56" y="110">O</text>
+          <line x1="230" y1="20" x2="230" y2="40"/><rect x="200" y="40" width="60" height="44"/><text x="230" y="62" text-anchor="middle">upper</text>
+          <line x1="230" y1="84" x2="230" y2="136"/><rect x="200" y="136" width="60" height="44"/><text x="230" y="158" text-anchor="middle">lower</text>
+          <line x1="230" y1="180" x2="230" y2="200"/>
+          <circle class="n" cx="230" cy="110" r="5"/><line x1="230" y1="110" x2="300" y2="110"/><circle cx="306" cy="110" r="6" style="fill:var(--paper);stroke:var(--ink2);stroke-width:2"/><text x="318" y="110">a</text>
+          <text x="420" y="74">upper on:</text><text x="420" y="98" class="hi">v<tspan baseline-shift="sub" font-size="12">aO</tspan> = +V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
+          <text x="420" y="134">lower on:</text><text x="420" y="158" class="hi">v<tspan baseline-shift="sub" font-size="12">aO</tspan> = −V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
+          <text x="110" y="110" class="mu">midpoint</text>
+        </g>
+      </svg>
+      <svg viewBox="0 0 640 420" style="width:640px;height:420px" aria-label="One carrier period with a constant reference">
+        <style>.cp line,.cp path,.cp polyline{fill:none} .cp text{font:600 16px var(--font);fill:var(--ink2);dominant-baseline:middle} .cp .grid{stroke:var(--grid);stroke-width:1} .cp .ax{stroke:var(--line);stroke-width:1.4} .cp .car{stroke:var(--muted);stroke-width:2.6} .cp .ref{stroke:var(--s2);stroke-width:3} .cp .rt{fill:var(--s2);font-weight:700} .cp .br{stroke:var(--ink2);stroke-width:1.8} .cp .pl{stroke:var(--ink);stroke-width:2.6} .cp .av{stroke:var(--s1);stroke-width:3;stroke-dasharray:7 5} .cp .bt{fill:var(--s1);font-weight:700}</style>
+        <g class="cp">
+          <text x="80" y="14" style="font-weight:700;fill:var(--ink)">One switching period T<tspan baseline-shift="sub" font-size="11">s</tspan></text>
+          <line class="grid" x1="80" y1="40.0" x2="520" y2="40.0"/><line class="grid" x1="80" y1="150.0" x2="520" y2="150.0"/><line class="grid" x1="80" y1="260.0" x2="520" y2="260.0"/>
+          <line class="ax" x1="80" y1="30.0" x2="80" y2="270.0"/>
+          <text x="68" y="40.0" text-anchor="end">+1</text><text x="68" y="150.0" text-anchor="end">0</text><text x="68" y="260.0" text-anchor="end">−1</text>
+          <g data-step="3"><rect x="135.0" y="30.0" width="330.0" height="240.0" style="fill:var(--s1);opacity:.10"/></g>
+          <polyline class="car" points="80,40.0 300.0,260.0 520,40.0"/>
+          <text x="300.0" y="282.0" text-anchor="middle" style="fill:var(--muted)">carrier</text>
+          <g data-step="2"><line class="ref" x1="80" y1="95.0" x2="520" y2="95.0"/><text class="rt" x="300.0" y="81.0" text-anchor="middle">r = 0.5</text></g>
+          <g data-step="3">
+            <path class="br" d="M542,260.0 h8 V95.0 h-8"/><text x="558" y="167.5">1 + r</text><text x="558" y="189.5">= 1.5</text>
+            <path class="br" d="M612,260.0 h8 V40.0 h-8"/><text x="628" y="150.0">2</text>
+          </g>
+          <g data-step="3">
+            <text x="68" y="318" text-anchor="end">+V<tspan baseline-shift="sub" font-size="11">dc</tspan>/2</text><text x="68" y="368" text-anchor="end">−V<tspan baseline-shift="sub" font-size="11">dc</tspan>/2</text>
+            <polyline class="pl" points="80,368 135.0,368 135.0,318 465.0,318 465.0,368 520,368"/>
+            <text x="542" y="343" style="fill:var(--muted)">v<tspan baseline-shift="sub" font-size="11">aO</tspan></text>
+            <path class="br" d="M135.0,392 v8 H465.0 v-8"/><text x="300.0" y="412" text-anchor="middle">on: 75 % of T<tspan baseline-shift="sub" font-size="11">s</tspan></text>
+          </g>
+          <g data-step="4"><line class="av" x1="80" y1="330.5" x2="520" y2="330.5"/><text class="bt" x="542" y="322">average</text><text class="bt" x="542" y="300">+200 V</text></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> One question per click; ask it out loud before you click.</p>
+    <ul>
+      <li><b>① “What can the leg output?”</b> Only two values. Everything else is built from time: how long we stay at each.</li>
+      <li><b>② “What is r?”</b> Just the wanted voltage, scaled so that ±1 is the most the leg can give. On the last slide (buck) the carrier went 0 … 1; here it goes −1 … +1 because the output must also go negative.</li>
+      <li><b>③ “Why can we treat r as constant?”</b> One carrier period is 1/15 of the sine cycle (m<sub>f</sub> = 15). The bigger m<sub>f</sub>, the better this is.</li>
+      <li><b>④ “Why (1 + r)/2?”</b> Point at the figure: the carrier falls from +1 to −1 and rises back, at constant speed. The fraction of time it is below r equals the fraction of its height below r: 1.5 of 2 → 75 %. Check the ends: r = 1 → always on; r = −1 → never on. Same as the buck on the last slide, where the carrier went 0 … 1 and the on-time was simply D.</li>
+      <li><b>⑤ “Why the average?”</b> An inductor current changes with the voltage’s area over time; if the pulses are fast, it only sees the net area per period, i.e. the average. Substitute ④: 2d − 1 = r.</li>
+      <li>Close: “Average output = r × V<sub>dc</sub>/2, in every switching period.” Next slide lets r be a sine.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: modulation index and frequency ratio">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · m<sub>a</sub>, m<sub>f</sub> and the PWM spectrum · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>From one period to the sine: <span class="m">m</span><sub>a</sub>, <span class="m">m</span><sub>f</sub> and the fundamental</h2></div></div>
+  <div class="body" style="grid-template-columns: 560px 1fr">
+    <div class="stack" style="gap:12px">
+      <div><h3 style="font-size:21px;margin:0">⑥ Let <span class="m">r</span> follow a sine</h3><p class="small" style="font-size:19px"><span class="m">r</span> = <span class="m">m</span><sub>a</sub> sin ω<span class="m">t</span>. <b><span class="m">m</span><sub>a</sub></b> is the sine’s peak compared with the carrier’s peak (1); here <span class="m">m</span><sub>a</sub> = 0.8.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">⑦ Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3><p class="small" style="font-size:19px">Every switching period gives its own average <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2 (last slide). Put the periods side by side: the averages trace <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2 · sin ω<span class="m">t</span>, the blue curve.</p>
+        <div><span class="eq box" style="font-size:24px"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span> &nbsp;<span class="small muted" style="font-size:18px">800 V, <span class="m">m</span><sub>a</sub> = 0.8 → 320 V peak</span></div>
+        <p class="small" style="font-size:19px">What is left (pulses minus their average) averages to zero in every period, so it only holds fast frequencies: the red groups in the spectrum, near <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … Nothing lands on the fundamental.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">⑧ What happens when <span class="m">m</span><sub>a</sub> &gt; 1</h3><p class="small" style="font-size:19px">Near its peak the sine is above the carrier’s top (1), so it is above the carrier all period: the upper switch never turns off (on-time cannot exceed 100 %). The average is cut flat at +<span class="m">V</span><sub>dc</sub>/2. A flat-topped wave holds less fundamental than <span class="m">m</span><sub>a</sub> predicts (the curve bends), plus harmonics 3, 5, 7. Limit: a square wave, 1.27 · <span class="m">V</span><sub>dc</sub>/2.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">⑨ <span class="m">m</span><sub>f</sub>: carrier periods per sine cycle</h3><p class="small" style="font-size:19px">Bigger <span class="m">m</span><sub>f</sub>: the red groups move higher (easier to filter), and “<span class="m">r</span> is constant within a period” is more accurate.</p></div>
     </div>
     <div data-sim="mindex" data-config='{"m":0.8,"mf":15}'></div>
   </div>
   <aside class="notes">
-    <p><b>2.5 min.</b> One step per click; do the algebra on the slide, slowly.</p>
+    <p><b>2.5 min.</b> One question per click.</p>
     <ul>
-      <li><b>① On-time:</b> draw it on the zoom of slide 3 if needed. The carrier goes from −1 to +1 in half a period, evenly; it is below r for the fraction (r − (−1))/2 = (1 + r)/2. Check: r = 0 → 50 %, r = 1 → 100 %, r = −1 → 0 %.</li>
-      <li><b>② Average:</b> on-time at +V<sub>dc</sub>/2, off-time at −V<sub>dc</sub>/2; substitute ①: (2d − 1)·V<sub>dc</sub>/2 = r·V<sub>dc</sub>/2. The leg reproduces the reference, scaled by V<sub>dc</sub>/2.</li>
-      <li><b>③ Fundamental:</b> the averages of all periods together form a sine of peak m<sub>a</sub>·V<sub>dc</sub>/2. In the simulation: m<sub>a</sub> = 0.8, the readout shows 320 V and the red dot sits on the straight line.</li>
-      <li><b>m<sub>a</sub> &gt; 1:</b> sweep m<sub>a</sub> up to 3. The dot leaves the line and flattens towards 4/π ≈ 1.27 (square wave); 3rd, 5th, 7th appear in the spectrum because a flat-topped sine is no longer a pure sine.</li>
-      <li><b>The rest:</b> back to 0.8: nothing in the spectrum until the group at m<sub>f</sub> = 15. Change m<sub>f</sub>: the groups move with it. If asked: with m<sub>f</sub> a multiple of 3 the harmonic exactly at m<sub>f</sub> cancels in the line-to-line voltage (pole ↔ line-to-line button); m<sub>f</sub> odd avoids even harmonics.</li>
+      <li><b>⑥ “What is m<sub>a</sub>?”</b> The size of the sine relative to the carrier. m<sub>a</sub> = 1: the sine just touches the carrier’s peaks.</li>
+      <li><b>⑦ “Why is the fundamental m<sub>a</sub>·V<sub>dc</sub>/2?”</b> Last slide gave the average per period; a sine of averages is a sine. In the simulation the readout shows 320 V and the red dot sits on the straight line. “Why does nothing else land on f<sub>1</sub>?” The remainder has zero area in every switching period, so it changes much faster than the sine: its frequencies are around the carrier and its multiples (red bars).</li>
+      <li><b>⑧ “Why does it bend above 1?”</b> Sweep m<sub>a</sub> to 3. The on-time saturates at 100 %, the tops go flat, the dot leaves the line. Why 3, 5, 7: a flat-topped wave is not a sine; positive and negative halves are mirror images, so only odd harmonics. Why 1.27: the fundamental of a square wave of height V<sub>dc</sub>/2 is (4/π)·V<sub>dc</sub>/2 (Fourier series).</li>
+      <li><b>⑨ m<sub>f</sub>:</b> change it and watch the groups move. If asked: with m<sub>f</sub> a multiple of 3, the harmonic exactly at m<sub>f</sub> cancels in the line-to-line voltage (pole ↔ line-to-line button).</li>
       <li>Three-phase min-max injection extends the linear range to 1.155: three slides later.</li>
     </ul>
   </aside>
