@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EE561 Multilevel Converters: Modulation and Balancing — Potential Final Questions</title>
+<link rel="stylesheet" href="handout.css">
+<style>
+  @page { size: A4; margin: 13mm 15mm 14mm; @bottom-right { content: "Potential final questions · page " counter(page) " of " counter(pages); font: 8pt Calibri, sans-serif; color: #666; } }
+  .q { break-inside: avoid; margin-bottom: 5mm; }
+  .sol { break-inside: avoid; }
+  .intro { font-size: 10pt; color: var(--ink2); border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--line); padding: 2mm 0; margin-bottom: 4mm; }
+  .figside { display: grid; grid-template-columns: 1fr 70mm; gap: 5mm; align-items: start; }
+  .hexwrap { border: 1px solid var(--line); border-radius: 1mm; padding: 1mm; }
+  .hexwrap .cap, .fig .cap { font-size: 8.5pt; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="top"><img class="odtu" src="img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="title">
+    <div class="c1">EE561 Advanced Static Power Conversion · Multilevel Converters module</div>
+    <div class="c2">Potential Final Questions: Modulation and Balancing</div>
+    <div class="c3">From the joint proposal by Sefer İdacı and M. Aytunç Evlice, for M. Aytunç Evlice’s talk</div>
+  </div>
+  <div class="intro">Two questions for a closed-book exam with the instructor’s cheat sheet, each designed for about 20 minutes and 25 points, on modulation and balancing: three-level space-vector modulation and a neutral-point balancing loop. Every question asks for a derivation, a numerical result and an engineering interpretation; full solutions and a marking guide follow on the later pages. All numbers differ from the lecture examples.</div>
+
+  <!-- ===================================================== Q1 -->
+  <div class="q">
+    <div class="qh"><b>Question 1 · Three-level space-vector modulation</b><span class="tag">modulation</span><span class="pts">25 pts</span></div>
+    <div class="figside">
+      <div>
+        <p>The figure shows the space-vector diagram of a 3-level NPC converter; vectors are in units of <span class="m">V</span><sub>dc</sub>/2 (small vectors 2/3, medium 2/√3, large 4/3). The reference is <b>v</b>* = 0.85 ∠ 15°.</p>
+        <ol class="parts" type="a">
+          <li>Identify the three nearest vectors (their switching states) and give their αβ coordinates. <span class="pp">[4]</span></li>
+          <li>Using volt-second balance, compute the dwell-time fractions <span class="m">d</span><sub>k</sub> = <span class="m">T</span><sub>k</sub>/<span class="m">T</span><sub>s</sub>. <span class="pp">[8]</span></li>
+          <li>Construct a symmetric seven-segment sequence in which exactly one phase changes by one level at each transition. Give each segment’s duration as a fraction of <span class="m">T</span><sub>s</sub> (split the redundant small vector equally). <span class="pp">[6]</span></li>
+          <li>Give the midpoint current <span class="m">i</span><sub>O</sub> of every state in your sequence in terms of the phase currents. If Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub> &gt; 0 and <span class="m">i</span><sub>a</sub> &gt; 0, how should the small-vector time be redistributed (with C dΔV/dt = i<sub>O</sub>, i<sub>O</sub> drawn from O)? Does this change the output voltage? <span class="pp">[7]</span></li>
+        </ol>
+      </div>
+      <div class="hexwrap"><div id="hexfig"></div><div class="cap">3-level space-vector diagram, states as phase levels (a b c).</div></div>
+    </div>
+  </div>
+
+  <!-- ===================================================== Q2 -->
+  <div class="q">
+    <div class="qh"><b>Question 2 · Designing a neutral-point balancing loop</b><span class="tag">balancing and control</span><span class="pts">25 pts</span></div>
+    <p>A 3-level NPC with carrier PWM has a split DC link of 2 × 3.3 mF; an ideal source holds <span class="m">v</span><sub>C1</sub> + <span class="m">v</span><sub>C2</sub> constant, so <span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = <span class="m">i</span><sub>O</sub> with Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub> and <span class="m">i</span><sub>O</sub> drawn from the midpoint. The phase currents are balanced with <span class="m">Î</span> = 40 A, and <span class="m">m</span> = 0.9. A common offset <span class="m">r</span><sub>0</sub> is added to all references.</p>
+    <ol class="parts" type="a">
+      <li>Starting from ⟨<span class="m">i</span><sub>O</sub>⟩ = Σ<sub>x</sub>(1 − |<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>|) <span class="m">i</span><sub>x</sub>, derive ∂⟨<span class="m">i</span><sub>O</sub>⟩/∂<span class="m">r</span><sub>0</sub> and its average over a fundamental period for <span class="m">r</span><sub>x</sub> = <span class="m">m</span> cos θ<sub>x</sub>, <span class="m">i</span><sub>x</sub> = <span class="m">Î</span> cos(θ<sub>x</sub> − φ). <span class="pp">[6]</span></li>
+      <li>With <span class="m">r</span><sub>0</sub> = <span class="m">K</span> · sign(<span class="m">P</span>) · Δ<span class="m">V</span>, derive the closed-loop time constant and choose <span class="m">K</span> for τ = 20 ms at cos φ = 0.8. <span class="pp">[6]</span></li>
+      <li>With the same <span class="m">K</span>, what is τ at cos φ = 0.2? What happens in rectifier mode if sign(<span class="m">P</span>) is omitted? <span class="pp">[5]</span></li>
+      <li>At unity power factor the midpoint current contains a third harmonic of amplitude 8<span class="m">mÎ</span>/(5π). Estimate the peak-to-peak ripple of Δ<span class="m">V</span>. Can — and should — the balancing loop remove this ripple? <span class="pp">[8]</span></li>
+    </ol>
+  </div>
+
+  <!-- ===================================================== SOLUTIONS -->
+  <h2 class="sec brk">Solutions and marking guide</h2>
+
+  <div class="qh"><b>Solution 1 · Three-level space-vector modulation</b><span class="pts">25 pts</span></div>
+  <div class="sol">
+    <p><b>(a)</b> <b>v</b>* = 0.85∠15° = (0.821, 0.220). Nearest vectors: small <b>ONN/POO</b> (0.667, 0); large <b>PNN</b> (1.333, 0); medium <b>PON</b> (1.000, 0.577). <span class="mark">[4]</span></p>
+    <p><b>(b)</b> β: 0.577 <span class="m">d</span><sub>PON</sub> = 0.220 → <span class="m">d</span><sub>PON</sub> = 0.381; &nbsp; <span class="m">d</span><sub>S</sub> + <span class="m">d</span><sub>L</sub> = 0.619. α: 0.667 <span class="m">d</span><sub>S</sub> + 1.333 <span class="m">d</span><sub>L</sub> + 0.381 = 0.821 → <span class="m">d</span><sub>L</sub> = 0.041, <span class="m">d</span><sub>S</sub> = 0.578. <span class="mark">[8]</span></p>
+    <p><b>(c)</b> ONN (0.145) → PNN (0.020) → PON (0.190) → POO (0.289) → PON (0.190) → PNN (0.020) → ONN (0.145). Transitions: phase a O→P, phase b N→O, phase c N→O, then back in reverse; each phase switches once up and once down per period. <span class="mark">[6]</span></p>
+    <p><b>(d)</b> <span class="m">i</span><sub>O</sub>: ONN = +<span class="m">i</span><sub>a</sub>; PNN = 0; PON = +<span class="m">i</span><sub>b</sub>; POO = <span class="m">i</span><sub>b</sub> + <span class="m">i</span><sub>c</sub> = −<span class="m">i</span><sub>a</sub>. To reduce ΔV we need ⟨<span class="m">i</span><sub>O</sub>⟩ &lt; 0: <b>lengthen POO and shorten ONN</b>, keeping their sum at 0.578. Both states produce the same space vector, so the output (line-to-line) voltage does not change — only the midpoint charge does. <span class="mark">[7]</span></p>
+  </div>
+
+  <div class="qh"><b>Solution 2 · Neutral-point balancing loop</b><span class="pts">25 pts</span></div>
+  <div class="sol">
+    <p><b>(a)</b> For an offset small enough not to change the sign of any <span class="m">r</span><sub>x</sub>: ∂⟨<span class="m">i</span><sub>O</sub>⟩/∂<span class="m">r</span><sub>0</sub> = −Σ<sub>x</sub> sign(<span class="m">r</span><sub>x</sub>) <span class="m">i</span><sub>x</sub>. Since ⟨sign(cos θ) cos(θ − φ)⟩ = (2/π) cos φ for each phase, the period average is <b>−(6/π) <span class="m">Î</span> cos φ</b>. <span class="mark">[6]</span></p>
+    <p><b>(b)</b> <span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = −(6/π)<span class="m">Î</span> cos φ · <span class="m">K</span> sign(<span class="m">P</span>) Δ<span class="m">V</span> = −(6/π)<span class="m">Î</span>|cos φ| <span class="m">K</span> Δ<span class="m">V</span> → <b>τ = π<span class="m">C</span>/(6<span class="m">ÎK</span>|cos φ|)</b>. For τ = 20 ms: <span class="m">K</span> = π · 3.3×10<sup>−3</sup>/(6 · 40 · 0.8 · 0.02) = <b>2.7 × 10<sup>−3</sup> V<sup>−1</sup></b> (an offset of 0.027 per 10 V of imbalance). <span class="mark">[6]</span></p>
+    <p><b>(c)</b> τ ∝ 1/|cos φ|: τ = 20 ms × 0.8/0.2 = <b>80 ms</b>. Without sign(<span class="m">P</span>), cos φ &lt; 0 in rectifier mode makes the loop gain positive: ΔV grows exponentially until saturation and an overvoltage trip. <span class="mark">[5]</span></p>
+    <p><b>(d)</b> <span class="m">Î</span><sub>O3</sub> = 8 · 0.9 · 40/(5π) = 18.3 A at 150 Hz. Integrating, Δ<span class="m">V</span><sub>pp</sub> ≈ 2<span class="m">Î</span><sub>O3</sub>/(3ω<span class="m">C</span>) = 2 · 18.3/(3 · 314 · 3.3×10<sup>−3</sup>) ≈ <b>11.8 V</b> (a numerical integration gives 11.9 V). The loop bandwidth is about 1/(2πτ) ≈ 8 Hz, far below 150 Hz, so it cannot remove the ripple — and it should not try: the ripple is inherent to carrier PWM with zero average, and chasing it would only inject large offsets. It is handled by sizing <span class="m">C</span> (or by modified modulation). <span class="mark">[8]</span></p>
+  </div>
+</div>
+
+<script src="keep_together.js"></script>
+<script>
+  // 3-level space-vector diagram with the reference v* = 0.85 / 15 deg
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg', W = 380, sc = 112, cx = W / 2, cy = W / 2 + 4, SQ3 = Math.sqrt(3);
+    const s = (tag, a, txt) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+    const svg = s('svg', { viewBox: `0 0 ${W} ${W}`, class: 'hexfig', width: '100%' });
+    const pts = {};
+    for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++) {
+      const xa = a - 1, xb = b - 1, xc = c - 1;
+      const al = (2 / 3) * (xa - xb / 2 - xc / 2), be = (xb - xc) / SQ3;
+      const key = al.toFixed(3) + ',' + be.toFixed(3);
+      (pts[key] = pts[key] || { al, be, st: [] }).st.push('NOP'[a] + 'NOP'[b] + 'NOP'[c]);
+    }
+    const P = Object.values(pts), X = (v) => cx + v * sc, Y = (v) => cy - v * sc;
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) {
+      const d = Math.hypot(P[i].al - P[j].al, P[i].be - P[j].be);
+      if (Math.abs(d - 2 / 3) < 1e-3) svg.append(s('line', { x1: X(P[i].al), y1: Y(P[i].be), x2: X(P[j].al), y2: Y(P[j].be), stroke: '#bbb', 'stroke-width': 1 }));
+    }
+    svg.append(s('line', { x1: X(-1.55), y1: Y(0), x2: X(1.6), y2: Y(0), stroke: '#888', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' }));
+    svg.append(s('text', { x: X(1.6), y: Y(0) - 16, 'text-anchor': 'end' }, 'α'));
+    for (const p of P) {
+      const r = Math.hypot(p.al, p.be);
+      svg.append(s('circle', { cx: X(p.al), cy: Y(p.be), r: 3.2, fill: '#333' }));
+      const ux = r > 1e-6 ? p.al / r : 0, uy = r > 1e-6 ? p.be / r : 1, off = r > 1e-6 ? 15 + (p.st.length - 1) * 5 : 22;
+      p.st.forEach((t, k) => svg.append(s('text', { x: X(p.al) + ux * off, y: Y(p.be) - uy * off + 4 + (k - (p.st.length - 1) / 2) * 11, 'text-anchor': 'middle' }, t)));
+    }
+    const th = 15 * Math.PI / 180, m = 0.85, tx = X(m * Math.cos(th)), ty = Y(m * Math.sin(th));
+    svg.append(s('line', { x1: cx, y1: cy, x2: tx, y2: ty, stroke: '#cf0a2c', 'stroke-width': 2.4 }));
+    const ang = Math.atan2(ty - cy, tx - cx);
+    svg.append(s('path', { d: `M${tx},${ty} L${tx - 10 * Math.cos(ang - 0.4)},${ty - 10 * Math.sin(ang - 0.4)} L${tx - 10 * Math.cos(ang + 0.4)},${ty - 10 * Math.sin(ang + 0.4)} Z`, fill: '#cf0a2c' }));
+    svg.append(s('text', { x: tx + 4, y: ty - 8, fill: '#cf0a2c', style: 'font-weight:700;font-size:12px;fill:#cf0a2c' }, 'v*'));
+    document.getElementById('hexfig').append(svg);
+  })();
+</script>
+</body>
+</html>

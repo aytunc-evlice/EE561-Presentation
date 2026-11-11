@@ -13,6 +13,7 @@ METU EE561, Fall 2026 · Presenters: **Sefer İdacı**, **Mustafa Aytunç Evlice
 | `lab-demo/` | Lab demo plan, setup photos, measurements |
 | `quiz/` | Post-presentation quiz and exam questions |
 | `Sefer_Presentation_and_Materials/` | Sefer’s part: interactive HTML deck, printed quiz and potential final questions, reference paper (see its [README](Sefer_Presentation_and_Materials/README.md)) |
+| `Aytunc_Presentation_and_Materials/` | Aytunç’s part: modulation, balancing and control slides (Part II of the original joint deck), printed quiz and potential final questions (see its [README](Aytunc_Presentation_and_Materials/README.md)) |
 | `private/` | Local only, git-ignored: instructor's slides, syllabus, course admin |
 
 See [`notes/outline.md`](notes/outline.md) for the topic breakdown and
@@ -24,6 +25,11 @@ Open [`Sefer_Presentation_and_Materials/Interactive_Deck/index.html`](Sefer_Pres
 (offline, live simulations; keys and slide outline in its [README](Sefer_Presentation_and_Materials/Interactive_Deck/README.md)).
 With GitHub Pages enabled (Settings → Pages → `main`, `/ (root)`), it is online at
 <https://aytunc-evlice.github.io/EE561-Presentation/Sefer_Presentation_and_Materials/Interactive_Deck/>.
+
+## Aytunç’s deck
+
+Open [`Aytunc_Presentation_and_Materials/Interactive_Deck/index.html`](Aytunc_Presentation_and_Materials/Interactive_Deck/index.html) the same way
+(keys and slide outline in its [README](Aytunc_Presentation_and_Materials/Interactive_Deck/README.md)).
 
 ## Workflow
 

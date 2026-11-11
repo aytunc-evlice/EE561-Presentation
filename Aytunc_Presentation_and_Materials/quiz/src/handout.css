@@ -1,0 +1,98 @@
+/* Print stylesheet for the EE561 multilevel handouts (A4, exact pages). */
+:root {
+  --ink: #111; --ink2: #333; --muted: #666; --line: #bbb; --grid: #e6e6e6; --accent: #cf0a2c; --panel: #fff;
+  --off: #9a9a9a; --on: #111; --good: #2e7d32; --flow: #f0a500; --block: #b45309;
+  --lvP: #cf0a2c; --lvO: #444; --lvN: #1f4e9c; --lvH: #e2707c; --lvL: #6f8fd0;
+  --font: Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+  --math: "Cambria Math", Cambria, "Times New Roman", serif;
+  --mono: Consolas, monospace;
+}
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; color: var(--ink); font-family: var(--font); }
+body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.page { width: 210mm; height: 297mm; padding: 13mm 15mm 11mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; display: flex; flex-direction: column; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.page.flow { height: auto; min-height: 297mm; overflow: visible; }
+
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4mm; }
+.top .odtu { height: 11mm; }
+.top .pl { height: 6.5mm; }
+.title { text-align: center; margin-bottom: 3mm; }
+.title .c1 { font-size: 11pt; font-weight: 700; }
+.title .c2 { font-size: 17pt; font-weight: 400; margin-top: 1mm; }
+.title .c3 { font-size: 10pt; color: var(--muted); margin-top: 1mm; }
+.fields { display: grid; grid-template-columns: 2.2fr 1.3fr 1fr; gap: 6mm; font-size: 10.5pt; margin: 2mm 0 3mm; }
+.fields span { border-bottom: 1px solid var(--ink2); padding-bottom: 1mm; }
+.instr { font-size: 9.5pt; color: var(--ink2); border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--line); padding: 1.6mm 0; margin-bottom: 3mm; }
+.foot { position: absolute; left: 15mm; right: 15mm; bottom: 6mm; display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted); }
+
+.q { margin-bottom: 3mm; }
+.qh { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--ink); padding-bottom: .8mm; margin-bottom: 1.6mm; }
+.qh b { font-size: 11.5pt; }
+.qh .tag { font-size: 8.5pt; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.qh .pts { font-size: 10pt; font-weight: 700; }
+p, li { font-size: 10.3pt; line-height: 1.38; margin: 0 0 1.2mm; }
+ol.parts { margin: 0; padding-left: 6mm; }
+ol.parts > li { margin-bottom: 1.2mm; }
+ol.parts > li .pp { color: var(--muted); font-size: 9pt; }
+.m { font-family: var(--math); font-style: italic; }
+.mr { font-family: var(--math); }
+.eq { font-family: var(--math); font-size: 11.5pt; margin: 1.2mm 0 1.6mm 4mm; }
+.box { border: 1px solid var(--ink2); padding: 0 2mm; }
+sub, sup { font-size: .7em; }
+
+.space { border: 1px solid var(--line); border-radius: 1mm; }
+
+/* flowing documents (answer key, final questions): page margins instead of fixed pages */
+.doc { padding: 0; }
+.brk { break-before: page; page-break-before: always; }
+.avoid { break-inside: avoid; page-break-inside: avoid; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.figq { display: grid; grid-template-columns: 76mm 1fr; gap: 5mm; align-items: start; }
+.fig { border: 1px solid var(--line); border-radius: 1mm; padding: 1mm; }
+.fig .cap { font-size: 8.5pt; color: var(--muted); text-align: center; }
+
+table.fill { border-collapse: collapse; width: 100%; font-size: 10pt; margin: 1mm 0 2mm; }
+table.fill th, table.fill td { border: 1px solid var(--ink2); padding: 1.6mm 2mm; text-align: left; }
+table.fill th { background: #f2f2f2; font-weight: 700; }
+table.fill td.blank { height: 8mm; }
+
+.rel { border: 1.2px solid var(--ink2); border-radius: 1mm; padding: 2mm 3mm; font-size: 9.5pt; background: #fafafa; }
+.rel h4 { margin: 0 0 1mm; font-size: 10pt; }
+.rel ul { margin: 0; padding-left: 5mm; }
+.rel li { font-size: 9.5pt; margin: 0 0 .6mm; }
+
+/* solutions / key */
+.sol { border-left: 3px solid var(--accent); background: #f7f7f7; padding: 2mm 3mm; margin: 1.5mm 0 3mm; }
+.sol p, .sol li { font-size: 10pt; }
+.sol h5 { margin: 0 0 1mm; font-size: 10pt; color: var(--accent); }
+table.key { border-collapse: collapse; font-size: 9.8pt; margin: 1mm 0 1.5mm; }
+table.key th, table.key td { border: 1px solid #999; padding: 1mm 2mm; text-align: center; }
+table.key th { background: #eee; }
+.mark { font-size: 9pt; color: var(--muted); }
+h2.sec { font-size: 14pt; font-weight: 400; margin: 2mm 0 3mm; border-bottom: 1.5px solid var(--ink); padding-bottom: 1mm; }
+
+/* schematic (shared with the deck), printed without animation or answers */
+.figrow figure { margin: 0; border: 0; padding: 0; }
+.figrow figcaption { display: none; }
+.sch { width: 100%; height: auto; display: block; }
+.sch .wire { stroke: var(--ink2); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.sch .dev .body { stroke: var(--ink2); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.sch .dev .chan { stroke-width: 4.5; }
+.sch .dev .arrow { fill: var(--ink2); }
+.sch .dev .dio { stroke: var(--ink2); stroke-width: 2.2; fill: none; }
+.sch .dev .dtri { fill: #fff; stroke: var(--ink2); stroke-width: 2.2; }
+.sch .dev .gate { fill: #fff; stroke: var(--ink2); stroke-width: 2; }
+.sch.gates .dev.on .gate { fill: var(--good); stroke: var(--good); }
+.sch .cap { stroke: var(--ink2); stroke-width: 2.4; fill: none; }
+.sch .cap .plate { stroke-width: 4; }
+.sch .lbl { fill: var(--ink); font: 700 17px var(--font); }
+.sch .lbl.sm { font-size: 14px; font-weight: 600; fill: var(--muted); }
+.sch .rail { font: 700 21px var(--font); }
+.sch .capv { fill: var(--ink2); font: 600 15px var(--mono); }
+.sch .dot { fill: var(--ink2); }
+.sch .term { fill: #fff; stroke: var(--ink2); stroke-width: 2.4; }
+.sch .flow, .sch .flow-glow, .sch .blk, .sch .vout, .sch .iarrow { display: none; }
+.hexfig text { font: 600 11px var(--font); fill: var(--ink2); }
