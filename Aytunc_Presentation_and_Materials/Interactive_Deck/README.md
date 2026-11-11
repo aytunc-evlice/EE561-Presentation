@@ -28,7 +28,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | --: | --- | --: |
 | 1 | Title | 0.5 |
 | 2 | Learning objectives | 0.5 |
-| 3 | ★ Basics: sine-triangle PWM: carrier, reference, comparator, duty cycle, local average (animated) | 2 |
+| 3 | ★ Basics: one comparator, from DC-DC to sine PWM: carrier, DC reference (buck), comparator, average, then a sine reference (inverter leg) | 2.5 |
 | 4 | ★ Basics: modulation index m<sub>a</sub> and frequency ratio m<sub>f</sub>: linear range, overmodulation, sideband clusters | 2 |
 | 5 | Reference → level → state → gates | 1.5 |
 | 6 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |

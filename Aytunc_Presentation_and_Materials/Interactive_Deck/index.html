@@ -41,26 +41,26 @@
   <aside class="notes"><p>30 s.</p></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Basics: sine-triangle PWM">
-  <div class="sh"><div><div class="kicker"><b>Basics</b> · carrier-based PWM of one leg · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Basics: sine-triangle PWM (SPWM)</h2></div></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: carrier PWM, DC and sine reference">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · carrier-based PWM of one leg · read: Mohan, Undeland &amp; Robbins, Ch. 7–8</div><h2>Basics: one comparator, from DC-DC to sine PWM</h2></div></div>
   <div class="body" style="grid-template-columns: 560px 1fr">
     <div class="stack" style="gap:12px">
-      <p class="small"><b>Carrier</b> <span class="m">c</span>(<span class="m">t</span>): a triangle between −1 and +1 at the switching frequency <span class="m">f</span><sub>c</sub>.</p>
-      <p class="small" data-step="1"><b>Reference</b> (modulating signal) <span class="m">r</span>(<span class="m">t</span>) = <span class="m">m</span><sub>a</sub> sin ω<sub>1</sub><span class="m">t</span>: the wanted pole voltage, normalized to <span class="m">V</span><sub>dc</sub>/2.</p>
-      <p class="small" data-step="2"><b>Comparator:</b> <span class="m">S</span><sub>1</sub> = 1 while <span class="m">r</span> &gt; <span class="m">c</span>, so <span class="m">v</span><sub>aO</sub> = ±<span class="m">V</span><sub>dc</sub>/2. The pulse width follows the reference.</p>
-      <p class="small" data-step="3"><b>Duty cycle</b> in one carrier period (<span class="m">r</span> ≈ constant), by similar triangles:</p>
-      <div class="eq" data-step="3"><span class="m">d</span> = (1 + <span class="m">r</span>)/2</div>
-      <div data-step="3"><span class="eq box" style="font-size:23px">⟨<span class="m">v</span><sub>aO</sub>⟩ = <span class="m">d</span> · <span class="m">V</span><sub>dc</sub>/2 + (1 − <span class="m">d</span>)(−<span class="m">V</span><sub>dc</sub>/2) = <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</span></div>
-      <p class="small" data-step="3">The <b>local average</b> (blue) reproduces the reference. Everything else is harmonics near multiples of <span class="m">f</span><sub>c</sub>.</p>
-      <div class="callout" data-step="4" style="font-size:19px"><span class="qlabel">Question:</span> 800 V link, <span class="m">r</span> = 0.5 at this instant. What are the duty cycle and the average pole voltage? <span class="ans" data-step="5"><span class="m">d</span> = 0.75 and ⟨v<sub>aO</sub>⟩ = 0.5 · 400 V = +200 V.</span></div>
+      <p class="small"><b>Carrier:</b> a triangle at the switching frequency <span class="m">f</span><sub>c</sub>.</p>
+      <p class="small" data-step="1"><b>Reference:</b> the voltage we want, as a fraction of the DC link. Start with a constant, a <b>DC reference</b>, as in a buck converter.</p>
+      <p class="small" data-step="2"><b>Comparator:</b> the switch is on while the reference is above the carrier. The output jumps between the two rails; only the pulse width changes.</p>
+      <p class="small" data-step="3"><b>Average</b> over one switching period (blue) equals the reference: a reference of 0.6 gives 60 % on-time, and 480 V on an 800 V link. This is the DC-DC converter you already know.</p>
+      <p class="small" data-step="4"><b>Now let the reference move:</b> a sine, slow compared with the carrier, and a carrier from −1 to +1 around the DC-link midpoint. Same comparator: the pulse width follows the sine and the local average reproduces it. That is an <b>inverter leg</b>. Everything else is harmonics near multiples of <span class="m">f</span><sub>c</sub>.</p>
+      <div class="callout" data-step="5" style="font-size:19px"><span class="qlabel">Question:</span> inverter leg on an 800 V link; at this instant the reference is +0.5, half way up the carrier. What are the on-time and the average pole voltage? <span class="ans" data-step="6">75 % on-time; +200 V from the midpoint.</span></div>
     </div>
-    <div data-sim="spwm" data-config='{"m":0.8,"mf":9}'></div>
+    <div data-sim="spwm" data-config='{"m":0.8,"mf":9,"D":0.6,"mode":"dc","sineStep":4}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> Build it click by click: carrier → reference → comparator → duty cycle and local average. Then press <b>P</b> to run time: the zoom window follows the cursor and the pulse width breathes with the sine. Drag on the top plot to place the cursor by hand.</p>
+    <p><b>2.5 min.</b> Build it click by click: carrier → DC reference → comparator → average (buck). Click 4 switches the same simulation to a sine reference. Press <b>P</b> to run time: in DC mode the pulses are all the same width; in sine mode the pulse width breathes with the sine and the zoom window follows the cursor. Drag on the top plot to place the cursor by hand.</p>
     <ul>
-      <li>Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the local average clips at ±400 V (next slide).</li>
-      <li>Recap of the undergraduate leg; Sefer used it on the two-level leg. The multilevel carrier lab generalizes the comparator: N − 1 carriers, count how many the reference exceeds.</li>
+      <li>DC mode: move D and watch the average and the readout (on-time × 800 V). The output is measured from the negative rail, as in a buck converter.</li>
+      <li>Sine mode: the pole voltage is measured from the midpoint, so it swings ±400 V. Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the average clips at ±400 V (next slide).</li>
+      <li>Message: the modulator does not care what the reference is. DC gives a DC-DC converter, a sine gives an inverter, and the controller later on simply hands it whatever voltage it needs.</li>
+      <li>Answer to the question: on-time = (1 + 0.5)/2 = 75 %, average = 0.75 · 400 + 0.25 · (−400) = +200 V. Sefer used the same leg; the multilevel carrier lab generalizes the comparator to N − 1 carriers.</li>
     </ul>
   </aside>
 </section>
