@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cascaded H-Bridge Multilevel Inverters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFFFFF; --surface:#F5F6F8; --ink:#111418; --ink2:#3B4048; --muted:#6B717B; --rule:#D9DCE1; --faint:#EEF0F3;
+  --c1:#156082; --c2:#E97132; --c3:#196B24; --c4:#A02B93; --carrier:#AAB0B9;
+  --font:Aptos, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121417; --surface:#1B1E23; --ink:#ECEEF1; --ink2:#C9CDD3; --muted:#959BA5; --rule:#33373E; --faint:#24272D;
+    --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121417; --surface:#1B1E23; --ink:#ECEEF1; --ink2:#C9CDD3; --muted:#959BA5; --rule:#33373E; --faint:#24272D;
+  --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%; margin:0; background:var(--paper); color:var(--ink); font-family:var(--font); overflow:hidden; -webkit-font-smoothing:antialiased}
+#viewport{position:relative; width:100%; height:100%; overflow:hidden}
+#stage{position:absolute; left:50%; top:50%; width:1600px; height:900px; transform:translate(-50%,-50%)}
+
+.slide{position:absolute; inset:0; padding:52px 110px 80px; display:none; flex-direction:column}
+.slide.active{display:flex}
+.slide h2{font-size:54px; font-weight:500; line-height:1.1; margin:0; letter-spacing:-0.01em}
+.slide .sub{font-size:28px; color:var(--muted); margin:8px 0 0; font-weight:400}
+.head{margin-bottom:30px}
+.body{flex:1; min-height:0; display:flex; gap:56px; align-items:center}
+.fig{flex:1; min-width:0; display:flex; justify-content:center}
+.side{width:400px; flex:none; display:flex; flex-direction:column; gap:20px}
+.say{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:12px}
+.say li{font-size:24px; line-height:1.35; padding-left:24px; position:relative; color:var(--ink2)}
+.say li::before{content:""; position:absolute; left:2px; top:.6em; width:8px; height:8px; border-radius:50%; background:var(--ink2)}
+.note{font-size:20px; color:var(--muted); line-height:1.4; margin:0}
+.notes{display:none}
+canvas{display:block}
+sub{font-size:.66em; line-height:0}
+
+.seg{display:flex; border:1.5px solid var(--rule); border-radius:12px; padding:4px; gap:4px}
+.seg button{flex:1; font:inherit; font-size:21px; font-weight:500; color:var(--ink2); background:transparent; border:0; border-radius:9px; padding:11px 10px; cursor:pointer; white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.seg button:hover:not([aria-pressed="true"]){background:var(--faint)}
+.seg.col{flex-direction:column}
+.seg.lv button{display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px}
+.seg.lv small{font-size:15px; font-weight:400; opacity:.75}
+button:focus-visible{outline:3px solid var(--c1); outline-offset:2px}
+.num{display:flex; gap:36px}
+.num div{display:flex; flex-direction:column}
+.num b{font-size:58px; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
+.num span{font-size:19px; color:var(--muted); margin-top:6px}
+
+/* formula box */
+.eq{border:1.5px solid var(--rule); border-radius:14px; padding:14px 22px; font-size:25px; line-height:1.65; color:var(--ink)}
+.eq .c{display:block; color:var(--muted); font-size:18px; line-height:1.4; margin-top:2px}
+.eq h4{margin:0 0 4px; font-size:19px; font-weight:600; color:var(--muted)}
+.frac{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; font-size:.86em; line-height:1.2; margin:0 .12em}
+.frac>span+span{border-top:1.5px solid currentColor}
+.hat{position:relative; display:inline-block}
+.hat::after{content:"^"; position:absolute; left:50%; top:-.58em; transform:translateX(-50%); font-size:.72em}
+
+/* switching state rows */
+.st{display:flex; flex-direction:column; gap:6px}
+.st-h,.st button{display:grid; grid-template-columns:repeat(var(--cols,5),1fr); align-items:center; text-align:center}
+.st-h{font-size:18px; color:var(--muted); padding:0 4px 2px}
+.st button{font:inherit; font-size:21px; color:var(--ink2); background:transparent; border:1.5px solid var(--rule); border-radius:10px; padding:7px 4px; cursor:pointer; font-variant-numeric:tabular-nums}
+.st button[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.st button:hover:not([aria-pressed="true"]){background:var(--faint)}
+
+/* bars */
+.bars{display:flex; flex-direction:column; gap:8px}
+.bars h4{margin:6px 0 0; font-size:19px; font-weight:600; color:var(--muted)}
+.bar{display:grid; grid-template-columns:42px 1fr 84px; align-items:center; gap:10px; font-size:19px; color:var(--ink2)}
+.bar i{display:block; height:18px; border-radius:5px; transition:width .35s}
+.bar span:last-child{text-align:right; font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){ .bar i{transition:none} }
+
+/* footer */
+#foot{position:absolute; left:110px; right:60px; bottom:28px; display:flex; justify-content:space-between; align-items:flex-end; font-size:16px; color:var(--muted); pointer-events:none}
+#foot > *{pointer-events:auto}
+#nav{display:none; gap:6px} @media (hover:none){ #nav{display:flex} }
+#nav button{font:inherit; font-size:16px; color:var(--muted); background:transparent; border:1px solid var(--rule); border-radius:8px; padding:4px 12px}
+#drawer{position:absolute; left:50%; transform:translateX(-50%); bottom:76px; width:1100px; background:var(--paper); border:1.5px solid var(--rule); border-radius:14px; padding:18px 24px; font-size:21px; line-height:1.45; color:var(--ink2); display:none; box-shadow:0 14px 34px rgba(0,0,0,.14)}
+#drawer.open{display:block}
+
+/* title slide */
+#s-title{justify-content:center; align-items:center; text-align:center}
+#s-title h1{font-size:84px; font-weight:700; line-height:1.08; margin:0; letter-spacing:-0.015em}
+#s-title .who{font-size:32px; margin-top:44px}
+#s-title .course{font-size:22px; color:var(--muted); margin-top:10px}
+
+/* schematic */
+.w{stroke:var(--ink); stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round}
+.lbl{font-family:var(--font); font-size:22px; fill:var(--ink)}
+.lbl.s{font-size:18px; fill:var(--muted)}
+.dev.on .w{stroke:var(--c1); stroke-width:3.2}
+.dev.on .lbl{fill:var(--c1); font-weight:700}
+.dio.on .w{stroke:var(--c1); stroke-width:3.2}
+.dio.on polygon{fill:var(--c1)}
+.dio polygon{fill:var(--paper)}
+.arr{fill:var(--ink)} .dev.on .arr{fill:var(--c1)}
+.path{fill:none; stroke:var(--c1); stroke-opacity:.16; stroke-width:18; stroke-linejoin:round; stroke-linecap:round}
+.flow{fill:none; stroke:var(--c1); stroke-width:3; stroke-dasharray:3 15; stroke-linecap:round; animation:flow 1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-18}}
+@media (prefers-reduced-motion: reduce){ .flow{animation:none} }
+#supSvg .lbl.s{font-size:22px}
+#supSvg .lbl{font-size:24px}
+.mc{cursor:pointer; transition:opacity .2s}
+.mc.dim{opacity:.35}
+
+/* lists, cards, tables */
+.colhead{font-size:24px; font-weight:600; display:flex; align-items:center; gap:10px; margin-bottom:16px}
+.k{display:inline-block; width:14px; height:14px; border-radius:4px}
+.plain{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:16px}
+.plain li{font-size:24px; line-height:1.35; color:var(--ink2); padding-left:22px; border-left:3px solid var(--rule)}
+.plain li b{display:block; color:var(--ink); font-weight:600; font-size:25px}
+.card{background:var(--surface); border-radius:16px; padding:28px 30px; display:flex; flex-direction:column; gap:12px}
+.card h3{margin:0; font-size:28px; font-weight:600}
+table.cmp{border-collapse:collapse; font-size:22px; width:100%}
+table.cmp th{text-align:left; font-weight:600; font-size:20px; padding:0 0 12px}
+table.cmp td{padding:14px 0; border-top:1.5px solid var(--rule); color:var(--ink2)}
+table.cmp td:first-child{color:var(--ink); padding-right:18px}
+ol.refs{margin:0; padding-left:30px; font-size:21px; line-height:1.45; color:var(--ink2); max-width:1340px}
+ol.refs li{margin-bottom:12px; padding-left:8px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- 1 title -->
+<section class="slide" id="s-title" data-ref="">
+  <h1>Cascaded H-Bridge<br>Multilevel Inverters</h1>
+  <div class="who">Elif Topaloğlu</div>
+  <div class="course">EE561 Advanced Static Power Conversion, ODTÜ</div>
+  <aside class="notes">From one H-bridge cell to the full CHB inverter, its modulation schemes and where it is used. Main reference: Wu and Narimani, Chapter 7.</aside>
+</section>
+
+<!-- 2 H-bridge cell -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.2, Fig. 7.2-1">
+  <div class="head"><h2>Single-Phase H-Bridge Cell</h2></div>
+  <div class="body">
+    <div class="fig" data-sim="cell"><svg id="hbSvg" viewBox="0 0 800 520" width="880" height="572" role="img" aria-label="H-bridge cell with the current path of the chosen switching state"></svg></div>
+    <div class="side" style="width:440px">
+      <ul class="say">
+        <li>Basic building block of the CHB.</li>
+        <li>Outputs +V<sub>d</sub>, 0 and −V<sub>d</sub>, with two zero states.</li>
+        <li>v<sub>AB</sub> is shaped by bipolar or unipolar PWM.</li>
+      </ul>
+      <div class="st" id="cellRows" style="--cols:5">
+        <div class="st-h"><span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>v<sub>AB</sub></span></div>
+        <button data-v="p" aria-pressed="true"><span>1</span><span>1</span><span>0</span><span>0</span><span>+V<sub>d</sub></span></button>
+        <button data-v="z1"><span>1</span><span>0</span><span>1</span><span>0</span><span>0</span></button>
+        <button data-v="z2"><span>0</span><span>1</span><span>0</span><span>1</span><span>0</span></button>
+        <button data-v="n"><span>0</span><span>0</span><span>1</span><span>1</span><span>−V<sub>d</sub></span></button>
+      </div>
+      <p class="note" id="cellSay" style="min-height:58px"></p>
+    </div>
+  </div>
+  <aside class="notes">Press the rows. +Vd: S1 and S2. −Vd: S3 and S4. Zero from +Vd: S2 turns off and the load current freewheels through S1 and D3. The other zero state: S1 turns off and the current freewheels through S2 and D4. The table shows gate signals: S3 (or S4) gets its complementary gate signal, but it only carries current if the load current reverses. Switches in one leg are complementary, so two gate signals per cell are enough.</aside>
+</section>
+
+<!-- 3 bipolar vs unipolar -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.2, Figs. 7.2-2 and 7.2-4">
+  <div class="head"><h2>Bipolar and Unipolar PWM</h2><div class="sub">f<sub>m</sub> = 60 Hz, f<sub>cr</sub> = f<sub>sw,dev</sub> = 900 Hz (m<sub>f</sub> = 15), m<sub>a</sub> = 0.8</div></div>
+  <div class="body">
+    <div class="fig"><canvas data-sim="pwm" style="width:940px;height:610px"></canvas></div>
+    <div class="side" style="width:420px">
+      <div class="seg" id="pwmMode"><button data-v="bi" aria-pressed="true">Bipolar</button><button data-v="uni">Unipolar</button></div>
+      <ul class="say" id="pwmSay" style="min-height:190px"></ul>
+      <div class="num"><div><b id="pwmInv">900</b><span>f<sub>sw,inv</sub> (Hz)</span></div><div><b>900</b><span>f<sub>sw,dev</sub> (Hz)</span></div></div>
+    </div>
+  </div>
+  <aside class="notes">A sine reference is compared with a triangular carrier; the carrier frequency is the IGBT switching frequency. Bipolar: S1 and S3 are complementary, vAB is only +Vd or −Vd and the harmonics sit around mf. Unipolar: two references 180° apart, S1 and S3 switch independently, vAB has three levels and the inverter switching frequency doubles while the IGBT frequency is unchanged.</aside>
+</section>
+
+<!-- 4 unipolar: shift reference or carrier -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.2">
+  <div class="head"><h2>Unipolar PWM</h2><div class="sub">Shift the reference or shift the carrier: same result</div></div>
+  <div class="body">
+    <div class="fig"><canvas data-sim="uni" style="width:920px;height:620px"></canvas></div>
+    <div class="side" style="width:440px">
+      <div class="eq" style="font-size:23px">
+        S1 on: v<sub>m</sub> &gt; v<sub>cr</sub><br>
+        S3 on: −v<sub>m</sub> &gt; v<sub>cr</sub> &nbsp;⇔&nbsp; v<sub>m</sub> &lt; −v<sub>cr</sub>
+        <span class="c">Same condition, so the gate signals are identical.</span>
+      </div>
+      <div class="colhead" style="font-size:22px; margin:4px 0 -6px">Why the CHB shifts the carrier</div>
+      <ul class="say">
+        <li>One reference is shared by all cells.</li>
+        <li>Cells already need shifted carriers (φ<sub>cr</sub>), so the 180° shift fits the same scheme.</li>
+        <li>Simple to implement: only carrier offsets change.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Top: two references, vm and −vm, against one carrier. Middle: one reference against two carriers 180° apart. Both give the same gate signals, so vAN, vBN and vAB are the same. Each leg pulses at fcr and vAB at 2fcr. In a CHB every cell needs its own carrier phase anyway, so all shifting is done on the carriers and one common reference drives every cell.</aside>
+</section>
+
+<!-- 5 CHB topology -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.3.1, Fig. 7.3-1">
+  <div class="head"><h2>Cascaded H-Bridge Topology – Equal DC Voltages</h2></div>
+  <div class="body" data-sim="topo" style="gap:40px">
+    <div style="flex:none; width:860px; display:flex; flex-direction:column; align-items:center; gap:8px">
+      <svg id="topoSvg" viewBox="0 0 880 605" width="830" height="571" role="img" aria-label="Five-level cascaded H-bridge inverter: two H-bridge cells per phase, Y-connected, feeding a three-phase load"></svg>
+      <div style="font-size:21px; color:var(--ink2)"><b style="color:var(--ink)">Figure 7.3-1</b>&nbsp;&nbsp;Five-level cascaded H-bridge inverter.</div>
+    </div>
+    <div class="side" style="width:440px">
+      <ul class="say">
+        <li>Identical H-bridge cells in series in each phase.</li>
+        <li>Each cell has an isolated DC source E and gives +E, 0 or −E.</li>
+        <li>v<sub>AN</sub> = v<sub>H1</sub> + v<sub>H2</sub>: five levels.</li>
+      </ul>
+      <svg id="supSvg" viewBox="0 0 560 300" width="440" height="236" role="img" aria-label="Phase-shifting transformer and diode rectifier supplying one cell"></svg>
+      <p class="note">Isolated DC supplies: multipulse diode rectifiers. If interested, see Wu &amp; Narimani, Ch. 3.</p>
+    </div>
+  </div>
+  <aside class="notes">Fig. 7.3-1: each phase has two H-bridge cells, H1 and H2, connected in series. The bottoms of the three phases join at the neutral N, and A, B and C feed the load. Every cell has its own isolated DC source E, so it can output +E, 0 or −E, and the phase voltage vAN = vH1 + vH2 has five levels.</aside>
+</section>
+
+<!-- 6 switching states -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.3.1, Table 7.3-1">
+  <div class="head"><h2>Five-Level CHB Topology</h2><div class="sub">Switching states and redundancy</div></div>
+  <div class="body" style="gap:50px">
+    <div class="fig" data-sim="five" style="flex:none; width:620px"><svg id="fiveSvg" viewBox="0 0 640 600" width="600" height="562" role="img" aria-label="One phase of a five-level CHB"></svg></div>
+    <div class="side" style="width:620px; gap:16px">
+      <ul class="say"><li>Same level, several states: redundancy.</li><li>Gives flexibility in switching pattern design.</li></ul>
+      <div class="seg lv" id="fiveLvl">
+        <button data-v="2">+2E<small>1 state</small></button><button data-v="1" aria-pressed="true">+E<small>4 states</small></button><button data-v="0">0<small>6 states</small></button><button data-v="-1">−E<small>4 states</small></button><button data-v="-2">−2E<small>1 state</small></button>
+      </div>
+      <div class="st" id="fiveRows" style="--cols:6; min-height:300px"></div>
+      <div class="eq">
+        <div style="display:flex; gap:48px; align-items:baseline"><div>m = 2H + 1</div><div>N<sub>sw</sub> = 6(m − 1)</div></div>
+        <span class="c">m: number of voltage levels (always odd). H: number of cells per phase. N<sub>sw</sub>: number of switches.<br>5 levels: H = 2, N<sub>sw</sub> = 24 switches.</span>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">vAN = vH1 + vH2. Choose a level, then a row: the drawing shows which switches are on. +E can be made in four ways and 0 in six. The number of levels is always odd, which differs from other multilevel topologies, and the three-phase inverter needs 6(m − 1) switches, 24 for five levels.</aside>
+</section>
+
+<!-- 7 unequal DC -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.3.2, Fig. 7.3-3">
+  <div class="head"><h2>Cascaded H-Bridge Topology – Unequal DC Voltages</h2><div class="sub">More levels without more cells</div></div>
+  <div class="body" data-sim="unequal" style="gap:28px">
+    <svg id="unSvg" viewBox="0 0 320 620" width="260" height="504" role="img" aria-label="One phase of the selected CHB: cells in series with their DC voltages"></svg>
+    <div class="fig"><canvas id="unCv" style="width:720px;height:600px"></canvas></div>
+    <div class="side" style="width:360px">
+      <div class="seg col" id="unSet"><button data-v="1,1,1" aria-pressed="true">Equal: E, E, E</button><button data-v="1,2">Unequal: E, 2E</button><button data-v="1,3">Unequal: E, 3E</button></div>
+      <div class="num"><div><b id="unM">7</b><span>levels</span></div><div><b id="unH">3</b><span>cells per phase</span></div></div>
+      <ul class="say"><li>Only two cells: 7 levels with E, 2E and 9 levels with E, 3E.</li></ul>
+    </div>
+  </div>
+  <aside class="notes">Three equal cells give seven levels. Two cells with E and 2E also give seven, and E with 3E gives nine, the same as four equal cells.</aside>
+</section>
+
+<!-- 8 redundancy -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.3.2, Table 7.3-2">
+  <div class="head"><h2>Cascaded H-Bridge Topology – Unequal DC Voltages</h2><div class="sub">Seven levels: equal vs unequal</div></div>
+  <div class="body">
+    <div class="fig"><canvas data-sim="redund" style="width:860px;height:560px"></canvas></div>
+    <div class="side" style="width:460px">
+      <ul class="say">
+        <li>Switching states: 64 with equal DC, 16 with unequal DC.</li>
+        <li>Redundancy is lost: less freedom for switching patterns.</li>
+        <li>Cells are no longer identical: modularity is lost.</li>
+        <li>Result: limited application in industry.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Number of switching states for each level, counting both zero states of every cell. Equal DC (three cells) has up to 20 ways to make zero; unequal DC (E and 2E) has at most four. Different cells also mean different spare parts and designs.</aside>
+</section>
+
+<!-- 9 PS-PWM principle -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.1, Fig. 7.4-1">
+  <div class="head"><h2>Carrier-Based PWM Schemes – Phase-Shifted PWM</h2><div class="sub">Seven levels, m<sub>f</sub> = 3 for clarity, m<sub>a</sub> = 0.8</div></div>
+  <div class="body" data-sim="ps" style="gap:24px">
+    <svg id="psSvg" viewBox="0 0 320 620" width="250" height="484" role="img" aria-label="One phase with three cells; select a cell"></svg>
+    <div class="fig"><canvas id="psCv" style="width:740px;height:620px"></canvas></div>
+    <div class="side" style="width:370px; gap:16px">
+      <div class="seg" id="psCell"><button data-v="0" aria-pressed="true">H1</button><button data-v="1">H2</button><button data-v="2">H3</button></div>
+      <div class="eq" style="font-size:22px; line-height:1.6">
+        S<sub>1k</sub> on: v<sub>m</sub> &gt; v<sub>crk</sub><br>S<sub>3k</sub> on: v<sub>m</sub> &lt; v<sub>crk−</sub><br>
+        φ<sub>cr</sub> = <span class="frac"><span>360°</span><span>m − 1</span></span> = 60°<br>
+        v<sub>AN</sub> = v<sub>H1</sub> + v<sub>H2</sub> + v<sub>H3</sub>
+        <span class="c">S<sub>4k</sub> and S<sub>2k</sub> are the complements of S<sub>1k</sub> and S<sub>3k</sub>.</span>
+      </div>
+      <ul class="say">
+        <li>Inside a cell: unipolar, v<sub>crk</sub> and v<sub>crk−</sub> 180° apart.</li>
+        <li>Between cells: carriers shifted by φ<sub>cr</sub>.</li>
+        <li>Cells switch at different instants: v<sub>AN</sub> steps by E only, not the full DC voltage as in a two-level inverter. Lower dv/dt and EMI.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Pick a cell, or click it in the drawing. Its carrier pair is highlighted: vcrk (solid) gives S1k, vcrk− (dashed, inverted) gives S3k. The lower switches get the complementary signals. Each cell works like the unipolar H-bridge; only the carrier phase differs between cells, by 60° for seven levels.</aside>
+</section>
+
+<!-- 10 PS-PWM harmonics -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.1, Fig. 7.4-2">
+  <div class="head"><h2>Phase-Shifted PWM</h2><div class="sub">m<sub>f</sub> = 10, f<sub>cr</sub> = 600 Hz, m<sub>a</sub> = 0.8</div></div>
+  <div class="body">
+    <div class="fig"><canvas data-sim="psh" style="width:920px;height:600px"></canvas></div>
+    <div class="side" style="width:420px">
+      <div class="seg" id="pshMode"><button data-v="h1">v<sub>H1</sub></button><button data-v="an" aria-pressed="true">v<sub>AN</sub></button><button data-v="ab">v<sub>AB</sub></button></div>
+      <div class="num"><div><b id="pshThd">24%</b><span>THD</span></div><div><b id="pshLv">7</b><span>levels</span></div></div>
+      <ul class="say" id="pshSay" style="min-height:130px"></ul>
+      <p class="note">THD falls from v<sub>H1</sub> to v<sub>AN</sub> to v<sub>AB</sub>.</p>
+    </div>
+  </div>
+  <aside class="notes">Grey bars show the previous waveform's spectrum. The sideband group around 2mf that each cell has cancels when the three cells add up, so vAN starts at 6mf. In the line voltage the triplen harmonics also cancel, and vAB has 13 levels with a peak of 6E.</aside>
+</section>
+
+<!-- 11 PS-PWM frequency and voltage -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.1">
+  <div class="head"><h2>Phase-Shifted PWM</h2><div class="sub">Switching frequency and output voltage</div></div>
+  <div class="body" style="gap:60px; align-items:stretch">
+    <div style="width:640px; display:flex; flex-direction:column; gap:22px; justify-content:center">
+      <div class="eq"><h4>Switching frequency</h4>f<sub>sw,inv</sub> = 2H · f<sub>sw,dev</sub> = (m − 1) · f<sub>sw,dev</sub>
+        <span class="c">Seven levels: f<sub>sw,inv</sub> = 6 f<sub>sw,dev</sub> (600 Hz → 3600 Hz)</span></div>
+      <ul class="say">
+        <li>High f<sub>sw,inv</sub>: harmonics move higher, more are eliminated.</li>
+        <li>Low f<sub>sw,dev</sub>: low switching losses.</li>
+      </ul>
+      <div class="eq"><h4>Output voltage</h4>V<sub>d</sub> = <span class="frac"><span>(m − 1)</span><span>2</span></span> E &nbsp;&nbsp; V<sub>AB1,max</sub> = <span class="frac"><span>√3</span><span>√2</span></span> m<sub>a</sub> V<sub>d</sub>
+        <span class="c">V<sub>d</sub>: total DC voltage per phase (H·E). V<sub>AB1</sub> is rms.</span></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:18px; justify-content:center">
+      <div class="seg" id="thiMode"><button data-v="sin" aria-pressed="true">Sine, m<sub>a</sub> = 1.155</button><button data-v="thi">With 3rd harmonic</button></div>
+      <canvas data-sim="thi" style="width:640px;height:340px"></canvas>
+      <p class="note" style="font-size:22px; color:var(--ink2)">Third-harmonic injection: up to <b style="color:var(--ink)">15.5%</b> more output voltage in the linear range.</p>
+    </div>
+  </div>
+  <aside class="notes">Every device switches at fsw,dev, but the phase voltage sees 2H times that, because the cells are interleaved. Third-harmonic injection flattens the reference so ma can rise to 1.155 without overmodulation; the third harmonic cancels in the line voltage.</aside>
+</section>
+
+<!-- 12 LS carriers -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.2, Fig. 7.4-4; McGrath &amp; Holmes, 2002">
+  <div class="head"><h2>Carrier-Based PWM Schemes – Level-Shifted PWM</h2><div class="sub">Carrier arrangements</div></div>
+  <div class="body">
+    <div class="fig"><canvas data-sim="lsarr" style="width:860px;height:560px"></canvas></div>
+    <div class="side" style="width:500px">
+      <div class="seg" id="lsArr"><button data-v="ipd" aria-pressed="true">IPD</button><button data-v="apod">APOD</button><button data-v="pod">POD</button></div>
+      <p class="note" id="lsArrSay" style="font-size:22px; color:var(--ink2); min-height:30px"></p>
+      <ul class="say"><li>Same frequency and amplitude, only shifted vertically.</li><li>IPD gives the best harmonic profile; used from here on.</li></ul>
+      <div class="eq" style="font-size:26px; display:grid; grid-template-columns:auto 1fr; column-gap:18px; row-gap:6px; align-items:center">
+        <span>Phase-shifted</span><span>m<sub>a</sub> = <span class="frac"><span>V̂<sub>m</sub></span><span>V̂<sub>cr</sub></span></span></span>
+        <span>Level-shifted</span><span>m<sub>a</sub> = <span class="frac"><span>V̂<sub>m</sub></span><span>V̂<sub>cr</sub> (m − 1)</span></span></span>
+        <span class="c" style="grid-column:1 / -1">PS: every carrier spans the full range. LS: the m − 1 carriers share it, V̂<sub>cr</sub> = peak-to-peak of one carrier. Both: m<sub>a</sub> = 1 at the edge of the linear range.</span>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">IPD: in phase disposition, APOD: alternative phase opposite disposition, POD: phase opposite disposition. The modulation index is defined differently only because the carriers are arranged differently; in both cases ma = 1 gives the same maximum linear output.</aside>
+</section>
+
+<!-- 13 LS waveforms -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.2, Fig. 7.4-5">
+  <div class="head"><h2>Level-Shifted PWM</h2><div class="sub">IPD, seven levels, f<sub>cr</sub> = 1080 Hz (m<sub>f</sub> = 18), m<sub>a</sub> = 0.8</div></div>
+  <div class="body" data-sim="ls" style="gap:24px">
+    <svg id="lsSvg" viewBox="0 0 230 600" width="220" height="574" role="img" aria-label="One phase with three cells; select a cell"></svg>
+    <div class="fig"><canvas id="lsCv" style="width:790px;height:610px"></canvas></div>
+    <div class="side" style="width:320px; gap:18px">
+      <div class="seg" id="lsCell"><button data-v="0" aria-pressed="true">H1</button><button data-v="1">H2</button><button data-v="2">H3</button></div>
+      <div class="eq" style="font-size:22px; padding:12px 18px">f<sub>sw,inv</sub> = f<sub>cr</sub><br>f<sub>sw,dev</sub> = <span class="frac"><span>f<sub>cr</sub></span><span>m − 1</span></span> = 180 Hz<span class="c">average over all devices</span></div>
+      <div class="bars" id="lsBars"></div>
+      <ul class="say"><li>Cell outputs are unipolar.</li><li>Upper band → S1, lower band → S3.</li></ul>
+    </div>
+  </div>
+  <aside class="notes">H1 takes the outer bands, H3 the inner bands. The upper carrier of a pair gives S1 of that cell, the lower one gives S3. Each cell output is 0 or +E in the positive half cycle and 0 or −E in the negative half, so it is unipolar. Counting pulses: the cells switch at 240, 180 and 120 Hz, average 180 Hz = 1080/6.</aside>
+</section>
+
+<!-- 14 LS rotation -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.2, Fig. 7.4-6">
+  <div class="head"><h2>Level-Shifted PWM</h2><div class="sub">Uneven device use and rotation</div></div>
+  <div class="body">
+    <div class="fig"><canvas data-sim="rot" style="width:900px;height:580px"></canvas></div>
+    <div class="side" style="width:440px">
+      <div class="seg" id="rotMode"><button data-v="none" aria-pressed="true">No rotation</button><button data-v="rot">Rotation</button></div>
+      <div class="bars" id="rotBars"></div>
+      <ul class="say"><li>Unequal f<sub>sw,dev</sub> and conduction time between cells.</li><li>Fix: rotate the bands among the cells every cycle.</li></ul>
+    </div>
+  </div>
+  <aside class="notes">Without rotation the inner cell conducts 86% of the time and the outer cell 10%, and their devices switch at different rates. Rotating which band each cell uses every fundamental cycle makes all cells equal over three cycles, and the phase voltage does not change.</aside>
+</section>
+
+<!-- 15 comparison -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.4.3, Table 7.4-1">
+  <div class="head"><h2>Phase-Shifted vs Level-Shifted</h2><div class="sub">Same average f<sub>sw,dev</sub> = 600 Hz for a fair comparison</div></div>
+  <div class="body" style="gap:60px">
+    <div style="width:740px; display:flex; flex-direction:column; gap:26px">
+      <table class="cmp">
+        <tr><th style="width:46%"></th><th style="color:var(--c1); width:28%">Phase-shifted</th><th style="color:var(--c2)">Level-shifted</th></tr>
+        <tr><td>Device switching frequency</td><td>Same for all</td><td>Different</td></tr>
+        <tr><td>Device conduction period</td><td>Same for all</td><td>Different</td></tr>
+        <tr><td>Rotation of switching patterns</td><td>Not required</td><td>Required</td></tr>
+        <tr><td>Line voltage THD</td><td>Good</td><td>Better</td></tr>
+      </table>
+      <ul class="say">
+        <li>PS: H1, H2, H3 are the same waveform with a small phase shift.</li>
+        <li>LS: each cell sees a different band, so use is uneven.</li>
+      </ul>
+    </div>
+    <div class="fig"><canvas data-sim="compare" style="width:600px;height:480px"></canvas></div>
+  </div>
+  <aside class="notes">Same average device switching frequency: phase-shifted uses fcr = 600 Hz, level-shifted uses fcr = 3600 Hz. Level-shifted gives lower line-voltage THD, most clearly at low modulation index. Phase-shifted shares the stress equally and needs no rotation.</aside>
+</section>
+
+<!-- 16 staircase SHE -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.5, Fig. 7.5-1">
+  <div class="head"><h2>Staircase Modulation</h2><div class="sub">Selective harmonic elimination, seven levels, m<sub>a</sub> = 0.8</div></div>
+  <div class="body" style="gap:40px">
+    <div class="fig"><canvas data-sim="stair" style="width:780px;height:610px"></canvas></div>
+    <div class="side" style="width:570px; gap:16px">
+      <div class="eq" style="font-size:21px; white-space:nowrap">v<sub>AN</sub> = Σ<sub>n = 1,3,5…</sub> <span class="frac"><span>4E</span><span>nπ</span></span> (cos nθ<sub>1</sub> + cos nθ<sub>2</sub> + cos nθ<sub>3</sub>) sin nωt</div>
+      <div class="eq" style="font-size:22px; line-height:1.55">cos θ<sub>1</sub> + cos θ<sub>2</sub> + cos θ<sub>3</sub> = 3m<sub>a</sub><br>cos 5θ<sub>1</sub> + cos 5θ<sub>2</sub> + cos 5θ<sub>3</sub> = 0<br>cos 7θ<sub>1</sub> + cos 7θ<sub>2</sub> + cos 7θ<sub>3</sub> = 0</div>
+      <ul class="say"><li>H cells give H angles: one sets m<sub>a</sub>, H − 1 remove harmonics.</li><li>More levels, more degrees of freedom.</li></ul>
+      <div class="seg" id="stMode"><button data-v="nl">Nearest level</button><button data-v="she" aria-pressed="true">Remove 5th and 7th</button></div>
+    </div>
+  </div>
+  <aside class="notes">Each cell gives one pulse per half cycle with its own angle. With three cells we have three equations: one fixes the fundamental, two cancel the 5th and 7th. At ma = 0.8 the angles are 57.1°, 28.7° and 11.5°. Triplen harmonics stay in vAN but cancel in vAB.</aside>
+</section>
+
+<!-- 17 staircase pros/cons -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.5">
+  <div class="head"><h2>Staircase Modulation</h2><div class="sub">Looks simple, but has drawbacks</div></div>
+  <div class="body"><div style="display:flex; gap:80px; width:100%; align-items:flex-start">
+    <div style="flex:1">
+      <div class="colhead"><span class="k" style="background:var(--c3)"></span>Why it looks simple</div>
+      <ul class="plain">
+        <li><b>Simple to implement</b>Each cell switches once per half cycle.</li>
+        <li><b>Lookup table</b>All angles calculated offline for digital control.</li>
+        <li><b>Low switching losses</b>IGBTs switch at the fundamental frequency.</li>
+      </ul>
+    </div>
+    <div style="flex:1">
+      <div class="colhead"><span class="k" style="background:var(--c4)"></span>Drawbacks</div>
+      <ul class="plain">
+        <li><b>Low-order harmonics remain</b>11th, 13th, … need a large filter.</li>
+        <li><b>Poor at low m<sub>a</sub></b>Only the inner levels are used.</li>
+        <li><b>Nonlinear equations</b>No solution exists for some m<sub>a</sub>.</li>
+        <li><b>Slow dynamics</b>Angles update once per cycle.</li>
+        <li><b>Unequal cell power</b>Cells with small θ conduct longest.</li>
+      </ul>
+    </div>
+  </div></div>
+  <aside class="notes">Compared with carrier-based PWM the losses are very low, but the remaining harmonics are close to the fundamental, the waveform degrades at low speed, the angle tables have gaps, and the cells do not share power equally unless the angles are rotated.</aside>
+</section>
+
+<!-- 18 summary -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.6; Innomotics, Catalog D 17, 2024">
+  <div class="head"><h2>Summary</h2></div>
+  <div class="body" style="align-items:center; gap:56px">
+    <ul class="say" style="flex:1; gap:16px">
+      <li>CHB: single-phase H-bridge cells in series on the ac side.</li>
+      <li>Number of cells set by operating voltage, harmonic requirements and cost.</li>
+      <li>Identical cells: modular design, redundant states, low dv/dt and THD.</li>
+      <li>Each cell needs an isolated DC supply: phase-shifting transformer and multipulse diode rectifiers.</li>
+      <li>Unequal DC: more levels, but modularity and redundancy are lost.</li>
+      <li>PS-PWM shares the stress evenly; LS-PWM gives lower THD but needs rotation; staircase has the lowest losses.</li>
+      <li>Widely used in high-power medium-voltage drives.</li>
+    </ul>
+    <div class="card" style="width:520px; flex:none">
+      <div class="note" style="font-size:18px">Real-world example</div>
+      <h3>Perfect Harmony GH180</h3>
+      <div class="note" style="margin-top:-6px">Innomotics, formerly Siemens and ROBICON</div>
+      <ul class="say" style="gap:10px; margin-top:8px">
+        <li style="font-size:21px">Cell-based CHB drive since 1994</li>
+        <li style="font-size:21px">Up to 8 cells per phase, 2.3 to 11 kV output</li>
+        <li style="font-size:21px">18- to 54-pulse diode rectifier</li>
+        <li style="font-size:21px">13 to 33 levels in the line voltage</li>
+        <li style="font-size:21px">Bypasses a failed cell and keeps running</li>
+        <li style="font-size:21px">Pumps, fans, compressors; 25,000+ units</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">The Perfect Harmony drive is the classic industrial CHB: P. Hammond's design, launched by ROBICON in 1994 and now sold by Innomotics. Figures from the 2024 catalog D 17.</aside>
+</section>
+
+<!-- 19 references -->
+<section class="slide" data-ref="">
+  <div class="head"><h2>References</h2></div>
+  <ol class="refs">
+    <li>B. Wu and M. Narimani, <i>High-Power Converters and AC Drives</i>, 2nd ed., Wiley-IEEE Press, 2017, Ch. 7.</li>
+    <li>B. P. McGrath and D. G. Holmes, “Multicarrier PWM strategies for multilevel inverters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 49, no. 4, pp. 858–867, 2002.</li>
+    <li>M. Malinowski, K. Gopakumar, J. Rodríguez and M. A. Pérez, “A survey on cascaded multilevel inverters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 57, no. 7, 2010.</li>
+    <li>J. Rodríguez, J.-S. Lai and F. Z. Peng, “Multilevel inverters: a survey of topologies, controls, and applications,” <i>IEEE Trans. Ind. Electron.</i>, vol. 49, no. 4, 2002.</li>
+    <li>P. W. Hammond, “A new approach to enhance power quality for medium voltage AC drives,” <i>IEEE Trans. Ind. Appl.</i>, vol. 33, no. 1, 1997.</li>
+    <li>S. Kouro et al., “Recent advances and industrial applications of multilevel converters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 57, no. 8, 2010.</li>
+    <li>Innomotics, <i>Perfect Harmony GH180 Medium Voltage Drives</i>, Catalog D 17, ed. 09/2024.</li>
+  </ol>
+  <aside class="notes">Simulations use ideal switches and a 60 Hz fundamental.</aside>
+</section>
+
+<div id="foot"><div id="ref"></div><div style="display:flex; gap:14px; align-items:center"><span id="nav"><button id="bPrev" aria-label="Previous slide">◀</button><button id="bNext" aria-label="Next slide">▶</button></span><span id="count"></span></div></div>
+<div id="drawer" role="note"><div id="noteText"></div></div>
+</div></div>
+<script>
+/* ================= kit ================= */
+const TAU = 2 * Math.PI, FONT = 'Aptos, "Segoe UI", Inter, Arial, sans-serif';
+const tri = x => { x -= Math.floor(x); return x < 0.5 ? 4 * x - 1 : 3 - 4 * x; };
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; } }
+  for (let len = 2; len <= n; len <<= 1) {
+    const a = -TAU / len, wr = Math.cos(a), wi = Math.sin(a);
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) { const p = i + k, q = p + len / 2, xr = re[q] * cr - im[q] * ci, xi = re[q] * ci + im[q] * cr;
+        re[q] = re[p] - xr; im[q] = im[p] - xi; re[p] += xr; im[p] += xi; const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t; } }
+  }
+}
+function spec(sig) { const n = sig.length, re = Float64Array.from(sig), im = new Float64Array(n); fft(re, im); const a = new Float64Array(n / 2); for (let h = 0; h < n / 2; h++) a[h] = 2 * Math.hypot(re[h], im[h]) / n; return a; }
+function thd(sig) { const a = spec(sig); let s = 0; for (let h = 2; h < a.length; h++) s += a[h] * a[h]; return Math.sqrt(s) / a[1]; }
+const ym = (v, lo, hi, y, h) => y + h - (v - lo) / (hi - lo) * h;
+function line(ctx, d, x, y, w, h, lo, hi, color, lw = 2, dash, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha; ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineJoin = 'round'; if (dash) ctx.setLineDash(dash);
+  for (let i = 0; i < d.length; i++) { const px = x + i / (d.length - 1) * w, py = ym(d[i], lo, hi, y, h); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+  ctx.stroke(); ctx.restore();
+}
+function stack(ctx, layers, colors, x, y, w, h, lo, hi, alpha = 1) {
+  const n = layers[0].length, pos = new Float64Array(n), neg = new Float64Array(n);
+  ctx.save(); ctx.globalAlpha = alpha;
+  layers.forEach((L, k) => {
+    const top = new Float64Array(n), bot = new Float64Array(n);
+    for (let i = 0; i < n; i++) { const v = L[i]; if (v >= 0) { bot[i] = pos[i]; top[i] = pos[i] += v; } else { top[i] = neg[i]; bot[i] = neg[i] += v; } }
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) { const a = x + i / n * w, b = x + (i + 1) / n * w, py = ym(top[i], lo, hi, y, h); i ? ctx.lineTo(a, py) : ctx.moveTo(a, py); ctx.lineTo(b, py); }
+    for (let i = n - 1; i >= 0; i--) { const a = x + i / n * w, b = x + (i + 1) / n * w, py = ym(bot[i], lo, hi, y, h); ctx.lineTo(b, py); ctx.lineTo(a, py); }
+    ctx.closePath(); ctx.fillStyle = colors[k]; ctx.fill();
+  });
+  ctx.restore();
+}
+const stackTop = (ctx, L, C, ...a) => stack(ctx, L.slice().reverse(), L.map((_, k) => C[k]).reverse(), ...a);
+function hline(ctx, x, w, py, color, lw = 1, dash) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(x, Math.round(py) + .5); ctx.lineTo(x + w, Math.round(py) + .5); ctx.stroke(); ctx.restore(); }
+function vline(ctx, px, y, h, color, lw = 1, dash) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(Math.round(px) + .5, y); ctx.lineTo(Math.round(px) + .5, y + h); ctx.stroke(); ctx.restore(); }
+function text(ctx, s, x, y, o = {}) {
+  ctx.save(); ctx.font = `${o.weight || 500} ${o.size || 17}px ${FONT}`;
+  ctx.fillStyle = o.color || D.col('muted'); ctx.textAlign = o.align || 'left'; ctx.fillText(s, x, y); ctx.restore();
+}
+// text with subscript, e.g. sub(ctx,'v','AN',x,y)
+function sub(ctx, base, s, x, y, o = {}) {
+  const size = o.size || 18, w = o.weight || 500, small = Math.round(size * .7);
+  ctx.save(); ctx.fillStyle = o.color || D.col('muted'); ctx.textAlign = 'left';
+  ctx.font = `${w} ${size}px ${FONT}`; const w1 = ctx.measureText(base).width;
+  ctx.font = `${w} ${small}px ${FONT}`; const w2 = ctx.measureText(s).width;
+  const x0 = o.align === 'right' ? x - w1 - w2 - 1 : o.align === 'center' ? x - (w1 + w2) / 2 : x;
+  ctx.font = `${w} ${size}px ${FONT}`; ctx.fillText(base, x0, y);
+  ctx.font = `${w} ${small}px ${FONT}`; ctx.fillText(s, x0 + w1 + 1, y + size * .3);
+  ctx.restore(); return w1 + w2 + 1;
+}
+// V with hat and subscript
+function vhat(ctx, s, x, y, o = {}) {
+  const size = o.size || 20, w = o.weight || 500;
+  ctx.save(); ctx.fillStyle = o.color || D.col('ink'); ctx.textAlign = 'left'; ctx.font = `${w} ${size}px ${FONT}`;
+  const pre = o.pre || ''; const wp = ctx.measureText(pre).width; ctx.fillText(pre, x, y);
+  const wv = ctx.measureText('V').width; ctx.fillText('V', x + wp, y);
+  ctx.font = `${w} ${Math.round(size * .75)}px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText('^', x + wp + wv / 2, y - size * .62);
+  ctx.textAlign = 'left'; ctx.font = `${w} ${Math.round(size * .7)}px ${FONT}`; ctx.fillText(s, x + wp + wv + 1, y + size * .3);
+  ctx.restore();
+}
+function gate(ctx, g, x, y, w, h, color, alpha = 1) { stack(ctx, [g], [color], x, y, w, h, -0.12, 1.12, alpha); hline(ctx, x, w, ym(0, -0.12, 1.12, y, h), D.col('rule')); }
+const edges = g => { let c = 0; const n = g.length; for (let i = 0; i < n; i++) if (g[i] && !g[(i - 1 + n) % n]) c++; return c; };
+const sumL = L => { const s = new Float64Array(L[0].length); L.forEach(a => a.forEach((v, i) => s[i] += v)); return s; };
+const cellCols = () => ['c1', 'c2', 'c3', 'c4'].map(D.col);
+
+/* phase-shifted PWM, H cells, phases A and B */
+function psPWM(H, ma, mf, N) {
+  const mk = () => Array.from({ length: H }, () => new Float64Array(N));
+  const cell = mk(), g1 = mk(), g3 = mk(), vA = new Float64Array(N), vB = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const t = i / N;
+    for (let p = 0; p < 2; p++) {
+      const r = ma * Math.sin(TAU * (t - p / 3)); let s = 0;
+      for (let k = 0; k < H; k++) { const c = tri(mf * t - k / (2 * H)), a = r > c ? 1 : 0, b = r < -c ? 1 : 0; s += a - b; if (!p) { cell[k][i] = a - b; g1[k][i] = a; g3[k][i] = b; } }
+      (p ? vB : vA)[i] = s;
+    }
+  }
+  return { cell, g1, g3, vA, vB };
+}
+/* level-shifted carriers: band b (0 = next to zero), up = above zero */
+function lsBand(b, up, t, mf, H, arr = 'ipd') {
+  const c = (up ? 1 : -1) * (b + 0.5) / H, q = up ? H - 1 - b : H + b;
+  const s = arr === 'pod' ? (up ? 1 : -1) : arr === 'apod' ? (q % 2 ? -1 : 1) : 1;
+  return c + 0.5 / H * s * tri(mf * t);
+}
+/* level-shifted PWM over CY cycles; assign(k, cycle) gives the band of cell k */
+function lsPWM(H, ma, mf, N, CY = 1, assign = k => H - 1 - k) {
+  const T = N * CY, mk = () => Array.from({ length: H }, () => new Float64Array(T));
+  const cell = mk(), g1 = mk(), g3 = mk(), vA = new Float64Array(T), vB = new Float64Array(T);
+  for (let i = 0; i < T; i++) {
+    const cy = Math.floor(i / N), t = (i % N) / N;
+    for (let p = 0; p < 2; p++) {
+      const r = ma * Math.sin(TAU * (t - p / 3)); let s = 0;
+      for (let k = 0; k < H; k++) { const b = assign(k, cy), a = r > lsBand(b, true, t, mf, H) ? 1 : 0, d = r < lsBand(b, false, t, mf, H) ? 1 : 0; s += a - d; if (!p) { cell[k][i] = a - d; g1[k][i] = a; g3[k][i] = d; } }
+      (p ? vB : vA)[i] = s;
+    }
+  }
+  return { cell, g1, g3, vA, vB };
+}
+
+/* ================= engine ================= */
+const D = (() => {
+  const stage = document.getElementById('stage'), vp = document.getElementById('viewport');
+  const slides = [...document.querySelectorAll('.slide')], fac = {}, inst = new Map();
+  let cur = -1, scale = 1, cache = {};
+  const col = n => cache[n] ??= getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
+  const register = (n, f) => fac[n] = f;
+  function canvas(cv) {
+    const w = cv.clientWidth, h = cv.clientHeight, k = Math.min(3, Math.max(1, (window.devicePixelRatio || 1) * scale));
+    if (cv.width !== Math.round(w * k) || cv.height !== Math.round(h * k)) { cv.width = Math.round(w * k); cv.height = Math.round(h * k); }
+    const ctx = cv.getContext('2d'); ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, w, h); return { ctx, w, h };
+  }
+  function seg(id, cb) {
+    const bs = [...document.getElementById(id).querySelectorAll('button')];
+    bs.forEach(b => { if (!b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => { bs.forEach(o => o.setAttribute('aria-pressed', String(o === b))); cb(b.dataset.v); b.blur(); }); });
+    return () => bs.find(b => b.getAttribute('aria-pressed') === 'true').dataset.v;
+  }
+  const sims = i => [...slides[i].querySelectorAll('[data-sim]')].map(el => { if (!inst.has(el)) inst.set(el, fac[el.dataset.sim] ? fac[el.dataset.sim](el) : null); return inst.get(el); }).filter(Boolean);
+  const redraw = () => { if (cur >= 0) sims(cur).forEach(s => s.draw()); };
+  function fit() { scale = Math.min(vp.clientWidth / 1600, vp.clientHeight / 900); stage.style.transform = `translate(-50%,-50%) scale(${scale})`; redraw(); }
+  const drawer = document.getElementById('drawer');
+  function go(i, push = true) {
+    i = Math.max(0, Math.min(slides.length - 1, i)); if (i === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = i; slides[i].classList.add('active'); sims(i).forEach(s => s.draw());
+    document.getElementById('count').textContent = i + 1;
+    document.getElementById('ref').innerHTML = slides[i].dataset.ref || '';
+    const n = slides[i].querySelector('.notes'); document.getElementById('noteText').innerHTML = n ? n.innerHTML : '';
+    if (push) try { history.replaceState(null, '', '#slide-' + (i + 1)); } catch (e) { }
+  }
+  const fromHash = () => { const m = /^#slide-(\d+)$/.exec(location.hash); return m ? +m[1] - 1 : 0; };
+  function theme() { const dark = col('paper').toLowerCase() === '#121417'; document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark'); cache = {}; redraw(); }
+  document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'PageDown') { go(cur + 1); e.preventDefault(); return; }
+    if (e.key === 'PageUp') { go(cur - 1); e.preventDefault(); return; }
+    if (/^(input|button)$/i.test(e.target.tagName)) return;
+    const k = e.key;
+    if (k === 'ArrowRight' || k === ' ' || k === 'ArrowDown') { go(cur + 1); e.preventDefault(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp') { go(cur - 1); e.preventDefault(); }
+    else if (k === 'Home') go(0); else if (k === 'End') go(slides.length - 1);
+    else if (k === 'n' || k === 'N') drawer.classList.toggle('open');
+    else if (k === 'd' || k === 'D') theme();
+    else if (k === 'f' || k === 'F') { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (er) { } }
+  });
+  document.getElementById('bPrev').onclick = () => go(cur - 1);
+  document.getElementById('bNext').onclick = () => go(cur + 1);
+  let tx = null;
+  vp.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  vp.addEventListener('touchend', e => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(dx) > 60) go(cur + (dx < 0 ? 1 : -1)); }, { passive: true });
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', () => go(fromHash(), false));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { cache = {}; redraw(); });
+  return { col, register, canvas, seg, boot() { fit(); go(fromHash(), false); }, redraw, go };
+})();
+
+/* ================= H-bridge cell ================= */
+D.register('cell', el => {
+  const svg = el.querySelector('svg');
+  const xa = 330, xb = 560, P = 60, N = 460, yu = 150, yl = 350, yA = 240, yB = 300, xs = 70, xc = 180, xo = 700;
+  const igbt = (x, y, n) => `<g class="dev" id="d${n}">
+    <path class="w" d="M${x} ${y - 34} V${y - 16} L${x - 12} ${y - 8} M${x - 12} ${y + 8} L${x} ${y + 16} V${y + 34}"/>
+    <path class="w" d="M${x - 12} ${y - 17} V${y + 17}" style="stroke-width:3.4"/>
+    <path class="w" d="M${x - 20} ${y - 13} V${y + 13} M${x - 20} ${y + 13} H${x - 32}"/>
+    <path class="arr" d="M${x} ${y + 16} l-9.5 -1.5 l5.5 -6.5 z"/>
+    <text class="lbl" x="${x - 40}" y="${y - 10}" text-anchor="end">${n}</text></g>`;
+  const diode = (x, y, n) => { const d = x + 40; return `<g class="dio" id="d${n}">
+    <path class="w" d="M${x} ${y - 34} H${d} V${y - 10} M${d} ${y + 10} V${y + 34} H${x}"/>
+    <polygon class="w" points="${d - 11},${y + 10} ${d + 11},${y + 10} ${d},${y - 10}"/><path class="w" d="M${d - 11} ${y - 10} H${d + 11}"/>
+    <text class="lbl s" x="${d + 16}" y="${y + 6}">${n}</text></g>`; };
+  svg.innerHTML = `
+    <polyline class="path" id="hbBg" points=""/>
+    <path class="w" d="M${xs} ${P} H${xb} M${xs} ${N} H${xb} M${xs} ${P} V236 M${xs} 254 V${N} M${xc} ${P} V238 M${xc} 256 V${N}
+      M${xa} ${P} V${yu - 34} M${xa} ${yu + 34} V${yl - 34} M${xa} ${yl + 34} V${N} M${xb} ${P} V${yu - 34} M${xb} ${yu + 34} V${yl - 34} M${xb} ${yl + 34} V${N}
+      M${xa} ${yA} H${xb - 10} a10 10 0 0 1 20 0 H${xo} V252 M${xb} ${yB} H${xo} V288"/>
+    <path class="w" d="M${xs - 24} 236 H${xs + 24} M${xc - 24} 238 H${xc + 24} M${xc - 24} 256 H${xc + 24}"/>
+    <path class="w" d="M${xs - 12} 254 H${xs + 12}" style="stroke-width:5"/>
+    <rect x="${xo - 16}" y="252" width="32" height="36" rx="5" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.2"/>
+    <circle cx="${xa}" cy="${yA}" r="5" fill="var(--ink)"/><circle cx="${xb}" cy="${yB}" r="5" fill="var(--ink)"/>
+    ${igbt(xa, yu, 'S1')}${diode(xa, yu, 'D1')}${igbt(xa, yl, 'S4')}${diode(xa, yl, 'D4')}
+    ${igbt(xb, yu, 'S3')}${diode(xb, yu, 'D3')}${igbt(xb, yl, 'S2')}${diode(xb, yl, 'D2')}
+    <polyline class="flow" id="hbFlow" points=""/>
+    <text class="lbl" x="${xs - 34}" y="252" text-anchor="end">V<tspan dy="6" font-size="16">d</tspan></text>
+    <text class="lbl s" x="${xs + 16}" y="228">+</text>
+    <text class="lbl s" x="${xc + 32}" y="254">C<tspan dy="5" font-size="13">d</tspan></text>
+    <text class="lbl s" x="${xs - 24}" y="${P + 6}" text-anchor="end">P</text><text class="lbl s" x="${xs - 24}" y="${N + 6}" text-anchor="end">N</text>
+    <text class="lbl" x="${xa - 14}" y="${yA - 12}" text-anchor="end">A</text><text class="lbl" x="${xb - 14}" y="${yB + 26}" text-anchor="end">B</text>
+    <text class="lbl s" x="${xo + 26}" y="${yA + 6}">+</text><text class="lbl s" x="${xo + 26}" y="${yB + 6}">−</text>
+    <text class="lbl" x="${xo + 26}" y="276">v<tspan dy="6" font-size="16">AB</tspan></text>`;
+  const S = {
+    p: { on: ['S1', 'S2'], dio: [], pts: [[xs, 236], [xs, P], [xa, P], [xa, yA], [xo, yA], [xo, yB], [xb, yB], [xb, N], [xs, N], [xs, 254]],
+      say: 'S1 and S2 on. The source drives the load: v<sub>AB</sub> = +V<sub>d</sub>.' },
+    z1: { on: ['S1'], dio: ['D3'], pts: [[xa, P], [xa, yA], [xo, yA], [xo, yB], [xb, yB], [xb, yu + 34], [xb + 40, yu + 34], [xb + 40, yu - 34], [xb, yu - 34], [xb, P], [xa, P]],
+      say: 'S2 turns off. Current freewheels through S1 and diode D3: v<sub>AB</sub> = 0.' },
+    z2: { on: ['S2'], dio: ['D4'], pts: [[xa, yA], [xo, yA], [xo, yB], [xb, yB], [xb, N], [xa, N], [xa, yl + 34], [xa + 40, yl + 34], [xa + 40, yl - 34], [xa, yl - 34], [xa, yA]],
+      say: 'S1 turns off. Current freewheels through S2 and diode D4: v<sub>AB</sub> = 0.' },
+    n: { on: ['S3', 'S4'], dio: [], pts: [[xs, 236], [xs, P], [xb, P], [xb, yB], [xo, yB], [xo, yA], [xa, yA], [xa, N], [xs, N], [xs, 254]],
+      say: 'S3 and S4 on. The load sees the source reversed: v<sub>AB</sub> = −V<sub>d</sub>.' }
+  };
+  let st = 'p';
+  D.seg('cellRows', v => { st = v; draw(); });
+  function draw() {
+    const s = S[st];
+    svg.querySelectorAll('.dev').forEach(g => { g.classList.toggle('on', s.on.includes(g.id.slice(1)));  });
+    svg.querySelectorAll('.dio').forEach(g => g.classList.toggle('on', s.dio.includes(g.id.slice(1))));
+    const pts = s.pts.map(p => p.join(',')).join(' ');
+    svg.querySelector('#hbBg').setAttribute('points', pts); svg.querySelector('#hbFlow').setAttribute('points', pts);
+    document.getElementById('cellSay').innerHTML = s.say;
+  }
+  return { draw };
+});
+
+/* ================= bipolar / unipolar ================= */
+D.register('pwm', el => {
+  let mode = 'bi'; const N = 4096, ma = 0.8, mf = 15;
+  const say = {
+    bi: ['One sine reference, one carrier.', 'S1 and S3 are complementary.', 'v<sub>AB</sub> is +V<sub>d</sub> or −V<sub>d</sub>.', 'Harmonics around m<sub>f</sub> (15th).'],
+    uni: ['Two references, v<sub>m</sub> and −v<sub>m</sub>, 180° apart.', 'S1 and S3 are not complementary.', 'v<sub>AB</sub> is +V<sub>d</sub>, 0 or −V<sub>d</sub>.', 'Harmonics around 2m<sub>f</sub> (30th).']
+  };
+  D.seg('pwmMode', v => { mode = v; draw(); });
+  function draw() {
+    document.getElementById('pwmSay').innerHTML = say[mode].map(t => `<li>${t}</li>`).join('');
+    document.getElementById('pwmInv').textContent = mode === 'bi' ? '900' : '1800';
+    const { ctx, w, h } = D.canvas(el), ink = D.col('ink'), car = D.col('carrier'), C = cellCols();
+    const ref = new Float64Array(N), refn = new Float64Array(N), cr = new Float64Array(N), g1 = new Float64Array(N), g3 = new Float64Array(N), v = new Float64Array(N);
+    for (let i = 0; i < N; i++) { const t = i / N; ref[i] = ma * Math.sin(TAU * t); refn[i] = -ref[i]; cr[i] = tri(mf * t);
+      g1[i] = ref[i] > cr[i] ? 1 : 0; g3[i] = mode === 'bi' ? 1 - g1[i] : (refn[i] > cr[i] ? 1 : 0); v[i] = g1[i] - g3[i]; }
+    const x = 112, W = w - 122;
+    line(ctx, cr, x, 4, W, 150, -1.1, 1.1, car, 1.3);
+    line(ctx, ref, x, 4, W, 150, -1.1, 1.1, ink, 2.6);
+    if (mode === 'uni') line(ctx, refn, x, 4, W, 150, -1.1, 1.1, ink, 2, [7, 5]);
+    sub(ctx, 'v', 'cr', 0, 64); sub(ctx, 'v', 'm', 0, 92, { color: ink }); if (mode === 'uni') sub(ctx, '−v', 'm', 0, 120, { color: ink });
+    gate(ctx, g1, x, 172, W, 30, C[0]); text(ctx, 'S1', 0, 194, { color: C[0], weight: 600 });
+    gate(ctx, g3, x, 214, W, 30, C[1]); text(ctx, 'S3', 0, 236, { color: C[1], weight: 600 });
+    const y = 266, hh = 168, a = spec(v);
+    stack(ctx, [v], [D.col('ink2')], x, y, W, hh, -1.25, 1.25);
+    hline(ctx, x, W, ym(0, -1.25, 1.25, y, hh), D.col('rule'));
+    line(ctx, Float64Array.from({ length: N }, (_, i) => a[1] * Math.sin(TAU * i / N)), x, y, W, hh, -1.25, 1.25, ink, 2, [6, 5]);
+    sub(ctx, 'v', 'AB', 0, y + hh / 2 + 6, { color: ink, size: 20 });
+    sub(ctx, '+V', 'd', x - 10, ym(1, -1.25, 1.25, y, hh) + 6, { align: 'right', size: 15 }); sub(ctx, '−V', 'd', x - 10, ym(-1, -1.25, 1.25, y, hh) + 6, { align: 'right', size: 15 });
+    const sy = 462, sh = 110, hmax = 50, bw = W / (hmax + 1);
+    for (let k = 1; k <= hmax; k++) { const r = Math.min(a[k] / 1.05, 1); if (r < .006) continue;
+      ctx.fillStyle = k === 1 ? ink : D.col('ink2'); ctx.fillRect(x + k * bw - bw * .3, sy + sh - r * sh, bw * .6, r * sh); }
+    hline(ctx, x, W, sy + sh, D.col('rule'));
+    [1, 15, 30, 45].forEach(k => text(ctx, String(k), x + k * bw, sy + sh + 22, { align: 'center', size: 15 }));
+    text(ctx, 'Harmonics', 0, sy + 64, { color: ink });
+  }
+  return { draw };
+});
+
+/* ================= unipolar: two equivalent ways ================= */
+D.register('uni', el => {
+  const N = 4096, ma = 0.8, mf = 7;
+  function draw() {
+    const { ctx, w, h } = D.canvas(el), ink = D.col('ink'), car = D.col('carrier'), C = cellCols();
+    const ref = new Float64Array(N), refn = new Float64Array(N), cr = new Float64Array(N), crn = new Float64Array(N), g1 = new Float64Array(N), g3 = new Float64Array(N), v = new Float64Array(N);
+    for (let i = 0; i < N; i++) { const t = i / N; ref[i] = ma * Math.sin(TAU * t); refn[i] = -ref[i]; cr[i] = tri(mf * t); crn[i] = -cr[i];
+      g1[i] = ref[i] > cr[i] ? 1 : 0; g3[i] = refn[i] > cr[i] ? 1 : 0; v[i] = g1[i] - g3[i]; }
+    const x = 130, W = w - 140, ph = 118;
+    // shift reference
+    let y0 = 4;
+    line(ctx, cr, x, y0, W, ph, -1.1, 1.1, car, 1.5); line(ctx, ref, x, y0, W, ph, -1.1, 1.1, ink, 2.4); line(ctx, refn, x, y0, W, ph, -1.1, 1.1, ink, 2, [7, 5]);
+    text(ctx, 'Shift', 0, y0 + 30, { color: ink, weight: 600 }); text(ctx, 'reference', 0, y0 + 50, { color: ink, weight: 600 });
+    sub(ctx, 'v', 'm', 0, y0 + 76, { color: ink, size: 16 }); sub(ctx, '−v', 'm', 30, y0 + 76, { color: ink, size: 16 }); sub(ctx, 'v', 'cr', 0, y0 + 98, { size: 16 });
+    // shift carrier
+    y0 = 136;
+    line(ctx, cr, x, y0, W, ph, -1.1, 1.1, car, 1.5); line(ctx, crn, x, y0, W, ph, -1.1, 1.1, car, 1.5, [6, 5]); line(ctx, ref, x, y0, W, ph, -1.1, 1.1, ink, 2.4);
+    text(ctx, 'Shift', 0, y0 + 30, { color: ink, weight: 600 }); text(ctx, 'carrier', 0, y0 + 50, { color: ink, weight: 600 });
+    sub(ctx, 'v', 'm', 0, y0 + 76, { color: ink, size: 16 }); sub(ctx, 'v', 'cr', 0, y0 + 98, { size: 16 }); sub(ctx, '−v', 'cr', 34, y0 + 98, { size: 16 });
+    hline(ctx, 0, w, 270, D.col('rule'));
+    text(ctx, 'Same output for both', x + W, 290, { align: 'right', size: 15 });
+    const rows = [[g1, 'AN', C[0], 300, 'S1 gate'], [g3, 'BN', C[1], 362, 'S3 gate']];
+    rows.forEach(([g, n, c, yy, gl]) => { gate(ctx, g, x, yy, W, 44, c); sub(ctx, 'v', n, 0, yy + 22, { color: c, weight: 600, size: 20 }); text(ctx, '= ' + gl + ', ' + edges(g) + ' pulses', 0, yy + 42, { size: 13 }); });
+    const y = 424, hh = 190;
+    stack(ctx, [v], [D.col('ink2')], x, y, W, hh, -1.25, 1.25);
+    hline(ctx, x, W, ym(0, -1.25, 1.25, y, hh), D.col('rule'));
+    const nz = v.map(a => a !== 0 ? 1 : 0);
+    sub(ctx, 'v', 'AB', 0, y + hh / 2, { color: ink, weight: 600, size: 20 }); text(ctx, edges(nz) + ' pulses', 0, y + hh / 2 + 22, { size: 13 });
+  }
+  return { draw };
+});
+
+/* ================= CHB topology and supply ================= */
+function bookCell(x0, y0, o = {}) {
+  const dot = (x, y) => `<circle cx="${x}" cy="${y}" r="3.4" fill="var(--ink)"/>`;
+  const sw = (x, yt, yb) => `<path class="w" d="M${x} ${yt} V${yt + 12} M${x} ${yb - 12} V${yb} M${x} ${yt + 12} L${x - 12} ${yb - 15}" style="stroke-width:2"/>`;
+  const di = (x, yt, yb) => { const yc = (yt + yb) / 2; return `<path class="w" d="M${x} ${yt} V${yb}" style="stroke-width:2"/><polygon points="${x - 8},${yc + 6} ${x + 8},${yc + 6} ${x},${yc - 7}" fill="var(--ink)"/><path class="w" d="M${x - 8} ${yc - 7} H${x + 8}" style="stroke-width:2"/>`; };
+  const pair = (xa, xb, yt, yb) => sw(xa, yt, yb) + di(xb, yt, yb) + `<path class="w" d="M${xa} ${yt} H${xb} M${xa} ${yb} H${xb}" style="stroke-width:2"/>` + dot(xa, yt) + dot(xb, yt) + dot(xa, yb) + dot(xb, yb);
+  const xs = x0, xa1 = x0 + 55, xb1 = x0 + 79, xm1 = x0 + 67, xa2 = x0 + 150, xb2 = x0 + 174, xm2 = x0 + 162, xT = x0 + 210, yb = y0 + 160;
+  let q = `<path class="w" d="M${xs} ${y0} H${xb2} M${xs} ${yb} H${xb2} M${xs} ${y0} V${y0 + 74} M${xs} ${y0 + 86} V${yb}
+    M${xm1} ${y0 + 55} V${y0 + 105} M${xm2} ${y0 + 55} V${y0 + 105} M${xm1} ${y0 + 68} H${xT} M${xm2} ${y0 + 95} H${xT}" style="stroke-width:2"/>`;
+  q += `<path class="w" d="M${xs - 12} ${y0 + 74} H${xs + 12}" style="stroke-width:2"/><path class="w" d="M${xs - 6} ${y0 + 86} H${xs + 6}" style="stroke-width:4.5"/>`;
+  q += `<text class="lbl" x="${xs - 18}" y="${y0 + 87}" text-anchor="end" style="font-size:${o.eSize || 18}px; font-style:italic; ${o.eColor ? 'fill:' + o.eColor + '; font-weight:700' : ''}">${o.E || 'E'}</text>`;
+  q += pair(xa1, xb1, y0, y0 + 55) + pair(xa2, xb2, y0, y0 + 55) + pair(xa1, xb1, y0 + 105, yb) + pair(xa2, xb2, y0 + 105, yb);
+  q += dot(xm1, y0 + 68) + dot(xm2, y0 + 95);
+  if (o.k) {
+    const L = (t, x, y, on) => `<text class="lbl" x="${x}" y="${y}" text-anchor="end" style="font-size:17px; font-style:italic; ${on ? 'fill:' + o.hl + '; font-weight:700' : 'fill:var(--muted)'}">S<tspan dy="5" font-size="12">${t}${o.k}</tspan></text>`;
+    q += L(1, xa1 - 14, y0 + 34, true) + L(3, xa2 - 14, y0 + 34, true) + L(4, xa1 - 14, y0 + 139, false) + L(2, xa2 - 14, y0 + 139, false);
+  }
+  return q;
+}
+D.register('topo', el => {
+  const svg = el.querySelector('#topoSvg');
+  const dot = (x, y) => `<circle cx="${x}" cy="${y}" r="3.4" fill="var(--ink)"/>`;
+  const sw = (x, yt, yb) => `<path class="w" d="M${x} ${yt} V${yt + 12} M${x} ${yb - 12} V${yb} M${x} ${yt + 12} L${x - 12} ${yb - 15}" style="stroke-width:2"/>`;
+  const di = (x, yt, yb) => { const yc = (yt + yb) / 2; return `<path class="w" d="M${x} ${yt} V${yb}" style="stroke-width:2"/><polygon points="${x - 8},${yc + 6} ${x + 8},${yc + 6} ${x},${yc - 7}" fill="var(--ink)"/><path class="w" d="M${x - 8} ${yc - 7} H${x + 8}" style="stroke-width:2"/>`; };
+  const pair = (xa, xb, yt, yb) => sw(xa, yt, yb) + di(xb, yt, yb) + `<path class="w" d="M${xa} ${yt} H${xb} M${xa} ${yb} H${xb}" style="stroke-width:2"/>` + dot(xa, yt) + dot(xb, yt) + dot(xa, yb) + dot(xb, yb);
+  const lbl = (t, k, x, y) => `<text class="lbl" x="${x}" y="${y}" text-anchor="end" style="font-size:17px; font-style:italic">S<tspan dy="5" font-size="12">${t}${k}</tspan></text>`;
+  function cell(x0, y0, k, lab) {
+    const xs = x0, xa1 = x0 + 55, xb1 = x0 + 79, xm1 = x0 + 67, xa2 = x0 + 150, xb2 = x0 + 174, xm2 = x0 + 162, xT = x0 + 210, yb = y0 + 160;
+    let q = `<path class="w" d="M${xs} ${y0} H${xb2} M${xs} ${yb} H${xb2} M${xs} ${y0} V${y0 + 74} M${xs} ${y0 + 86} V${yb}
+      M${xm1} ${y0 + 55} V${y0 + 105} M${xm2} ${y0 + 55} V${y0 + 105} M${xm1} ${y0 + 68} H${xT} M${xm2} ${y0 + 95} H${xT}" style="stroke-width:2"/>`;
+    q += `<path class="w" d="M${xs - 12} ${y0 + 74} H${xs + 12}" style="stroke-width:2"/><path class="w" d="M${xs - 6} ${y0 + 86} H${xs + 6}" style="stroke-width:4.5"/>`;
+    q += `<text class="lbl" x="${xs - 18}" y="${y0 + 87}" text-anchor="end" style="font-size:18px; font-style:italic">E</text>`;
+    q += pair(xa1, xb1, y0, y0 + 55) + pair(xa2, xb2, y0, y0 + 55) + pair(xa1, xb1, y0 + 105, yb) + pair(xa2, xb2, y0 + 105, yb);
+    q += dot(xm1, y0 + 68) + dot(xm2, y0 + 95);
+    if (lab) {
+      q += lbl(1, k, xa1 - 14, y0 + 34) + lbl(3, k, xa2 - 14, y0 + 34) + lbl(4, k, xa1 - 14, y0 + 139) + lbl(2, k, xa2 - 14, y0 + 139);
+      q += `<text class="lbl" x="${xT + 8}" y="${y0 + 62}" style="font-size:14px">+</text><text class="lbl" x="${xT + 8}" y="${y0 + 112}" style="font-size:16px">−</text>
+        <text class="lbl" x="${xT + 8}" y="${y0 + 88}" style="font-size:18px; font-style:italic">v<tspan dy="5" font-size="12">H${k}</tspan></text>`;
+      q += `<text class="lbl" x="${(xa1 + xb2) / 2}" y="${yb + 22}" text-anchor="middle" style="font-size:18px; font-weight:700; font-style:italic">H${k}</text>`;
+    }
+    return q;
+  }
+  const X0 = [60, 345, 630], ph = ['A', 'B', 'C'], yt = 155, y1 = 170, y2 = 380, yN = 572, lx = 555, ly = 82, lr = 46, yl = 62;
+  let s = '';
+  X0.forEach((x0, j) => {
+    const xT = x0 + 210;
+    s += cell(x0, y1, 1, j === 0) + cell(x0, y2, 2, j === 0);
+    s += `<path class="w" d="M${xT} ${yt + 5} V${y1 + 68} M${xT} ${y1 + 95} V${y2 + 68} M${xT} ${y2 + 95} V${yN}" style="stroke-width:2"/>`;
+    s += `<circle cx="${xT}" cy="${yt}" r="5" fill="var(--paper)" class="w" style="stroke-width:2"/><text class="lbl" x="${xT + 11}" y="${yt + 6}" style="font-size:19px; font-style:italic">${ph[j]}</text>`;
+  });
+  const xA = X0[0] + 210, xB = X0[1] + 210, xC = X0[2] + 210;
+  // Y-connected load
+  const eL = [lx - 34, yl], eR = [lx + 34, yl], eB = [lx, ly + 30], O = [lx, ly];
+  s += `<path class="w" d="M${xA} ${yt - 5} V${yl} H${eL[0]} M${xC} ${yt - 5} V${yl} H${eR[0]} M${xB} ${yt - 5} V${eB[1]}" style="stroke-width:2"/>`;
+  s += `<circle cx="${lx}" cy="${ly}" r="${lr}" fill="none" class="w" style="stroke-width:2.4"/>`;
+  [eL, eR, eB].forEach(([ex, ey]) => {
+    const mx = (ex + O[0]) / 2, my = (ey + O[1]) / 2, ang = Math.atan2(ey - O[1], ex - O[0]) * 180 / Math.PI;
+    s += `<path class="w" d="M${ex} ${ey} L${O[0]} ${O[1]}" style="stroke-width:2"/>`;
+    s += `<rect x="${mx - 9}" y="${my - 4.5}" width="18" height="9" fill="var(--ink)" transform="rotate(${ang} ${mx} ${my})"/>`;
+  });
+  s += dot(O[0], O[1]) + `<text class="lbl" x="${lx}" y="${ly - 9}" text-anchor="middle" style="font-size:14px; font-style:italic">O</text>`;
+  s += `<text class="lbl" x="${lx}" y="${ly - lr - 8}" text-anchor="middle" style="font-size:17px">LOAD</text>`;
+  // neutral
+  s += `<path class="w" d="M${xA} ${yN} H${xC}" style="stroke-width:2"/>` + dot(xB, yN);
+  s += `<text class="lbl" x="${xB}" y="${yN + 24}" text-anchor="middle" style="font-size:19px; font-style:italic">N</text>`;
+  svg.innerHTML = s;
+  // DC supply of one cell
+  const sup = el.querySelector('#supSvg');
+  const d = (x, y) => `<polygon points="${x - 8},${y + 7} ${x + 8},${y + 7} ${x},${y - 7}" fill="var(--ink)"/><path d="M${x - 8} ${y - 7} H${x + 8}" stroke="var(--ink)" stroke-width="2"/>`;
+  let q = `<text class="lbl s" x="10" y="98">Grid</text><path class="w" d="M10 120 H66 M10 140 H66 M10 160 H66" style="stroke-width:2"/>`;
+  q += `<circle cx="100" cy="140" r="34" class="w" style="stroke-width:2"/><circle cx="140" cy="140" r="34" class="w" style="stroke-width:2"/>`;
+  q += `<path class="w" d="M174 120 H230 M174 140 H230 M174 160 H230" style="stroke-width:2"/>`;
+  q += `<text class="lbl s" x="120" y="206" text-anchor="middle">Phase-shifting</text><text class="lbl s" x="120" y="230" text-anchor="middle">transformer</text>`;
+  q += `<rect x="230" y="70" width="160" height="140" rx="12" fill="none" class="w" style="stroke-width:2"/>`;
+  q += `<path class="w" d="M260 90 H360 M260 190 H360 M260 90 V190 M310 90 V190 M360 90 V190" style="stroke-width:1.8"/>`;
+  [260, 310, 360].forEach(x => { q += d(x, 116) + d(x, 164); });
+  q += `<text class="lbl s" x="310" y="240" text-anchor="middle">Diode rectifier</text>`;
+  q += `<path class="w" d="M390 90 H520 M390 190 H520 M450 90 V132 M450 148 V190 M430 132 H470 M430 148 H470" style="stroke-width:2"/>`;
+  q += `<text class="lbl" x="478" y="148" style="font-style:italic">E</text>`;
+  q += `<circle cx="524" cy="90" r="4.5" fill="var(--paper)" class="w" style="stroke-width:2"/><circle cx="524" cy="190" r="4.5" fill="var(--paper)" class="w" style="stroke-width:2"/>`;
+  q += `<text class="lbl s" x="520" y="240" text-anchor="middle">to cell</text>`;
+  q += `<text class="lbl s" x="280" y="282" text-anchor="middle" style="font-size:20px">Own winding per cell: isolated E</text>`;
+  sup.innerHTML = q;
+  return { draw() { } };
+});
+
+/* ================= five-level switching states ================= */
+D.register('five', el => {
+  const svg = el.querySelector('svg'), rows = document.getElementById('fiveRows');
+  const CS = [[1, 0], [1, 1], [0, 0], [0, 1]], val = b => b[0] - b[1];
+  const states = {}; CS.forEach(a => CS.forEach(b => { const l = val(a) + val(b); (states[l] = states[l] || []).push([a, b]); }));
+  Object.values(states).forEach(L => L.sort((p, q) => (Math.abs(val(p[0])) + Math.abs(val(p[1]))) - (Math.abs(val(q[0])) + Math.abs(val(q[1])))));
+  let lv = 1, idx = 0;
+  D.seg('fiveLvl', v => { lv = +v; idx = 0; draw(); });
+  const name = v => v === 0 ? '0' : (v > 0 ? '+' : '−') + (Math.abs(v) === 2 ? '2E' : 'E');
+  function cell(x, y, k, b) {
+    const c = `var(--c${k})`, L = x + 170, R = x + 290, xr = x + 370;
+    const on = { S1: b[0], S4: 1 - b[0], S3: b[1], S2: 1 - b[1] }, v = b[0] - b[1];
+    const sq = (cx, cy, n) => `<rect x="${cx - 20}" y="${cy - 17}" width="40" height="34" rx="7" fill="${on[n] ? c : 'var(--paper)'}" stroke="${c}" stroke-width="2.4"/>
+      <text class="lbl s" x="${cx - 28}" y="${cy + 6}" text-anchor="end">${n}${k}</text>`;
+    return `<rect x="${x}" y="${y}" width="340" height="210" rx="16" fill="none" stroke="var(--rule)" stroke-width="2"/>
+      <path class="w" d="M${x + 50} ${y + 40} H${R} M${x + 50} ${y + 170} H${R} M${x + 50} ${y + 40} V${y + 96} M${x + 50} ${y + 114} V${y + 170} M${L} ${y + 40} V${y + 170} M${R} ${y + 40} V${y + 170}
+        M${L} ${y + 100} H${R - 9} a9 9 0 0 1 18 0 H${xr} M${R} ${y + 112} H${xr}"/>
+      <path class="w" d="M${x + 32} ${y + 96} H${x + 68}"/><path class="w" d="M${x + 41} ${y + 114} H${x + 59}" style="stroke-width:5"/>
+      <text class="lbl s" x="${x + 22}" y="${y + 112}" text-anchor="end">E</text>
+      ${sq(L, y + 70, 'S1')}${sq(L, y + 140, 'S4')}${sq(R, y + 70, 'S3')}${sq(R, y + 140, 'S2')}
+      <text class="lbl" x="${xr + 56}" y="${y + 100}" style="font-size:20px; fill:${c}; font-weight:600">H${k}</text>
+      <text class="lbl" x="${xr + 56}" y="${y + 134}" style="font-size:30px; font-weight:600">${name(v)}</text>`;
+  }
+  function draw() {
+    const list = states[lv], s = list[idx], xr = 40 + 370;
+    svg.innerHTML = `<path class="w" d="M${xr} 20 V150 M${xr} 162 V380 M${xr} 392 V580"/>
+      <circle cx="${xr}" cy="20" r="6" fill="var(--paper)" class="w"/><text class="lbl" x="${xr + 18}" y="28">A</text>
+      <circle cx="${xr}" cy="580" r="6" fill="var(--paper)" class="w"/><text class="lbl" x="${xr + 18}" y="588">N</text>
+      ${cell(40, 50, 1, s[0])}${cell(40, 280, 2, s[1])}`;
+    rows.innerHTML = `<div class="st-h"><span>v<sub>H1</sub></span><span>v<sub>H2</sub></span><span>S<sub>11</sub></span><span>S<sub>31</sub></span><span>S<sub>12</sub></span><span>S<sub>32</sub></span></div>` +
+      list.map((q, i) => `<button data-i="${i}" aria-pressed="${i === idx}"><span>${name(val(q[0]))}</span><span>${name(val(q[1]))}</span><span>${q[0][0]}</span><span>${q[0][1]}</span><span>${q[1][0]}</span><span>${q[1][1]}</span></button>`).join('');
+    rows.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { idx = +b.dataset.i; draw(); }));
+  }
+  return { draw };
+});
+
+/* ================= unequal DC ================= */
+D.register('unequal', el => {
+  let V = [1, 1, 1]; const cv = el.querySelector('#unCv'), N = 2400;
+  D.seg('unSet', v => { V = v.split(',').map(Number); draw(); });
+  function combos(V) {
+    let res = [[]]; V.forEach(() => { res = res.flatMap(o => [-1, 0, 1].map(a => [...o, a])); });
+    const m = {}; res.forEach(o => { const l = o.reduce((s, a, k) => s + a * V[k], 0); (m[l] = m[l] || []).push(o); }); return m;
+  }
+  function draw() {
+    const S = V.reduce((a, b) => a + b, 0), n = V.length;
+    document.getElementById('unM').textContent = 2 * S + 1; document.getElementById('unH').textContent = n;
+    const cmb = combos(V), out = V.map(() => new Float64Array(N)), lev = new Float64Array(N); let prev = V.map(() => 0);
+    for (let i = 0; i < N; i++) {
+      const t = Math.round(S * Math.sin(TAU * i / N)); let best = null, bc = 1e9;
+      cmb[t].forEach(o => { const c = o.reduce((s, a, k) => s + (a !== prev[k]) * 10 + Math.abs(a) * (1 + 0.01 * k), 0); if (c < bc) { bc = c; best = o; } });
+      prev = best; best.forEach((a, k) => out[k][i] = a * V[k]); lev[i] = t;
+    }
+    const svg = el.querySelector('#unSvg'), Cc = cellCols(); let q = '';
+    const x0 = 62, xT = x0 + 210, step = 190, top = 46;
+    q += `<circle cx="${xT}" cy="22" r="5" fill="var(--paper)" class="w" style="stroke-width:2"/><text class="lbl" x="${xT + 12}" y="28" style="font-style:italic">A</text>`;
+    let prevY = 27;
+    V.forEach((v, k) => {
+      const y0 = top + k * step;
+      q += bookCell(x0, y0, { E: (v > 1 ? v : '') + 'E', eColor: Cc[k], eSize: 20 });
+      q += `<path class="w" d="M${xT} ${prevY} V${y0 + 68}" style="stroke-width:2"/>`;
+      q += `<text class="lbl" x="${xT + 8}" y="${y0 + 88}" style="font-size:18px; font-weight:700; fill:${Cc[k]}">H${k + 1}</text>`;
+      prevY = y0 + 95;
+    });
+    const yN = top + (n - 1) * step + 182;
+    q += `<path class="w" d="M${xT} ${prevY} V${yN - 5}" style="stroke-width:2"/><circle cx="${xT}" cy="${yN}" r="5" fill="var(--paper)" class="w" style="stroke-width:2"/><text class="lbl" x="${xT + 12}" y="${yN + 6}" style="font-style:italic">N</text>`;
+    svg.innerHTML = q;
+    const { ctx, w, h } = D.canvas(cv), C = cellCols(), x = 90, W = w - 100;
+    let y = 4; const unit = (262 - 12 * (n - 1)) / (2 * S + 0.6 * n);
+    for (let k = 0; k < n; k++) {
+      const sh = (2 * V[k] + 0.6) * unit, lo = -(V[k] + .3), hi = V[k] + .3;
+      stack(ctx, [out[k]], [C[k]], x, y, W, sh, lo, hi); hline(ctx, x, W, ym(0, lo, hi, y, sh), D.col('rule'));
+      text(ctx, 'H' + (k + 1), 0, y + sh / 2 - 2, { color: C[k], weight: 600, size: 19 });
+      text(ctx, (V[k] > 1 ? V[k] : '') + 'E', 0, y + sh / 2 + 20, { size: 16 });
+      y += sh + 12;
+    }
+    y = 300; const hh = 280, R = S + 0.4;
+    for (let l = -S; l <= S; l++) hline(ctx, x, W, ym(l, -R, R, y, hh), l ? D.col('faint') : D.col('ink2'));
+    stack(ctx, [lev], [D.col('faint')], x, y, W, hh, -R, R);
+    ctx.save(); ctx.beginPath(); ctx.strokeStyle = D.col('ink'); ctx.lineWidth = 2.4;
+    for (let i = 0; i < N; i++) { const a = x + i / N * W, py = ym(lev[i], -R, R, y, hh); i ? ctx.lineTo(a, py) : ctx.moveTo(a, py); ctx.lineTo(x + (i + 1) / N * W, py); }
+    ctx.stroke(); ctx.restore();
+    sub(ctx, 'v', 'AN', 0, y + hh / 2 + 6, { color: D.col('ink'), weight: 600, size: 20 });
+    text(ctx, '+' + S + 'E', x - 10, ym(S, -R, R, y, hh) + 6, { align: 'right', size: 15 });
+    text(ctx, '−' + S + 'E', x - 10, ym(-S, -R, R, y, hh) + 6, { align: 'right', size: 15 });
+  }
+  return { draw };
+});
+
+/* ================= redundancy bar chart ================= */
+D.register('redund', el => {
+  const poly = V => { let p = { 0: 1 }; V.forEach(v => { const q = {}; Object.entries(p).forEach(([l, c]) => [[-v, 1], [0, 2], [v, 1]].forEach(([d, m]) => { const k = +l + d; q[k] = (q[k] || 0) + c * m; })); p = q; }); return p; };
+  const eq = poly([1, 1, 1]), un = poly([1, 2]);
+  function draw() {
+    const { ctx, w, h } = D.canvas(el), C = cellCols(), ink = D.col('ink'), x = 70, y = 70, W = w - 90, hh = h - 140, max = 22;
+    for (let g = 0; g <= 20; g += 5) { const py = y + hh - g / max * hh; hline(ctx, x, W, py, g ? D.col('faint') : D.col('ink2')); text(ctx, String(g), x - 12, py + 6, { align: 'right', size: 15 }); }
+    const bw = W / 7;
+    for (let l = -3; l <= 3; l++) {
+      const cx = x + (l + 3.5) * bw;
+      [[eq[l] || 0, C[0], -1], [un[l] || 0, C[1], 1]].forEach(([v, c, s]) => {
+        const bh = v / max * hh, bx = cx + (s < 0 ? -bw * .36 : bw * .02);
+        ctx.fillStyle = c; ctx.fillRect(bx, y + hh - bh, bw * .34, bh);
+        text(ctx, String(v), bx + bw * .17, y + hh - bh - 8, { align: 'center', size: 16, color: c, weight: 600 });
+      });
+      text(ctx, l === 0 ? '0' : (l > 0 ? '+' : '−') + (Math.abs(l) > 1 ? Math.abs(l) : '') + 'E', cx, y + hh + 28, { align: 'center', size: 17, color: ink });
+    }
+    text(ctx, 'Switching states per level', x, 24, { size: 17, color: ink });
+    ctx.fillStyle = C[0]; ctx.fillRect(x, 40, 14, 14); text(ctx, 'Equal DC, 3 cells (64)', x + 22, 53, { size: 16, color: ink });
+    ctx.fillStyle = C[1]; ctx.fillRect(x + 260, 40, 14, 14); text(ctx, 'Unequal DC E, 2E, 2 cells (16)', x + 282, 53, { size: 16, color: ink });
+    text(ctx, 'Phase voltage level', x + W, y + hh + 58, { align: 'right', size: 15 });
+  }
+  return { draw };
+});
+
+/* ================= phase-shifted principle ================= */
+D.register('ps', el => {
+  let sel = 0; const H = 3, ma = 0.8, mf = 3, N = 4096, R = psPWM(H, ma, mf, N);
+  const cv = el.querySelector('#psCv'), svg = el.querySelector('#psSvg');
+  D.seg('psCell', v => { sel = +v; draw(); });
+  function schem() {
+    const Cc = cellCols(), x0 = 62, xT = x0 + 210, step = 190, top = 46;
+    let q = `<circle cx="${xT}" cy="22" r="5" fill="var(--paper)" class="w" style="stroke-width:2"/><text class="lbl" x="${xT + 12}" y="28" style="font-style:italic">A</text>`;
+    let prevY = 27;
+    for (let k = 0; k < H; k++) {
+      const y0 = top + k * step;
+      q += `<g class="mc${k === sel ? '' : ' dim'}" data-k="${k}"><rect x="${x0 - 46}" y="${y0 - 12}" width="${xT - x0 + 96}" height="184" fill="transparent"/>` + bookCell(x0, y0, { k: k + 1, hl: Cc[k] });
+      q += `<text class="lbl" x="${xT + 8}" y="${y0 + 88}" style="font-size:18px; font-weight:700; fill:${Cc[k]}">H${k + 1}</text></g>`;
+      q += `<path class="w" d="M${xT} ${prevY} V${y0 + 68}" style="stroke-width:2"/>`;
+      prevY = y0 + 95;
+    }
+    const yN = top + (H - 1) * step + 182;
+    q += `<path class="w" d="M${xT} ${prevY} V${yN - 5}" style="stroke-width:2"/><circle cx="${xT}" cy="${yN}" r="5" fill="var(--paper)" class="w" style="stroke-width:2"/><text class="lbl" x="${xT + 12}" y="${yN + 6}" style="font-style:italic">N</text>`;
+    svg.innerHTML = q;
+    svg.querySelectorAll('.mc').forEach(g => g.addEventListener('click', () => document.querySelector(`#psCell button[data-v="${g.dataset.k}"]`).click()));
+  }
+  function draw() {
+    schem();
+    const { ctx, w, h } = D.canvas(cv), C = cellCols(), ink = D.col('ink'), x = 104, W = w - 112, k1 = sel + 1;
+    const y0 = 4, h0 = 186;
+    for (let k = 0; k < H; k++) {
+      const a = Float64Array.from({ length: N }, (_, i) => tri(mf * i / N - k / (2 * H))), b = a.map(v => -v), on = k === sel;
+      line(ctx, a, x, y0, W, h0, -1.05, 1.05, C[k], on ? 2.6 : 1.2, null, on ? 1 : .2);
+      line(ctx, b, x, y0, W, h0, -1.05, 1.05, C[k], on ? 2.6 : 1.2, [6, 5], on ? 1 : .2);
+    }
+    line(ctx, Float64Array.from({ length: 800 }, (_, i) => ma * Math.sin(TAU * i / 799)), x, y0, W, h0, -1.05, 1.05, ink, 2.6);
+    const c = C[sel];
+    // legend
+    const leg = (yy, dash, s1) => { ctx.save(); ctx.strokeStyle = c; ctx.lineWidth = 2.6; if (dash) ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(0, yy - 5); ctx.lineTo(24, yy - 5); ctx.stroke(); ctx.restore(); sub(ctx, 'v', s1, 30, yy, { color: c, weight: 600, size: 17 }); };
+    leg(46, false, 'cr' + k1); leg(76, true, 'cr' + k1 + '−');
+    ctx.save(); ctx.strokeStyle = ink; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(0, 101); ctx.lineTo(24, 101); ctx.stroke(); ctx.restore(); sub(ctx, 'v', 'm', 30, 106, { color: ink, weight: 600, size: 17 });
+    gate(ctx, R.g1[sel], x, 206, W, 30, c); sub(ctx, 'v', 'g1' + k1, 0, 226, { color: c, weight: 600 });
+    gate(ctx, R.g3[sel], x, 246, W, 30, c); sub(ctx, 'v', 'g3' + k1, 0, 266, { color: c, weight: 600 });
+    let y = 296; const sh = 42;
+    for (let k = 0; k < H; k++) { const yy = y + k * (sh + 10), on = k === sel;
+      stack(ctx, [R.cell[k]], [C[k]], x, yy, W, sh, -1.2, 1.2, on ? 1 : .3); hline(ctx, x, W, ym(0, -1.2, 1.2, yy, sh), D.col('rule'));
+      sub(ctx, 'v', 'H' + (k + 1), 0, yy + sh / 2 + 6, { color: C[k], weight: 600 }); }
+    y = 458; const ph = 156;
+    for (let l = -3; l <= 3; l++) hline(ctx, x, W, ym(l, -3.3, 3.3, y, ph), l ? D.col('faint') : D.col('rule'));
+    stack(ctx, [R.vA], [D.col('ink2')], x, y, W, ph, -3.3, 3.3);
+    sub(ctx, 'v', 'AN', 0, y + ph / 2 + 6, { color: ink, weight: 600, size: 20 });
+    text(ctx, '+3E', x - 10, ym(3, -3.3, 3.3, y, ph) + 6, { align: 'right', size: 14 }); text(ctx, '−3E', x - 10, ym(-3, -3.3, 3.3, y, ph) + 6, { align: 'right', size: 14 });
+  }
+  return { draw };
+});
+
+/* ================= phase-shifted harmonics ================= */
+D.register('psh', el => {
+  let mode = 'an'; const H = 3, ma = 0.8, mf = 10, N = 8192, R = psPWM(H, ma, mf, N);
+  const ab = R.vA.map((v, i) => v - R.vB[i]), sig = { h1: R.cell[0], an: R.vA, ab };
+  const sp = {}, T = {}; Object.keys(sig).forEach(k => { sp[k] = spec(sig[k]); T[k] = thd(sig[k]); });
+  const ghost = { h1: null, an: 'h1', ab: 'an' }, gname = { h1: 'H1', an: 'AN', ab: 'AB' };
+  const info = {
+    h1: { lv: 3, pk: 1, say: ['Three levels: +E, 0, −E.', 'Harmonics around 2m<sub>f</sub> (20th).'] },
+    an: { lv: 7, pk: 3, say: ['Seven levels, peak 3E.', 'The 2m<sub>f</sub> group cancels; first group at 6m<sub>f</sub> (60th).'] },
+    ab: { lv: 13, pk: 6, say: ['13 levels, peak 6E.', 'No 3rd harmonic: triplens cancel (57th, 63rd gone).'] }
+  };
+  D.seg('pshMode', v => { mode = v; draw(); });
+  function draw() {
+    document.getElementById('pshSay').innerHTML = info[mode].say.map(t => `<li>${t}</li>`).join('');
+    document.getElementById('pshThd').textContent = Math.round(T[mode] * 100) + '%';
+    document.getElementById('pshLv').textContent = info[mode].lv;
+    const { ctx, w, h } = D.canvas(el), C = cellCols(), ink = D.col('ink'), x = 96, W = w - 106;
+    const pk = info[mode].pk, Rg = pk + 0.6, y = 4, hh = 270;
+    for (let l = -pk; l <= pk; l++) hline(ctx, x, W, ym(l, -Rg, Rg, y, hh), l ? D.col('faint') : D.col('rule'));
+    if (mode === 'h1') stack(ctx, [R.cell[0]], [C[0]], x, y, W, hh, -Rg, Rg);
+    else if (mode === 'an') stack(ctx, [R.vA], [D.col('ink2')], x, y, W, hh, -Rg, Rg);
+    else stack(ctx, [ab], [D.col('ink2')], x, y, W, hh, -Rg, Rg);
+    const a = sp[mode];
+    line(ctx, Float64Array.from({ length: 800 }, (_, i) => a[1] * Math.sin(TAU * i / 799)), x, y, W, hh, -Rg, Rg, ink, 2, [6, 5]);
+    sub(ctx, 'v', gname[mode], 0, y + hh / 2 + 6, { color: ink, weight: 600, size: 20 });
+    const pl = pk === 1 ? 'E' : pk + 'E';
+    text(ctx, '+' + pl, x - 10, ym(pk, -Rg, Rg, y, hh) + 6, { align: 'right', size: 14 }); text(ctx, '−' + pl, x - 10, ym(-pk, -Rg, Rg, y, hh) + 6, { align: 'right', size: 14 });
+    const sy = 320, sh = 210, hmax = 80, bw = W / (hmax + 1), sc = 0.4;
+    hline(ctx, x, W, sy, D.col('faint'), 1, [4, 4]); text(ctx, '40%', x - 10, sy + 5, { align: 'right', size: 14 });
+    const g = ghost[mode];
+    if (g) for (let k = 2; k <= hmax; k++) { const r = Math.min(sp[g][k] / sp[g][1] / sc, 1); if (r < .008) continue; ctx.fillStyle = D.col('rule'); ctx.fillRect(x + k * bw - bw * .32, sy + sh - r * sh, bw * .64, r * sh); }
+    for (let k = 1; k <= hmax; k++) { const r = k === 1 ? 1 : Math.min(a[k] / a[1] / sc, 1); if (r < .008) continue; ctx.fillStyle = k === 1 ? ink : D.col('ink2'); ctx.fillRect(x + k * bw - bw * .22, sy + sh - r * sh, bw * .44, r * sh); }
+    hline(ctx, x, W, sy + sh, D.col('ink2'));
+    [1, 20, 40, 60, 80].forEach(k => text(ctx, String(k), x + k * bw, sy + sh + 22, { align: 'center', size: 15 }));
+    sub(ctx, '2m', 'f', x + 20 * bw, sy + sh + 44, { align: 'center', size: 15, color: D.col('c4') });
+    sub(ctx, '6m', 'f', x + 60 * bw, sy + sh + 44, { align: 'center', size: 15, color: D.col('c4') });
+    text(ctx, 'Harmonics', 0, sy + sh / 2, { color: ink });
+    if (g) { ctx.fillStyle = D.col('rule'); ctx.fillRect(x + W - 150, sy - 34, 14, 14); sub(ctx, 'grey: v', gname[g], x + W - 128, sy - 21, { size: 15 }); }
+  }
+  return { draw };
+});
+
+/* ================= third-harmonic injection ================= */
+D.register('thi', el => {
+  let mode = 'sin'; const N = 1200, ma = 2 / Math.sqrt(3);
+  D.seg('thiMode', v => { mode = v; draw(); });
+  function draw() {
+    const { ctx, w, h } = D.canvas(el), C = cellCols(), ink = D.col('ink'), x = 56, W = w - 66, y = 10, hh = h - 30, lo = -1.4, hi = 1.4;
+    const f = Float64Array.from({ length: N }, (_, i) => ma * Math.sin(TAU * i / (N - 1)));
+    const r = mode === 'sin' ? f : Float64Array.from({ length: N }, (_, i) => ma * (Math.sin(TAU * i / (N - 1)) + Math.sin(3 * TAU * i / (N - 1)) / 6));
+    ctx.fillStyle = D.col('faint'); ctx.fillRect(x, ym(1, lo, hi, y, hh), W, ym(-1, lo, hi, y, hh) - ym(1, lo, hi, y, hh));
+    hline(ctx, x, W, ym(1, lo, hi, y, hh), D.col('muted'), 1.2, [6, 5]); hline(ctx, x, W, ym(-1, lo, hi, y, hh), D.col('muted'), 1.2, [6, 5]);
+    hline(ctx, x, W, ym(0, lo, hi, y, hh), D.col('rule'));
+    text(ctx, '+1', x - 10, ym(1, lo, hi, y, hh) + 6, { align: 'right', size: 15 }); text(ctx, '−1', x - 10, ym(-1, lo, hi, y, hh) + 6, { align: 'right', size: 15 });
+    if (mode === 'sin') {
+      ctx.save(); ctx.beginPath(); ctx.rect(x, y, W, ym(1, lo, hi, y, hh) - y); ctx.rect(x, ym(-1, lo, hi, y, hh), W, y + hh - ym(-1, lo, hi, y, hh)); ctx.clip();
+      ctx.beginPath(); for (let i = 0; i < N; i++) { const px = x + i / (N - 1) * W, py = ym(f[i], lo, hi, y, hh); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+      ctx.lineTo(x + W, ym(0, lo, hi, y, hh)); ctx.lineTo(x, ym(0, lo, hi, y, hh)); ctx.closePath(); ctx.fillStyle = C[3]; ctx.globalAlpha = .35; ctx.fill(); ctx.restore();
+      text(ctx, 'Overmodulation', x + W * .25, ym(1.3, lo, hi, y, hh), { align: 'center', size: 16, color: C[3], weight: 600 });
+    } else {
+      line(ctx, f, x, y, W, hh, lo, hi, C[0], 2, [7, 5]);
+      text(ctx, 'Fundamental, 1.155', x + W * .25, ym(1.28, lo, hi, y, hh), { align: 'center', size: 16, color: C[0], weight: 600 });
+    }
+    line(ctx, r, x, y, W, hh, lo, hi, ink, 3);
+    text(ctx, 'Carrier peak', x + W, ym(1, lo, hi, y, hh) - 8, { align: 'right', size: 14 });
+  }
+  return { draw };
+});
+
+/* ================= level-shifted carrier arrangements ================= */
+D.register('lsarr', el => {
+  let arr = 'ipd'; const H = 3, ma = 0.8, mf = 10, N = 1600;
+  const say = { ipd: 'In phase: all carriers in phase.', apod: 'Alternative phase opposite: neighbours 180° apart.', pod: 'Phase opposite: above zero 180° from below zero.' };
+  D.seg('lsArr', v => { arr = v; draw(); });
+  function draw() {
+    document.getElementById('lsArrSay').textContent = say[arr];
+    const { ctx, w, h } = D.canvas(el), C = cellCols(), ink = D.col('ink'), x = 120, W = w - 345, y = 20, hh = h - 50, lo = -1.06, hi = 1.06;
+    for (let l = -H; l <= H; l++) hline(ctx, x, W, ym(l / H, lo, hi, y, hh), l ? D.col('faint') : D.col('rule'));
+    for (let b = 0; b < H; b++) [true, false].forEach(up => {
+      const d = Float64Array.from({ length: N }, (_, i) => lsBand(b, up, i / N, mf, H, arr));
+      line(ctx, d, x, y, W, hh, lo, hi, C[H - 1 - b], 1.8);
+    });
+    line(ctx, Float64Array.from({ length: N }, (_, i) => ma * Math.sin(TAU * i / (N - 1))), x, y, W, hh, lo, hi, ink, 2.8);
+    // bracket helper
+    const br = (bx, v1, v2, color) => { const p1 = ym(v1, lo, hi, y, hh), p2 = ym(v2, lo, hi, y, hh); ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(bx - 7, p1); ctx.lineTo(bx, p1); ctx.lineTo(bx, p2); ctx.lineTo(bx - 7, p2); ctx.stroke(); ctx.restore(); return (p1 + p2) / 2; };
+    let my = br(x - 62, 1, 2 / 3, C[0]); vhat(ctx, 'cr', x - 110, my + 8, { color: C[0], size: 20 });
+    const px = x + 0.25 * W, pyk = ym(ma, lo, hi, y, hh);
+    ctx.save(); ctx.strokeStyle = ink; ctx.lineWidth = 1.3; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(px, pyk); ctx.lineTo(x + W + 16, pyk); ctx.stroke(); ctx.restore();
+    my = br(x + W + 22, ma, 0, ink); vhat(ctx, 'm', x + W + 30, my + 8, { color: ink, size: 20 });
+    my = br(x + W + 92, 1, -1, ink); vhat(ctx, 'cr', x + W + 100, ym(-0.5, lo, hi, y, hh) + 8, { color: ink, size: 20, pre: '(m − 1)' });
+    ['H1', 'H2', 'H3'].forEach((n, k) => { text(ctx, n, x - 40, ym(1 - (k + 0.5) / H, lo, hi, y, hh) + 6, { color: C[k], weight: 600, size: 16 }); text(ctx, n, x - 40, ym(-1 + (k + 0.5) / H, lo, hi, y, hh) + 6, { color: C[k], weight: 600, size: 16 }); });
+  }
+  return { draw };
+});
+
+/* ================= level-shifted waveforms ================= */
+D.register('ls', el => {
+  let sel = 0; const H = 3, ma = 0.8, mf = 18, N = 8192, R = lsPWM(H, ma, mf, N);
+  const fsw = R.g1.map(g => edges(g) * 60), cv = el.querySelector('#lsCv'), svg = el.querySelector('#lsSvg');
+  // schematic: one phase, three cells
+  let s = `<circle cx="115" cy="14" r="6" fill="var(--paper)" class="w"/><text class="lbl" x="132" y="21">A</text>`;
+  s += `<path class="w" d="M115 20 V40 M115 200 V224 M115 384 V408 M115 568 V584"/>`;
+  for (let k = 0; k < H; k++) {
+    const y0 = 40 + k * 184, c = `var(--c${k + 1})`;
+    s += `<g class="mc" data-k="${k}"><rect x="10" y="${y0}" width="210" height="160" rx="14" fill="var(--paper)" stroke="${c}" stroke-width="2.4"/>`;
+    s += `<text class="lbl" x="24" y="${y0 + 28}" style="fill:${c}; font-weight:600; font-size:19px">H${k + 1}</text>`;
+    [['S1', 70, 58], ['S3', 160, 58], ['S4', 70, 128], ['S2', 160, 128]].forEach(([n, dx, dy]) => {
+      const key = n === 'S1' || n === 'S3';
+      s += `<rect x="${dx - 17}" y="${y0 + dy - 15}" width="34" height="30" rx="6" fill="${key ? c : 'var(--paper)'}" fill-opacity="${key ? .18 : 1}" stroke="${c}" stroke-width="2"/>`;
+      s += `<text class="lbl s" x="${dx}" y="${y0 + dy + 6}" text-anchor="middle" style="font-size:14px; fill:${key ? c : 'var(--muted)'}; font-weight:${key ? 600 : 400}">${n}${k + 1}</text>`;
+    });
+    s += `<path d="M70 ${y0 + 73} V${y0 + 113} M160 ${y0 + 73} V${y0 + 113}" stroke="${c}" stroke-width="2"/>`;
+    s += `<text class="lbl s" x="115" y="${y0 + 98}" text-anchor="middle" style="font-size:15px">${['outer', 'middle', 'inner'][k]}</text></g>`;
+  }
+  s += `<circle cx="115" cy="590" r="6" fill="var(--paper)" class="w"/><text class="lbl" x="132" y="597">N</text>`;
+  svg.innerHTML = s;
+  svg.querySelectorAll('.mc').forEach(g => g.addEventListener('click', () => document.querySelector(`#lsCell button[data-v="${g.dataset.k}"]`).click()));
+  D.seg('lsCell', v => { sel = +v; draw(); });
+  function draw() {
+    svg.querySelectorAll('.mc').forEach(g => g.classList.toggle('dim', +g.dataset.k !== sel));
+    const C = cellCols(), fmax = Math.max(...fsw);
+    document.getElementById('lsBars').innerHTML = '<h4>Device switching frequency</h4>' + fsw.map((f, k) => `<div class="bar" style="opacity:${k === sel ? 1 : .5}"><span>H${k + 1}</span><i style="width:${f / fmax * 100}%; background:${C[k]}"></i><span>${f} Hz</span></div>`).join('');
+    const { ctx, w, h } = D.canvas(cv), ink = D.col('ink'), x = 86, W = w - 92, y0 = 4, h0 = 176, lo = -1.05, hi = 1.05;
+    for (let b = 0; b < H; b++) { const k = H - 1 - b, on = k === sel;
+      [true, false].forEach(up => line(ctx, Float64Array.from({ length: 2400 }, (_, i) => lsBand(b, up, i / 2400, mf, H)), x, y0, W, h0, lo, hi, C[k], on ? 2 : 1, null, on ? 1 : .25)); }
+    line(ctx, Float64Array.from({ length: 800 }, (_, i) => ma * Math.sin(TAU * i / 799)), x, y0, W, h0, lo, hi, ink, 2.6);
+    text(ctx, 'Carriers', 0, y0 + h0 / 2 - 6, { color: ink }); sub(ctx, 'and v', 'm', 0, y0 + h0 / 2 + 16, { color: ink, size: 17 });
+    const c = C[sel];
+    gate(ctx, R.g1[sel], x, 196, W, 28, c); text(ctx, 'S1' + (sel + 1), 0, 216, { color: c, weight: 600 });
+    gate(ctx, R.g3[sel], x, 232, W, 28, c); text(ctx, 'S3' + (sel + 1), 0, 252, { color: c, weight: 600 });
+    const yc = 278, sh = 40;
+    for (let k = 0; k < H; k++) { const yy = yc + k * (sh + 10), on = k === sel;
+      stack(ctx, [R.cell[k]], [C[k]], x, yy, W, sh, -1.2, 1.2, on ? 1 : .3); hline(ctx, x, W, ym(0, -1.2, 1.2, yy, sh), D.col('rule'));
+      sub(ctx, 'v', 'H' + (k + 1), 0, yy + sh / 2 + 6, { color: C[k], weight: 600 }); }
+    const y = 440, ph = 160;
+    for (let l = -3; l <= 3; l++) hline(ctx, x, W, ym(l, -3.3, 3.3, y, ph), l ? D.col('faint') : D.col('rule'));
+    stackTop(ctx, R.cell, C, x, y, W, ph, -3.3, 3.3);
+    sub(ctx, 'v', 'AN', 0, y + ph / 2 + 6, { color: ink, weight: 600, size: 20 });
+  }
+  return { draw };
+});
+
+/* ================= rotation ================= */
+D.register('rot', el => {
+  let mode = 'none'; const H = 3, ma = 0.8, mf = 18, N = 2048, CY = 3;
+  const asg = { none: k => H - 1 - k, rot: (k, c) => (((H - 1 - k - c) % H) + H) % H }, pre = {};
+  Object.keys(asg).forEach(m => { const R = lsPWM(H, ma, mf, N, CY, asg[m]);
+    pre[m] = { R, cond: R.cell.map(v => v.reduce((s, a) => s + (a !== 0), 0) / v.length), fsw: R.g1.map(g => Math.round(edges(g) / CY * 60)) }; });
+  D.seg('rotMode', v => { mode = v; draw(); });
+  function draw() {
+    const P = pre[mode], C = cellCols();
+    const bar = (lbl, vals, fmt, max) => `<h4>${lbl}</h4>` + vals.map((v, k) => `<div class="bar"><span>H${k + 1}</span><i style="width:${v / max * 100}%; background:${C[k]}"></i><span>${fmt(v)}</span></div>`).join('');
+    document.getElementById('rotBars').innerHTML = bar('Conduction time', P.cond, v => Math.round(v * 100) + '%', 1) + bar('Device switching frequency', P.fsw, v => v + ' Hz', 260);
+    const { ctx, w, h } = D.canvas(el), ink = D.col('ink'), x = 86, W = w - 92, T = N * CY, sh = 76;
+    for (let c = 0; c <= CY; c++) vline(ctx, x + c / CY * W, 0, h - 26, D.col('rule'), 1, [4, 4]);
+    for (let c = 0; c < CY; c++) text(ctx, 'Cycle ' + (c + 1), x + (c + 0.5) / CY * W, h - 4, { align: 'center', size: 15 });
+    for (let k = 0; k < H; k++) {
+      const yy = 4 + k * (sh + 30);
+      stack(ctx, [P.R.cell[k]], [C[k]], x, yy, W, sh, -1.2, 1.2); hline(ctx, x, W, ym(0, -1.2, 1.2, yy, sh), D.col('rule'));
+      sub(ctx, 'v', 'H' + (k + 1), 0, yy + sh / 2 + 6, { color: C[k], weight: 600, size: 19 });
+      for (let c = 0; c < CY; c++) { const b = asg[mode](k, c); text(ctx, ['inner band', 'middle band', 'outer band'][b], x + (c + 0.5) / CY * W, yy + sh + 17, { size: 14, align: 'center' }); }
+    }
+    const y = 330, ph = 200;
+    stackTop(ctx, P.R.cell, C, x, y, W, ph, -3.3, 3.3); hline(ctx, x, W, ym(0, -3.3, 3.3, y, ph), D.col('rule'));
+    sub(ctx, 'v', 'AN', 0, y + ph / 2 + 6, { color: ink, weight: 600, size: 20 }); text(ctx, 'same in both', 0, y + ph / 2 + 28, { size: 14 });
+  }
+  return { draw };
+});
+
+/* ================= PS vs LS THD ================= */
+D.register('compare', el => {
+  let data = null; const N = 8192, H = 3;
+  const lineTHD = (R) => thd(R.vA.map((v, i) => v - R.vB[i]));
+  function draw() {
+    if (!data) { data = { m: [], ps: [], ls: [] }; for (let m = 0.2; m <= 1.0001; m += 0.1) { data.m.push(m); data.ps.push(lineTHD(psPWM(H, m, 10, N))); data.ls.push(lineTHD(lsPWM(H, m, 60, N))); } }
+    const { ctx, w, h } = D.canvas(el), C = cellCols(), ink = D.col('ink'), x = 70, y = 40, W = w - 90, hh = h - 110;
+    const X = m => x + (m - 0.2) / 0.8 * W, Y = v => y + hh - v * hh;
+    for (let g = 0; g <= 1.0001; g += 0.2) { hline(ctx, x, W, Y(g), g ? D.col('faint') : D.col('ink2')); text(ctx, Math.round(g * 100) + '%', x - 10, Y(g) + 6, { align: 'right', size: 15 }); }
+    [0.2, 0.4, 0.6, 0.8, 1.0].forEach(m => text(ctx, m.toFixed(1), X(m), y + hh + 26, { align: 'center', size: 15 }));
+    sub(ctx, 'Modulation index m', 'a', x + W, y + hh + 56, { align: 'right', size: 16 });
+    text(ctx, 'Line voltage THD', x, y - 16, { size: 16, color: ink });
+    [['ps', C[0], 'Phase-shifted'], ['ls', C[1], 'Level-shifted']].forEach(([k, c, n], j) => {
+      ctx.save(); ctx.strokeStyle = c; ctx.lineWidth = 3.5; ctx.beginPath(); data[k].forEach((v, i) => i ? ctx.lineTo(X(data.m[i]), Y(v)) : ctx.moveTo(X(data.m[i]), Y(v))); ctx.stroke();
+      data[k].forEach((v, i) => { ctx.beginPath(); ctx.arc(X(data.m[i]), Y(v), 4, 0, TAU); ctx.fillStyle = c; ctx.fill(); }); ctx.restore();
+      text(ctx, n, X(0.62), Y(data[k][4]) + (j ? 34 : -16), { color: c, weight: 600, size: 18 });
+    });
+  }
+  return { draw };
+});
+
+/* ================= staircase ================= */
+function she(m, g) {
+  let t = g.slice(); const ns = [1, 5, 7];
+  for (let it = 0; it < 60; it++) {
+    const F = ns.map((n, r) => t.reduce((s, a) => s + Math.cos(n * a), 0) - (r ? 0 : 3 * m)), J = ns.map(n => t.map(a => -n * Math.sin(n * a)));
+    if (Math.hypot(...F) < 1e-12) break;
+    const det = M => M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
+    const d = det(J), dx = [0, 1, 2].map(c => det(J.map((row, r) => row.map((v, j) => j === c ? F[r] : v))) / d);
+    t = t.map((a, k) => a - dx[k]);
+  }
+  return t;
+}
+D.register('stair', el => {
+  let mode = 'she'; const N = 4096, m = 0.8, deg = Math.PI / 180;
+  const angles = { she: she(m, [57 * deg, 29 * deg, 11 * deg]), nl: [1, 2, 3].map(j => Math.asin((3 - j + 0.5) / (m * 3 * 4 / Math.PI))) };
+  D.seg('stMode', v => { mode = v; draw(); });
+  function draw() {
+    const th = angles[mode], { ctx, w, h } = D.canvas(el), C = cellCols(), ink = D.col('ink'), x = 96, W = w - 106;
+    const L = th.map(a => Float64Array.from({ length: N }, (_, i) => { let p = (i / N) * TAU; const g = p < Math.PI ? 1 : -1; if (p >= Math.PI) p -= Math.PI; return p > a && p < Math.PI - a ? g : 0; }));
+    const v = sumL(L), a = spec(v);
+    for (let k = 0; k < 3; k++) {
+      const yy = 6 + k * 56; stack(ctx, [L[k]], [C[k]], x, yy, W, 44, -1.2, 1.2); hline(ctx, x, W, ym(0, -1.2, 1.2, yy, 44), D.col('rule'));
+      sub(ctx, 'v', 'H' + (k + 1), 0, yy + 28, { color: C[k], weight: 600 });
+      text(ctx, (th[k] / deg).toFixed(1) + '°', x + th[k] / TAU * W - 8, yy + 20, { color: C[k], size: 15, weight: 600, align: 'right' });
+    }
+    const y = 190, hh = 230;
+    stackTop(ctx, L, C, x, y, W, hh, -3.4, 3.4); hline(ctx, x, W, ym(0, -3.4, 3.4, y, hh), D.col('rule'));
+    line(ctx, Float64Array.from({ length: 600 }, (_, i) => a[1] * Math.sin(TAU * i / 599)), x, y, W, hh, -3.4, 3.4, ink, 2, [6, 5]);
+    sub(ctx, 'v', 'AN', 0, y + hh / 2 + 6, { color: ink, weight: 600, size: 20 });
+    text(ctx, 'THD ' + (thd(v) * 100).toFixed(1) + '%', x + W, y + 18, { align: 'right', size: 16, color: ink, weight: 600 });
+    const sy = 470, sh = 110, hmax = 25, bw = W / (hmax + 1);
+    for (let k = 1; k <= hmax; k += 2) {
+      const r = Math.min(a[k] / a[1] / 0.25, 1), px = x + k * bw;
+      if ((k === 5 || k === 7) && r < 0.01) { ctx.strokeStyle = C[3]; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(px, sy + sh - 9, 8, 0, TAU); ctx.stroke(); }
+      if (r > 0.004) { ctx.fillStyle = k === 1 ? ink : D.col('ink2'); ctx.fillRect(px - bw * .28, sy + sh - r * sh, bw * .56, r * sh); }
+      text(ctx, String(k), px, sy + sh + 22, { align: 'center', size: 15, color: (k === 5 || k === 7) ? C[3] : D.col('muted') });
+    }
+    hline(ctx, x, W, sy + sh, D.col('rule'));
+    text(ctx, 'Harmonics', 0, sy + 60, { color: ink });
+  }
+  return { draw };
+});
+
+D.boot();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => D.redraw());
+</script>
+</body></html>
