@@ -22,23 +22,19 @@
     <div class="c2">Potential Final Questions: Modulation and Balancing</div>
     <div class="c3">From the joint proposal by Sefer İdacı and M. Aytunç Evlice, for M. Aytunç Evlice’s talk</div>
   </div>
-  <div class="intro">Two questions for a closed-book exam with the instructor’s cheat sheet, each designed for about 20 minutes and 25 points, on modulation and balancing: three-level space-vector modulation and a neutral-point balancing loop. Every question asks for a derivation, a numerical result and an engineering interpretation; full solutions and a marking guide follow on the later pages. All numbers differ from the lecture examples.</div>
+  <div class="intro">Two questions for a closed-book exam with the instructor’s cheat sheet, each designed for about 20 minutes and 25 points, on modulation and balancing: carrier-based modulation of a three-level NPC with a common offset, and a neutral-point balancing loop. Every question asks for a derivation, a numerical result and an engineering interpretation; full solutions and a marking guide follow on the later pages. All numbers differ from the lecture examples.</div>
 
   <!-- ===================================================== Q1 -->
   <div class="q">
-    <div class="qh"><b>Question 1 · Three-level space-vector modulation</b><span class="tag">modulation</span><span class="pts">25 pts</span></div>
-    <div class="figside">
-      <div>
-        <p>The figure shows the space-vector diagram of a 3-level NPC converter; vectors are in units of <span class="m">V</span><sub>dc</sub>/2 (small vectors 2/3, medium 2/√3, large 4/3). The reference is <b>v</b>* = 0.85 ∠ 15°.</p>
-        <ol class="parts" type="a">
-          <li>Identify the three nearest vectors (their switching states) and give their αβ coordinates. <span class="pp">[4]</span></li>
-          <li>Using volt-second balance, compute the dwell-time fractions <span class="m">d</span><sub>k</sub> = <span class="m">T</span><sub>k</sub>/<span class="m">T</span><sub>s</sub>. <span class="pp">[8]</span></li>
-          <li>Construct a symmetric seven-segment sequence in which exactly one phase changes by one level at each transition. Give each segment’s duration as a fraction of <span class="m">T</span><sub>s</sub> (split the redundant small vector equally). <span class="pp">[6]</span></li>
-          <li>Give the midpoint current <span class="m">i</span><sub>O</sub> of every state in your sequence in terms of the phase currents. If Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub> &gt; 0 and <span class="m">i</span><sub>a</sub> &gt; 0, how should the small-vector time be redistributed (with C dΔV/dt = i<sub>O</sub>, i<sub>O</sub> drawn from O)? Does this change the output voltage? <span class="pp">[7]</span></li>
-        </ol>
-      </div>
-      <div class="hexwrap"><div id="hexfig"></div><div class="cap">3-level space-vector diagram, states as phase levels (a b c).</div></div>
-    </div>
+    <div class="qh"><b>Question 1 · Carrier-based PWM of a three-level NPC, and its offset</b><span class="tag">modulation</span><span class="pts">25 pts</span></div>
+    <p>A three-phase 3-level NPC on an 800 V DC link uses phase-disposition (PD) carriers: an upper carrier between 0 and +1 and a lower carrier between −1 and 0, in phase. Within one carrier period the normalized references are <span class="m">r</span> = (0.62, 0.18, −0.80) and the phase currents are <span class="m">i</span> = (40, −10, −30) A. Pole voltages are measured from the midpoint O; <span class="m">i</span><sub>O</sub> is drawn from O.</p>
+    <ol class="parts" type="a">
+      <li>For each phase, give the two levels it switches between in this carrier period and the fraction of time spent at each. <span class="pp">[6]</span></li>
+      <li>Compute the average pole voltages ⟨<span class="m">v</span><sub>xO</sub>⟩ and the average line voltage ⟨<span class="m">v</span><sub>ab</sub>⟩. <span class="pp">[4]</span></li>
+      <li>Compute the average midpoint current ⟨<span class="m">i</span><sub>O</sub>⟩ in this period. <span class="pp">[5]</span></li>
+      <li>Apply min-max injection. Give the offset <span class="m">r</span><sub>0</sub>, the new references, the new ⟨<span class="m">i</span><sub>O</sub>⟩ and the new ⟨<span class="m">v</span><sub>ab</sub>⟩. What changed, and what did not? <span class="pp">[6]</span></li>
+      <li>Which offset would make ⟨<span class="m">i</span><sub>O</sub>⟩ = 0 in this period? Is it allowed, and what does this tell you about using min-max injection and neutral-point balancing together? <span class="pp">[4]</span></li>
+    </ol>
   </div>
 
   <!-- ===================================================== Q2 -->
@@ -56,12 +52,13 @@
   <!-- ===================================================== SOLUTIONS -->
   <h2 class="sec brk">Solutions and marking guide</h2>
 
-  <div class="qh"><b>Solution 1 · Three-level space-vector modulation</b><span class="pts">25 pts</span></div>
+  <div class="qh"><b>Solution 1 · Carrier-based PWM of a three-level NPC</b><span class="pts">25 pts</span></div>
   <div class="sol">
-    <p><b>(a)</b> <b>v</b>* = 0.85∠15° = (0.821, 0.220). Nearest vectors: small <b>ONN/POO</b> (0.667, 0); large <b>PNN</b> (1.333, 0); medium <b>PON</b> (1.000, 0.577). <span class="mark">[4]</span></p>
-    <p><b>(b)</b> β: 0.577 <span class="m">d</span><sub>PON</sub> = 0.220 → <span class="m">d</span><sub>PON</sub> = 0.381; &nbsp; <span class="m">d</span><sub>S</sub> + <span class="m">d</span><sub>L</sub> = 0.619. α: 0.667 <span class="m">d</span><sub>S</sub> + 1.333 <span class="m">d</span><sub>L</sub> + 0.381 = 0.821 → <span class="m">d</span><sub>L</sub> = 0.041, <span class="m">d</span><sub>S</sub> = 0.578. <span class="mark">[8]</span></p>
-    <p><b>(c)</b> ONN (0.145) → PNN (0.020) → PON (0.190) → POO (0.289) → PON (0.190) → PNN (0.020) → ONN (0.145). Transitions: phase a O→P, phase b N→O, phase c N→O, then back in reverse; each phase switches once up and once down per period. <span class="mark">[6]</span></p>
-    <p><b>(d)</b> <span class="m">i</span><sub>O</sub>: ONN = +<span class="m">i</span><sub>a</sub>; PNN = 0; PON = +<span class="m">i</span><sub>b</sub>; POO = <span class="m">i</span><sub>b</sub> + <span class="m">i</span><sub>c</sub> = −<span class="m">i</span><sub>a</sub>. To reduce ΔV we need ⟨<span class="m">i</span><sub>O</sub>⟩ &lt; 0: <b>lengthen POO and shorten ONN</b>, keeping their sum at 0.578. Both states produce the same space vector, so the output (line-to-line) voltage does not change — only the midpoint charge does. <span class="mark">[7]</span></p>
+    <p><b>(a)</b> With PD carriers a positive reference switches between P and O, a negative one between O and N; the time away from O is |<span class="m">r</span>|. Phase a: P 62 %, O 38 %. Phase b: P 18 %, O 82 %. Phase c: N 80 %, O 20 %. <span class="mark">[6]</span></p>
+    <p><b>(b)</b> ⟨<span class="m">v</span><sub>xO</sub>⟩ = <span class="m">r</span><sub>x</sub> · 400 V: +248 V, +72 V, −320 V. ⟨<span class="m">v</span><sub>ab</sub>⟩ = 248 − 72 = <b>176 V</b>. <span class="mark">[4]</span></p>
+    <p><b>(c)</b> ⟨<span class="m">i</span><sub>O</sub>⟩ = Σ(1 − |<span class="m">r</span><sub>x</sub>|) <span class="m">i</span><sub>x</sub> = 0.38 · 40 + 0.82 · (−10) + 0.20 · (−30) = 15.2 − 8.2 − 6.0 = <b>+1.0 A</b>. <span class="mark">[5]</span></p>
+    <p><b>(d)</b> <span class="m">r</span><sub>0</sub> = −(0.62 + (−0.80))/2 = <b>+0.09</b>; <span class="m">r</span>′ = (0.71, 0.27, −0.71). ⟨<span class="m">i</span><sub>O</sub>⟩ = 0.29 · 40 + 0.73 · (−10) + 0.29 · (−30) = 11.6 − 7.3 − 8.7 = <b>−4.4 A</b>. ⟨<span class="m">v</span><sub>ab</sub>⟩ = (0.71 − 0.27) · 400 = <b>176 V</b>, unchanged. The common offset leaves every line voltage unchanged and moves the peak references away from ±1 (headroom), but it changes the midpoint current: min-max injection is not neutral for the midpoint. <span class="mark">[6]</span></p>
+    <p><b>(e)</b> While no reference changes sign, ⟨<span class="m">i</span><sub>O</sub>⟩(<span class="m">r</span><sub>0</sub>) = 1.0 − Σ sign(<span class="m">r</span><sub>x</sub>) <span class="m">i</span><sub>x</sub> · <span class="m">r</span><sub>0</sub> = 1.0 − (40 − 10 + 30) <span class="m">r</span><sub>0</sub> = 1.0 − 60 <span class="m">r</span><sub>0</sub> (check: <span class="m">r</span><sub>0</sub> = 0.09 gives −4.4 A). Zero at <span class="m">r</span><sub>0</sub> ≈ <b>+0.017</b>: allowed, since all |<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>| stay below 1 and keep their sign. Min-max and balancing act through the <b>same</b> offset and share the same headroom: the balancing loop adds its correction on top of the min-max offset, and the sum must stay within the carrier band. <span class="mark">[4]</span></p>
   </div>
 
   <div class="qh"><b>Solution 2 · Neutral-point balancing loop</b><span class="pts">25 pts</span></div>
@@ -74,39 +71,5 @@
 </div>
 
 <script src="keep_together.js"></script>
-<script>
-  // 3-level space-vector diagram with the reference v* = 0.85 / 15 deg
-  (function () {
-    const NS = 'http://www.w3.org/2000/svg', W = 380, sc = 112, cx = W / 2, cy = W / 2 + 4, SQ3 = Math.sqrt(3);
-    const s = (tag, a, txt) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
-    const svg = s('svg', { viewBox: `0 0 ${W} ${W}`, class: 'hexfig', width: '100%' });
-    const pts = {};
-    for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++) {
-      const xa = a - 1, xb = b - 1, xc = c - 1;
-      const al = (2 / 3) * (xa - xb / 2 - xc / 2), be = (xb - xc) / SQ3;
-      const key = al.toFixed(3) + ',' + be.toFixed(3);
-      (pts[key] = pts[key] || { al, be, st: [] }).st.push('NOP'[a] + 'NOP'[b] + 'NOP'[c]);
-    }
-    const P = Object.values(pts), X = (v) => cx + v * sc, Y = (v) => cy - v * sc;
-    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) {
-      const d = Math.hypot(P[i].al - P[j].al, P[i].be - P[j].be);
-      if (Math.abs(d - 2 / 3) < 1e-3) svg.append(s('line', { x1: X(P[i].al), y1: Y(P[i].be), x2: X(P[j].al), y2: Y(P[j].be), stroke: '#bbb', 'stroke-width': 1 }));
-    }
-    svg.append(s('line', { x1: X(-1.55), y1: Y(0), x2: X(1.6), y2: Y(0), stroke: '#888', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' }));
-    svg.append(s('text', { x: X(1.6), y: Y(0) - 16, 'text-anchor': 'end' }, 'α'));
-    for (const p of P) {
-      const r = Math.hypot(p.al, p.be);
-      svg.append(s('circle', { cx: X(p.al), cy: Y(p.be), r: 3.2, fill: '#333' }));
-      const ux = r > 1e-6 ? p.al / r : 0, uy = r > 1e-6 ? p.be / r : 1, off = r > 1e-6 ? 15 + (p.st.length - 1) * 5 : 22;
-      p.st.forEach((t, k) => svg.append(s('text', { x: X(p.al) + ux * off, y: Y(p.be) - uy * off + 4 + (k - (p.st.length - 1) / 2) * 11, 'text-anchor': 'middle' }, t)));
-    }
-    const th = 15 * Math.PI / 180, m = 0.85, tx = X(m * Math.cos(th)), ty = Y(m * Math.sin(th));
-    svg.append(s('line', { x1: cx, y1: cy, x2: tx, y2: ty, stroke: '#cf0a2c', 'stroke-width': 2.4 }));
-    const ang = Math.atan2(ty - cy, tx - cx);
-    svg.append(s('path', { d: `M${tx},${ty} L${tx - 10 * Math.cos(ang - 0.4)},${ty - 10 * Math.sin(ang - 0.4)} L${tx - 10 * Math.cos(ang + 0.4)},${ty - 10 * Math.sin(ang + 0.4)} Z`, fill: '#cf0a2c' }));
-    svg.append(s('text', { x: tx + 4, y: ty - 8, fill: '#cf0a2c', style: 'font-weight:700;font-size:12px;fill:#cf0a2c' }, 'v*'));
-    document.getElementById('hexfig').append(svg);
-  })();
-</script>
 </body>
 </html>

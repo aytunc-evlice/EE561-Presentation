@@ -30,7 +30,7 @@
     const part = s.dataset.part || '1';
     if (!s.classList.contains('no-chrome')) {
       s.append(K.h('footer', { class: 'sf' },
-        K.h('span', null, 'EE561 Advanced Static Power Conversion · Multilevel Converters · ' + (part === '2' ? 'Part II' : 'Part I')),
+        K.h('span', null, 'EE561 Advanced Static Power Conversion · Multilevel Converters · Running the levels · M. Aytunç Evlice'),
         K.h('span', null, String(i + 1))));
       const head = s.querySelector('.sh');
       if (head) head.append(K.h('div', { class: 'logos' },
@@ -115,7 +115,7 @@
     const n = s.querySelector('aside.notes');
     nTitle.textContent = (cur + 1) + '. ' + titleOf(s);
     const mins = +(s.dataset.min || 0);
-    nPlan.textContent = mins ? '  ·  slot ' + fmtT(mins * 60) + '  ·  part clock should read ≈ ' + fmtT(cum[cur] * 60) + ' at the end' : '';
+    nPlan.textContent = mins ? '  ·  slot ' + fmtT(mins * 60) + '  ·  talk clock should read ≈ ' + fmtT(cum[cur] * 60) + ' at the end' : '';
     nBody.innerHTML = n ? n.innerHTML : '<p>No notes.</p>';
   }
   setInterval(() => {
@@ -134,7 +134,7 @@
   slides.forEach((s, i) => {
     const part = s.dataset.part || '1';
     const col = part === '2' ? colB : colA;
-    if (!col.childElementCount) col.append(K.h('h4', { style: { marginTop: 0, fontSize: '18px', color: '#fff' } }, part === '2' ? 'Part II · Running the levels' : 'Part I · Building the levels'));
+    if (!col.childElementCount) col.append(K.h('h4', { style: { marginTop: 0, fontSize: '18px', color: '#fff' } }, 'Running the levels: Modulate · Balance · Control'));
     const sec = part + (s.dataset.section || '');
     if (sec !== lastSec && s.dataset.section) { col.append(K.h('h4', null, s.dataset.section)); lastSec = sec; }
     const a = K.h('a', { href: '#' + (i + 1) }, K.h('span', null, String(i + 1)), titleOf(s));
