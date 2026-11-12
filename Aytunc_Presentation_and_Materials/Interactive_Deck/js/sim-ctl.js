@@ -34,7 +34,7 @@
     host.classList.add('sim');
     host.style.gridTemplateColumns = CW + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el),
-      h('div', { class: 'sim-col', style: { gap: '10px' } }, ...(SIMPLE ? [ctl.bleed.el, ctl.speed.el] : [ctl.on.el, ctl.law.el, ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el]),
+      h('div', { class: 'sim-col', style: { gap: '10px' } }, ...(SIMPLE ? (cfg.loopCtl ? [ctl.on.el, ctl.bleed.el, ctl.speed.el] : [ctl.bleed.el, ctl.speed.el]) : [ctl.on.el, ctl.law.el, ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el]),
         h('div', { class: 'row' }, playB, K.btn(SIMPLE ? 'Kick: C1 +20 V, C2 −20 V' : 'Kick ΔV +40 V', () => { st.dv += 40; }), K.btn('Reset', () => { reset(cfg.dv0 != null ? cfg.dv0 : 40); })),
         h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, ...(SIMPLE ? [roV.el, roSt.el] : [roDv.el, roV.el, roG.el, roSt.el]))));
 
@@ -79,7 +79,12 @@
       const ctx = cv.ctx; cv.clear();
       if (SIMPLE) {
         const dv = chrono(st.bDv), v1 = dv.map((d) => 400 + d / 2), v2 = dv.map((d) => 400 - d / 2);
-        K.plot(ctx, { x: 62, y: 34, w: cv.w - 78, h: cv.h - 80 }, {
+        const R0 = !!cfg.showR0;
+        if (R0) K.plot(ctx, { x: 62, y: 410, w: cv.w - 78, h: 130 }, {
+          xlim: [0, NW], ylim: [-0.25, 0.25], yticks: [[-0.2, '−0.2'], [0, '0'], [0.2, '+0.2']], xticks: [[0, '−200 ms'], [NW / 2, '−100 ms'], [NW, 'now']],
+          series: [{ y: chrono(st.bR0), x0: 0, dx: 1, color: K.css('--accent'), width: 2.6 }], title: 'PI output: the offset r₀ added to all three references',
+        });
+        K.plot(ctx, { x: 62, y: 34, w: cv.w - 78, h: R0 ? 320 : cv.h - 80 }, {
           xlim: [0, NW], ylim: [330, 470], xticks: [[0, '−200 ms'], [NW / 2, '−100 ms'], [NW, 'now']],
           yticks: [[350, '350'], [400, '400'], [450, '450']],
           hlines: [{ v: 450, color: K.css('--bad'), dash: [5, 4], label: 'trip' }, { v: 350, color: K.css('--bad'), dash: [5, 4] }],
@@ -87,7 +92,7 @@
           title: 'Capacitor voltages [V]', legend: [['C1 (top)', K.css('--s2')], ['C2 (bottom)', K.css('--s1')]],
         });
         roV.set(Math.round(400 + st.dv / 2) + ' / ' + Math.round(400 - st.dv / 2) + ' V');
-        roSt.set(st.trip ? '<span class="pill bad">trip</span>' : Math.abs(st.dv) < 5 ? '<span class="pill ok">balanced</span>' : '<span class="pill warn">drifting apart</span>');
+        roSt.set(st.trip ? '<span class="pill bad">trip</span>' : Math.abs(st.dv) < 5 ? '<span class="pill ok">balanced</span>' : '<span class="pill warn">' + (P.on ? 'coming back' : 'apart') + '</span>');
         return;
       }
       const xt = [[0, '−200 ms'], [NW / 2, '−100 ms'], [NW, 'now']];
@@ -121,8 +126,7 @@
       start: loop.start, stop: loop.stop, toggle, reset() { reset(cfg.dv0 != null ? cfg.dv0 : 40); },
       step(k) {
         if (!ST) return;
-        let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key];
-        if (!o) return;
+        const o = {}; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) Object.assign(o, ST[key]);
         if (o.bleed != null && o.bleed !== P.bleed) { P.bleed = o.bleed; ctl.bleed.set(o.bleed); }
         if (o.on != null && o.on !== P.on) { P.on = o.on; ctl.on.set(o.on); }
       },
@@ -134,7 +138,7 @@
     const L = 2e-3, R = 0.1, W = K.TAU * 50, E0 = 326.6, TS = 100e-6, DT = 2e-6, TEND = 0.06;
     const P = { ff: true, dec: true, delay: true, bw: 400, vmax: 462 };
     for (const k of ['ff', 'dec', 'delay', 'bw', 'vmax']) if (cfg[k] != null) P[k] = cfg[k];
-    const cv = K.canvas(900, 560);
+    const cv = K.canvas(cfg.w || 900, 560);
     const ctl = [
       K.seg({ label: 'Grid-voltage feed-forward', options: [[true, 'on'], [false, 'off']], value: P.ff, onChange: (v) => { P.ff = v; calc(); } }),
       K.seg({ label: 'ωL decoupling', options: [[true, 'on'], [false, 'off']], value: P.dec, onChange: (v) => { P.dec = v; calc(); } }),
@@ -143,9 +147,10 @@
       K.seg({ label: 'Voltage limit', options: [[400, 'SPWM: V<sub>dc</sub>/2'], [462, 'min-max: V<sub>dc</sub>/√3']], value: P.vmax, onChange: (v) => { P.vmax = v; calc(); } }),
     ];
     const roE = K.readout('Peak i<sub>q</sub> disturbance'), roS = K.readout('Peak error after grid sag');
+    const SIMPLE = !!cfg.simple;
     host.classList.add('sim');
-    host.style.gridTemplateColumns = '900px 1fr';
-    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col' }, ctl.map((c) => c.el), h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, roE.el, roS.el),
+    host.style.gridTemplateColumns = (cfg.w || 900) + 'px 1fr';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col' }, (SIMPLE ? [ctl[3]] : ctl).map((c) => c.el), SIMPLE ? null : h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, roE.el, roS.el),
       h('div', { class: 'tiny', html: 'L = 2 mH, R = 0.1 Ω, 400 V<sub>LL</sub> grid (e<sub>d</sub> = 327 V), V<sub>dc</sub> = 800 V, sampling 10 kHz. PI: K<sub>p</sub> = ω<sub>c</sub>L, K<sub>i</sub> = ω<sub>c</sub>R. Events: i<sub>d</sub>* step at 5 ms, i<sub>q</sub>* step at 25 ms, 20 % grid sag at 40 ms.' })));
     let res = null, reveal = 1;
     function calc() {
@@ -185,6 +190,15 @@
       const n = Math.max(2, Math.floor(res.t.length * reveal));
       const xt = [0, 10, 20, 30, 40, 50, 60].map((v) => [v, v + ' ms']);
       const c1 = K.css('--s1'), c2 = K.css('--s2'), mut = K.css('--muted');
+      if (SIMPLE) {
+        K.plot(ctx, { x: 62, y: 30, w: cv.w - 78, h: 480 }, {
+          xlim: [0, 60], ylim: [-30, 45], yticks: [[-30, '−30'], [-15, '−15'], [0, '0'], [15, '15'], [30, '30'], [45, '45']], xticks: xt,
+          series: [{ x: res.t, y: res.idr, color: c1, width: 1.8, dash: [6, 4], alpha: 0.9 }, { x: res.t, y: res.iqr, color: c2, width: 1.8, dash: [6, 4], alpha: 0.9 },
+            { x: res.t, y: res.id, color: c1, width: 3, n }, { x: res.t, y: res.iq, color: c2, width: 3, n }],
+          title: 'Grid current in the rotating frame [A]', legend: [['i_d (active)', c1], ['i_q (reactive)', c2], ['reference', mut, [6, 4]]],
+        });
+        return;
+      }
       K.plot(ctx, { x: 62, y: 30, w: cv.w - 78, h: 220 }, {
         xlim: [0, 60], ylim: [-30, 45], yticks: [[-30, '−30'], [-15, '−15'], [0, '0'], [15, '15'], [30, '30'], [45, '45']], xticks: xt,
         series: [{ x: res.t, y: res.idr, color: c1, width: 1.5, dash: [6, 4], alpha: 0.8 }, { x: res.t, y: res.iqr, color: c2, width: 1.5, dash: [6, 4], alpha: 0.8 },

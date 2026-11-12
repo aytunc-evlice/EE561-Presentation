@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 54 min)
+## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 53 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -43,13 +43,13 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
 | 15 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
 | 16 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
-| 17 | Neutral-point balancing simulation | 3.5 |
-| 18 | Flying-capacitor balancing | 2 |
-| 19 | ★ Averaged model for control | 2 |
-| 20 | Control structure | 2 |
-| 21 | dq current control (simulation) | 2.5 |
-| 22 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
-| 23 | Where multilevel lives today | 1.5 |
+| 17 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
+| 18 | Flying capacitor: two ways to make 0 V (10 / 01), they push its voltage opposite ways, alternating is not enough, choose by the error (simulation) | 2.5 |
+| 19 | To the controller, the converter is just a voltage source behind an inductor (figure) | 2 |
+| 20 | Three PI controllers, three jobs: current, DC voltage (sum), midpoint (difference) (block diagram) | 2 |
+| 21 | Current control: rotate with the grid so the sines become constants i_d, i_q; one PI each (simulation) | 2.5 |
+| 22 | Grid filter: ripple, 3-level halves it, LCL filters much more, damp the resonance (simulation) | 2.5 |
+| 23 | Where multilevel converters are used (three cards) | 1 |
 | 24 | Three things to remember, handover to Elif | 1 |
 | 25 | References | |
 
