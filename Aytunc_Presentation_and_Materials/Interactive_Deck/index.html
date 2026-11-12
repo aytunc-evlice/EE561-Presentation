@@ -423,7 +423,7 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:21px;margin:0">① Ideal case: only the wiggle</h3><p class="small" style="font-size:19px">Last slide: with a balanced load the midpoint current has no average. The two voltages wiggle at 150 Hz around 400 V and stay there.</p></div>
       <div data-step="1"><h3 style="font-size:21px;margin:0">② But nothing pulls them back</h3><p class="small" style="font-size:19px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
-      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next slide: closing the loop.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next: how it moves the charge.</p></div>
     </div>
     <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"1":{"bleed":1}}}'></div>
   </div>
@@ -438,12 +438,34 @@
   </aside>
 </section>
 
+<section class="slide" data-part="2" data-section="balance" data-min="2.5" data-title="How the offset moves charge">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · what the offset does inside one switching period</div><h2>How the offset pushes charge into or out of the midpoint</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 960px; gap:22px">
+    <div class="stack" style="gap:14px">
+      <div><h3 style="font-size:22px;margin:0">① One instant, no offset</h3><p class="small" style="font-size:19px">Leg c is positive (+43 A), leg b negative (−43 A). Both sit at O for 31 % of the period, so their currents through O cancel: no midpoint current.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Lift all references: <span class="m">r</span><sub>0</sub> = +0.1</h3><p class="small" style="font-size:19px">Every leg moves up. Leg c: more time at P, less at O. Leg b: less time at N, more at O. Now b’s negative current wins: current flows <b>into</b> the midpoint. C1 goes down, C2 goes up.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Lower them: <span class="m">r</span><sub>0</sub> = −0.1</h3><p class="small" style="font-size:19px">The opposite: c spends more time at O, b less. Current flows <b>out of</b> the midpoint. C1 goes up, C2 goes down.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ The load sees nothing</h3><p class="small" style="font-size:19px">All legs moved together, so the line voltages do not change (slide 7). So: C1 too high → <span class="m">r</span><sub>0</sub> &gt; 0; C2 too high → <span class="m">r</span><sub>0</sub> &lt; 0. That is exactly what the PI controller on the next slide does.</p></div>
+    </div>
+    <div data-sim="r0explain" data-config='{"w":680,"th":0,"steps":{"0":0,"1":0.1,"2":-0.1}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> One instant, when leg a crosses zero (r = 0, no current, so it does not matter where it sits). Each bar is one switching period: red P, grey O, blue N. The dashed box marks the time at O without offset. Clicks set r<sub>0</sub> = 0, +0.1, −0.1; the slider and buttons do the same.</p>
+    <ul>
+      <li><b>①</b> Time at O is 1 − |r| (slide 11): 1 − 0.69 = 31 % for both b and c. +43 A × 31 % and −43 A × 31 % cancel.</li>
+      <li><b>②</b> c: r = 0.79, O 21 %, +9 A through O. b: r = −0.59, O 41 %, −18 A. Sum −9 A: into O.</li>
+      <li><b>③</b> The mirror image: +9 A, out of O.</li>
+      <li><b>④</b> This works because, while delivering power, the positive leg carries the positive current. With reactive current or as a rectifier the push changes or reverses; the controller then uses r<sub>0</sub> = sign(P)·PI(ΔV).</li>
+    </ul>
+  </aside>
+</section>
+
 <section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Neutral-point balancing simulation">
   <div class="sh"><div><div class="kicker"><b>Balance</b> · closing the loop with a PI controller</div><h2>Balancing the midpoint with a PI controller</h2></div></div>
   <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① Measure the difference</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>. The goal is zero.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② A PI controller makes the offset</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> goes into a PI controller; its output is the offset <span class="m">r</span><sub>0</sub> added to all three references (slide 14). The P part reacts at once, the I part keeps pushing until Δ<span class="m">V</span> is exactly zero.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② A PI controller makes the offset</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> goes into a PI controller; its output is the offset <span class="m">r</span><sub>0</sub> added to all three references (last slide). The P part reacts at once, the I part keeps pushing until Δ<span class="m">V</span> is exactly zero.</p></div>
       <div data-step="2"><h3 style="font-size:22px;margin:0">③ Loop on: the voltages come back</h3><p class="small" style="font-size:20px">C1 and C2 return to 400 V within a few cycles. The 150 Hz wiggle stays: it is normal (slide 15).</p></div>
       <div data-step="3"><h3 style="font-size:22px;margin:0">④ A leak? The I part handles it</h3><p class="small" style="font-size:20px">With a 1 A leak the I part settles at the small offset that cancels it, and Δ<span class="m">V</span> stays at zero.</p></div>
     </div>
@@ -510,7 +532,7 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① Current PI</h3><p class="small" style="font-size:20px">Compares the grid current with its reference and sets the converter voltage. It is the fastest loop.</p></div>
       <div data-step="1"><h3 style="font-size:22px;margin:0">② DC-voltage PI</h3><p class="small" style="font-size:20px">Watches the <b>total</b> <span class="m">v</span><sub>C1</sub> + <span class="m">v</span><sub>C2</sub> and asks for more or less current from the grid.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Midpoint PI</h3><p class="small" style="font-size:20px">Watches the <b>difference</b> <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub> and adds the offset <span class="m">r</span><sub>0</sub> in the modulator (slide 17). The load never sees it.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Midpoint PI</h3><p class="small" style="font-size:20px">Watches the <b>difference</b> <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub> and adds the offset <span class="m">r</span><sub>0</sub> in the modulator (slide 18). The load never sees it.</p></div>
     </div>
     <div style="align-self:center"><svg class="bd" viewBox="0 0 1000 470" style="width:1000px;height:470px" aria-label="Control structure">
       <defs><marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker></defs>

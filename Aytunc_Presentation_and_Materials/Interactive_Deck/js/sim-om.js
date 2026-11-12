@@ -559,3 +559,73 @@
     return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o != null && o !== P.phi) { P.phi = o; phS.set(o); draw(); } } };
   };
 })();
+
+/* How the offset r0 moves charge: one instant, three legs of a 3-level NPC with PD carriers. Each leg's switching
+   period split into time at P, O and N; the legs' currents through O add up to the midpoint current. */
+(function () {
+  'use strict';
+  const { h } = K;
+  SIMS.r0explain = function (host, cfg) {
+    const I = 50, m = 0.8, th = ((cfg.th != null ? cfg.th : 0) * Math.PI) / 180;
+    const P = { r0: 0 };
+    const cv = K.canvas(cfg.w || 680, 470);
+    const rS = K.slider({ label: 'Offset r₀', min: -0.2, max: 0.2, step: 0.01, value: 0, fmt: (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2), onInput: (v) => { P.r0 = v; draw(); } });
+    const btns = h('div', { class: 'row' }, ...[[0, 'r₀ = 0'], [0.1, 'r₀ = +0.1'], [-0.1, 'r₀ = −0.1']].map(([v, t]) => K.btn(t, () => { P.r0 = v; rS.set(v); draw(); })));
+    const roI = K.readout('Midpoint current', 'big'), roE = K.readout('Effect on the capacitors');
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = (cfg.w || 680) + 'px 1fr';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, rS.el, btns, roI.el, roE.el,
+      h('div', { class: 'tiny', html: 'One instant (leg a at its zero crossing), m = 0.8, 50 A peak, unity power factor, PD carriers. Each bar is one switching period. Dashed outline: time at O without offset.' })));
+    const legs = [0, 1, 2].map((k) => ({ name: 'abc'[k], r: m * Math.sin(th - (k * K.TAU) / 3), i: I * Math.sin(th - (k * K.TAU) / 3) }));
+    const split = (r) => { r = K.clamp(r, -1, 1); return r >= 0 ? { P: r, O: 1 - r, N: 0 } : { P: 0, O: 1 + r, N: -r }; };
+    const f = (v, d) => (v > 0.0005 ? '+' : v < -0.0005 ? '−' : '') + Math.abs(v).toFixed(d == null ? 0 : d);
+    function draw() {
+      const ctx = cv.ctx; cv.clear();
+      const x0 = 150, W = cv.w - x0 - 200, rowH = 92, y0 = 40;
+      const cP = K.css('--lvP'), cO = '#9a9a9a', cN = K.css('--lvN'), ink = K.css('--ink'), mut = K.css('--muted');
+      ctx.font = '700 14px ' + K.font; ctx.textBaseline = 'middle';
+      ctx.fillStyle = mut; ctx.textAlign = 'center';
+      ctx.fillText('one switching period', x0 + W / 2, 18);
+      let iO = 0;
+      const order = [2, 1, 0];
+      order.forEach((k, row) => {
+        const L = legs[k], y = y0 + row * rowH, s0 = split(L.r), s = split(L.r + P.r0);
+        // label
+        ctx.textAlign = 'left'; ctx.fillStyle = ink; ctx.font = '700 16px ' + K.font; ctx.fillText('leg ' + L.name, 10, y + 12);
+        ctx.font = '600 13px ' + K.font; ctx.fillStyle = mut;
+        ctx.fillText('r = ' + f(L.r + P.r0, 2), 10, y + 34); ctx.fillText('i = ' + f(L.i) + ' A', 10, y + 52);
+        // bar: P | O | N
+        let x = x0;
+        [['P', s.P, cP], ['O', s.O, cO], ['N', s.N, cN]].forEach(([lab, frac, col]) => {
+          if (frac <= 0) return;
+          const w = frac * W;
+          ctx.fillStyle = col; ctx.fillRect(x, y, w, 46);
+          if (w > 36) { ctx.fillStyle = '#fff'; ctx.font = '700 14px ' + K.font; ctx.textAlign = 'center'; ctx.fillText(lab + ' ' + Math.round(frac * 100) + '%', x + w / 2, y + 23); }
+          x += w;
+        });
+        // dashed outline of O without offset
+        const ox = x0 + s0.P * W, ow = s0.O * W;
+        ctx.save(); ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(ox, y - 4, ow, 54); ctx.restore();
+        // contribution
+        const c = s.O * L.i; iO += c;
+        ctx.textAlign = 'left'; ctx.font = '700 14px ' + K.font; ctx.fillStyle = Math.abs(c) < 0.05 ? mut : c < 0 ? K.css('--s1') : K.css('--s2');
+        ctx.fillText('through O:', x0 + W + 14, y + 14);
+        ctx.fillText(Math.round(s.O * 100) + '% × ' + f(L.i) + ' A = ' + f(c, 1) + ' A', x0 + W + 14, y + 36);
+      });
+      // total
+      const yT = y0 + 3 * rowH + 10;
+      ctx.strokeStyle = K.css('--line'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(10, yT - 8); ctx.lineTo(cv.w - 10, yT - 8); ctx.stroke();
+      ctx.textAlign = 'left'; ctx.fillStyle = ink; ctx.font = '700 17px ' + K.font;
+      const into = iO < -0.05, out = iO > 0.05;
+      ctx.fillText('Midpoint current: ' + (into ? Math.abs(iO).toFixed(1) + ' A into O' : out ? iO.toFixed(1) + ' A out of O' : '0 A'), 10, yT + 18);
+      ctx.font = '700 17px ' + K.font; ctx.fillStyle = into ? K.css('--s1') : out ? K.css('--s2') : mut;
+      ctx.fillText(into ? 'C1 goes down, C2 goes up' : out ? 'C1 goes up, C2 goes down' : 'no change', 10, yT + 46);
+      roI.set(into ? Math.abs(iO).toFixed(1) + ' A <small class="muted">into O</small>' : out ? iO.toFixed(1) + ' A <small class="muted">out of O</small>' : '0 A');
+      roE.set(into ? 'C1 ↓, C2 ↑' : out ? 'C1 ↑, C2 ↓' : 'no change');
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o != null && o !== P.r0) { P.r0 = o; rS.set(o); draw(); } } };
+  };
+})();

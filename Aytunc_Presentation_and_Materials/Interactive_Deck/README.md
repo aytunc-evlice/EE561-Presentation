@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 53 min)
+## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 55.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -43,23 +43,24 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
 | 15 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
 | 16 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
-| 17 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
-| 18 | Flying capacitor: two ways to make 0 V (10 / 01), they push its voltage opposite ways, alternating is not enough, choose by the error (simulation) | 2.5 |
-| 19 | To the controller, the converter is just a voltage source behind an inductor (figure) | 2 |
-| 20 | Three PI controllers, three jobs: current, DC voltage (sum), midpoint (difference) (block diagram) | 2 |
-| 21 | Current control: rotate with the grid so the sines become constants i_d, i_q; one PI each (simulation) | 2.5 |
-| 22 | Grid filter: ripple, 3-level halves it, LCL filters much more, damp the resonance (simulation) | 2.5 |
-| 23 | Where multilevel converters are used (three cards) | 1 |
-| 24 | Three things to remember, handover to Elif | 1 |
-| 25 | References | |
+| 17 | ★ How the offset pushes charge into or out of the midpoint: one instant, time at P/O/N per leg, r₀ = 0, +0.1, −0.1 (simulation) | 2.5 |
+| 18 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
+| 19 | Flying capacitor: two ways to make 0 V (10 / 01), they push its voltage opposite ways, alternating is not enough, choose by the error (simulation) | 2.5 |
+| 20 | To the controller, the converter is just a voltage source behind an inductor (figure) | 2 |
+| 21 | Three PI controllers, three jobs: current, DC voltage (sum), midpoint (difference) (block diagram) | 2 |
+| 22 | Current control: rotate with the grid so the sines become constants i_d, i_q; one PI each (simulation) | 2.5 |
+| 23 | Grid filter: ripple, 3-level halves it, LCL filters much more, damp the resonance (simulation) | 2.5 |
+| 24 | Where multilevel converters are used (three cards) | 1 |
+| 25 | Three things to remember, handover to Elif | 1 |
+| 26 | References | |
 
 ## Simulation models: what to say if asked
 
 - **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
-- **Neutral-point balancing (slide 17):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
-- **Flying-capacitor balancing (slide 18):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
-- **dq control (slide 21):** an L-filter average model with a voltage limit and an optional one-sample delay.
-- **Grid filter (slide 22):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
+- **Neutral-point balancing (slide 18):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
+- **Flying-capacitor balancing (slide 19):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
+- **dq control (slide 22):** an L-filter average model with a voltage limit and an optional one-sample delay.
+- **Grid filter (slide 23):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
 
 ## Printed handouts
 
