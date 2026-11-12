@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 58 min)
+## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 57 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -41,7 +41,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
 | 13 | More levels: five levels, four carriers, same rule; PD vs POD (simulation) | 1.5 |
 | 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
-| 15 | ★ Why the capacitor voltages wiggle at 150 Hz: time at O per leg, each leg’s share, the sum repeats three times per cycle, the capacitors follow it (simulation, built step by step) | 2.5 |
+| 15 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
 | 16 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
 | 17 | ★ How strong is the offset knob? Lifting the references changes time at O; strength = (6/π)·I·cos φ; no grip at 90°, sign flips in rectifier mode (simulation) | 3 |
 | 18 | Neutral-point balancing simulation | 3.5 |

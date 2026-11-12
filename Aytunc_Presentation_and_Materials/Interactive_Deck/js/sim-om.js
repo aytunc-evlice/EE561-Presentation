@@ -424,10 +424,11 @@
       K.slider({ label: 'φ (current lag)', min: -180, max: 180, step: 5, value: P.phi, fmt: (v) => v + '°', onInput: (v) => { P.phi = v; draw(); } }),
       K.slider({ label: 'C (each)', min: 1, max: 10, step: 0.1, value: P.C, fmt: (v) => v.toFixed(1) + ' mF', onInput: (v) => { P.C = v; draw(); } }),
     ];
+    const SIMPLE = !!cfg.simple;
     const roF = K.readout('Midpoint current repeats at', 'big'), roI = K.readout('Midpoint current, peak'), roV = K.readout('Wiggle of each capacitor (peak-to-peak)');
     host.classList.add('sim');
     host.style.gridTemplateColumns = (cfg.w || 680) + 'px 1fr';
-    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, ctl.map((c) => c.el), roF.el, roI.el, roV.el,
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, ...(SIMPLE ? [ctl[2].el, roF.el, roV.el] : [...ctl.map((c) => c.el), roF.el, roI.el, roV.el]),
       h('div', { class: 'tiny', html: 'Average over each switching period, 50 A peak phase current, f<sub>1</sub> = 50 Hz, V<sub>dc</sub> = 800 V.' })));
     function draw() {
       const phi = (P.phi * Math.PI) / 180, C = P.C * 1e-3, dt = 1 / F1 / N;
@@ -448,6 +449,27 @@
       const cols = [K.css('--s2'), K.css('--s3'), K.css('--s4')], ink = K.css('--ink');
       const xt = [0, 5, 10, 15, 20].map((v) => [v, v + ' ms']);
       const k = P.k;
+      if (SIMPLE) {
+        const A = K.plot(ctx, { x: 62, y: 30, w: cv.w - 78, h: 220 }, {
+          xlim: [0, 20], ylim: [-30, 30], yticks: [[-20, '−20'], [0, '0'], [20, '20']], xticks: xt,
+          series: [{ x, y: iO, color: ink, width: 3.2 }], title: 'Midpoint current over one cycle [A]',
+        });
+        if (k >= 1) {
+          ctx.save(); ctx.strokeStyle = K.css('--accent'); ctx.lineWidth = 1.8; ctx.setLineDash([6, 5]);
+          [0, 20 / 3, 40 / 3, 20].forEach((t) => { ctx.beginPath(); ctx.moveTo(A.X(t), 30); ctx.lineTo(A.X(t), 250); ctx.stroke(); });
+          ctx.setLineDash([]); ctx.fillStyle = K.css('--accent'); ctx.font = '700 14px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          [10 / 3, 10, 50 / 3].forEach((t) => ctx.fillText('⅓ cycle', A.X(t), 36));
+          ctx.restore();
+        }
+        if (k >= 2) {
+          const lo = Math.min(...v2, ...v1), hi = Math.max(...v1, ...v2), pad = Math.max(2, (hi - lo) * 0.3);
+          K.plot(ctx, { x: 62, y: 320, w: cv.w - 78, h: 220 }, {
+            xlim: [0, 20], ylim: [Math.floor(lo - pad), Math.ceil(hi + pad)], yticks: [[Math.round(lo), Math.round(lo) + ''], [400, '400'], [Math.round(hi), Math.round(hi) + '']], xticks: xt,
+            series: [{ x, y: v1, color: K.css('--s2'), width: 3 }, { x, y: v2, color: K.css('--s1'), width: 3 }],
+            title: 'Capacitor voltages [V]', legend: [['C1', K.css('--s2')], ['C2', K.css('--s1')]],
+          });
+        }
+      } else {
       K.plot(ctx, { x: 62, y: 30, w: cv.w - 78, h: 130 }, {
         xlim: [0, 20], ylim: [0, 1.05], yticks: [[0, '0'], [0.5, '50 %'], [1, '100 %']], xticks: xt,
         series: tO.map((y, i) => ({ x, y, color: cols[i], width: 2.4 })), title: 'Time each leg spends at O: 1 − |r|', legend: [['leg a', cols[0]], ['leg b', cols[1]], ['leg c', cols[2]]],
@@ -468,12 +490,14 @@
           title: 'Capacitor voltages [V]', legend: [['C1', K.css('--s2')], ['C2', K.css('--s1')]],
         });
       }
+      }
       // dominant frequency of i_O
       const sig = new Float64Array(512); for (let q = 0; q < 512; q++) { const th = (K.TAU * q) / 512; let s = 0; for (let kk = 0; kk < 3; kk++) { const r = P.m * Math.sin(th - (kk * K.TAU) / 3); s += (1 - Math.abs(r)) * I * Math.sin(th - (kk * K.TAU) / 3 - phi); } sig[q] = s; }
       const amp = K.harmonics(sig); let hk = 1; for (let q = 1; q < 40; q++) if (amp[q] > amp[hk]) hk = q;
-      roF.set(k >= 2 ? hk * 50 + ' Hz <small class="muted">= ' + hk + ' × 50 Hz</small>' : '–');
+      const kF = SIMPLE ? 1 : 2, kV = SIMPLE ? 2 : 3;
+      roF.set(k >= kF ? hk * 50 + ' Hz <small class="muted">= ' + hk + ' × 50 Hz</small>' : '–');
       roI.set(k >= 2 ? Math.round(Math.max(...iO.map(Math.abs))) + ' A' : '–');
-      roV.set(k >= 3 ? (Math.max(...v1) - Math.min(...v1)).toFixed(1) + ' V' : '–');
+      roV.set(k >= kV ? (Math.max(...v1) - Math.min(...v1)).toFixed(1) + ' V' : '–');
     }
     K.onTheme(draw);
     draw();

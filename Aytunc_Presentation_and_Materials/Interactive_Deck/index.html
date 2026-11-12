@@ -397,26 +397,23 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="2.5" data-title="Why the capacitors wiggle at 150 Hz">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · the midpoint current over one cycle</div><h2>Why the capacitor voltages wiggle at 150 Hz</h2></div></div>
-  <div class="body" style="grid-template-columns: 1fr 960px; gap:22px">
-    <div class="stack" style="gap:14px">
-      <div><h3 style="font-size:21px;margin:0">① Time at O, leg by leg</h3><p class="small" style="font-size:19px">A leg sits at O for 1 − |<span class="m">r</span>| of each period: longest when its reference crosses zero, never at its peak. The pattern repeats every half cycle.</p></div>
-      <div data-step="1"><h3 style="font-size:21px;margin:0">② Each leg’s share</h3><p class="small" style="font-size:19px">While at O, the leg’s own current goes through the midpoint (slide 14). Its share: time at O × its current.</p></div>
-      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Add the three legs</h3><p class="small" style="font-size:19px">Balanced load: the sum has no average. The three legs are 120° apart, so what is left repeats every third of a cycle: <b>3 × 50 Hz = 150 Hz</b>.</p></div>
-      <div data-step="3"><h3 style="font-size:21px;margin:0">④ The capacitors follow it</h3><p class="small" style="font-size:19px">This current flows in and out of the midpoint, so C1 and C2 wiggle at 150 Hz in opposite directions. It does not grow. Bigger C: smaller wiggle; more current: bigger wiggle.</p></div>
+<section class="slide" data-part="2" data-section="balance" data-min="1.5" data-title="Why the capacitors wiggle at 150 Hz">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · the normal ripple</div><h2>Why the capacitor voltages wiggle at 150 Hz</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:20px">
+      <div><h3 style="font-size:22px;margin:0">① The midpoint current goes up and down</h3><p class="small" style="font-size:20px">Legs at O send their current through the midpoint (slide 14). Over one cycle this current rises and falls (plot).</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② It repeats three times per cycle</h3><p class="small" style="font-size:20px">The three phases are identical, just shifted by a third of a cycle. So what they make together repeats every third of a cycle: 3 × 50 Hz = <b>150 Hz</b>.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ The capacitors follow it</h3><p class="small" style="font-size:20px">C1 and C2 wiggle at 150 Hz, a few volts, in opposite directions. It averages to zero, so it never grows. Bigger capacitors, smaller wiggle.</p></div>
     </div>
-    <div data-sim="npripple" data-config='{"w":660}'></div>
+    <div data-sim="npripple" data-config='{"w":680,"simple":true}'></div>
   </div>
   <aside class="notes">
-    <p><b>2.5 min.</b> One output cycle, 20 ms. The plots build up with the clicks.</p>
+    <p><b>1.5 min.</b> One output cycle, 20 ms; 50 A, m = 0.8, unity power factor.</p>
     <ul>
-      <li><b>①</b> Red, green, orange: each leg’s time at O. 100 % when its sine crosses zero, 20 % at the peak (m = 0.8).</li>
-      <li><b>②</b> Multiply by that leg’s current (here in phase with its voltage).</li>
-      <li><b>③ “Why 150 Hz?”</b> The sum (black) has no average, but it is not zero: it repeats three times per cycle. Readout: 150 Hz. In words: each leg’s share flips sign every half cycle (only odd harmonics), and adding three phases 120° apart keeps only the harmonics that are the same in all three: 3rd, 9th … The 3rd is the big one.</li>
-      <li><b>④</b> Readout: a few volts peak-to-peak with 4.7 mF and 50 A. Drag C down to 1 mF: the wiggle grows. Drag φ to 90°: the shape changes, still 150 Hz.</li>
-      <li>This ripple is not a fault and the balancing loop should not chase it (it is far too fast for it): it is handled by choosing C. The real problem is the slow drift: next slide.</li>
-      <li>If asked for a number: at unity PF the 3rd-harmonic amplitude of i<sub>O</sub> is 8mI/(5π) ≈ 20 A here; ripple of ΔV peak-to-peak ≈ 2 · 20 A / (3ω · 4.7 mF) ≈ 9 V, about 4.6 V on each capacitor.</li>
+      <li><b>①</b> Just show the shape. No formula needed.</li>
+      <li><b>② “Why three?”</b> Click: the dashed lines cut the cycle into thirds; the curve is the same in each. Phase b is phase a delayed by a third of a cycle, phase c by two thirds. Anything built equally from all three cannot tell the difference after a third of a cycle, so it repeats. (The same reason the min-max offset on slide 7 repeats at 150 Hz.)</li>
+      <li><b>③</b> Click: the capacitor voltages. Readout about 4.6 V peak-to-peak with 4.7 mF each. Drag C down: the wiggle grows. This is normal and handled by choosing C; the balancing loop does not try to remove it.</li>
+      <li>Formula if asked: a leg is at O for (1 − |r|) of each period, so i<sub>O</sub> = Σ (1 − |r<sub>x</sub>|)·i<sub>x</sub>.</li>
     </ul>
   </aside>
 </section>
