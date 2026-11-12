@@ -306,26 +306,24 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Three levels: why two carriers">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · sine PWM for a three-level leg · read: Holmes &amp; Lipo</div><h2>Three levels: why two carriers?</h2></div></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Three levels: why two carriers">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · sine PWM for a three-level leg · read: Holmes &amp; Lipo</div><h2>Three levels: one carrier for each half</h2></div></div>
   <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
-    <div class="stack" style="gap:8px">
-      <div><h3 style="font-size:20px;margin:0">① One comparison, two answers</h3><p class="small" style="font-size:18px">Above or below the carrier: that is all one comparator can say. Enough for a two-level leg (slide 4).</p></div>
-      <div data-step="1"><h3 style="font-size:20px;margin:0">② Three levels need two answers</h3><p class="small" style="font-size:18px">A 3-level leg can be at P (+<span class="m">V</span><sub>dc</sub>/2), O (0, the midpoint) or N (−<span class="m">V</span><sub>dc</sub>/2). First question: is the reference positive or negative (which half)? Second: is it above the carrier (inside that half)?</p></div>
-      <div data-step="2"><h3 style="font-size:20px;margin:0">③ One carrier, used twice</h3><p class="small" style="font-size:18px">Take one carrier from 0 to 1 and compare it with the size |<span class="m">r</span>|. If <span class="m">r</span> &gt; 0: above → P, below → O. If <span class="m">r</span> &lt; 0: above → N, below → O. Each half is the buck of slide 3, so the average is still <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2.</p></div>
-      <div data-step="3"><h3 style="font-size:20px;margin:0">④ Drawn on the −1 … +1 axis</h3><p class="small" style="font-size:18px">For <span class="m">r</span> &lt; 0 that comparison is the same as comparing <span class="m">r</span> with the carrier’s <b>mirror image</b> below zero. So “one carrier used twice” is an upper carrier plus a mirrored lower carrier. Its name: <b>POD</b>, phase opposition.</p></div>
-      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ The other choice: shift instead of mirror</h3><p class="small" style="font-size:18px">Move the same carrier down by 1 instead: <b>PD</b>, phase disposition. For one leg nothing changes: same average, same fundamental. The difference appears with three phases: next slide.</p></div>
+    <div class="stack" style="gap:14px">
+      <div><h3 style="font-size:21px;margin:0">① Two levels: one carrier</h3><p class="small" style="font-size:19px">Reference above the carrier → P, below → N. One yes/no answer picks one of two levels (slide 4).</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② Three levels: split into two halves</h3><p class="small" style="font-size:19px">The leg can also sit at O, the midpoint (0 V). Positive reference: switch between P and O. Negative: between O and N. Each half gets its own carrier: <b>upper</b> 0 … +1, <b>lower</b> −1 … 0.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Inside each half: the same rule</h3><p class="small" style="font-size:19px">Above the upper carrier → P, otherwise O. Below the lower carrier → N, otherwise O. Each half is slide 4 again, so the average is still <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2, with jumps of only <span class="m">V</span><sub>dc</sub>/2.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Two ways to draw the lower carrier</h3><p class="small" style="font-size:19px">A shifted copy of the upper one (<b>PD</b>), or its mirror image (<b>POD</b>; that is using the same carrier for both halves). For one leg the result is the same. Next slide: why PD is used.</p></div>
     </div>
-    <div data-sim="carrier" data-config='{"n":3,"arr":"POD","w":620,"simple":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"POD","sig":"a","onlyA":true,"n":3},"4":{"arr":"PD","sig":"a","onlyA":true,"n":3}}}'></div>
+    <div data-sim="carrier" data-config='{"n":3,"arr":"PD","w":620,"simple":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"PD","sig":"a","onlyA":true,"n":3},"3":{"arr":"POD","sig":"a","onlyA":true,"n":3}}}'></div>
   </div>
   <aside class="notes">
-    <p><b>3 min.</b> Only leg a is shown. Clicks 0–3 use the mirrored lower carrier (POD), click 4 switches to PD.</p>
+    <p><b>2.5 min.</b> Only leg a is shown. Click 3 switches the lower carrier from shifted (PD) to mirrored (POD).</p>
     <ul>
-      <li><b>① “Why not just one carrier per phase?”</b> Answer the question honestly: a comparator only answers yes or no, so it can only pick between two levels.</li>
-      <li><b>② “How many questions for three levels?”</b> Two. The sign of the reference picks the half; the carrier picks inside the half.</li>
-      <li><b>③</b> This is exactly “one carrier per phase”: it works. Point at the output plot: positive half only P/O pulses, negative half only O/N, and the fundamental readout is 0.9 × 400 = 360 V.</li>
-      <li><b>④ “Where is the second carrier?”</b> Comparing |r| = −r with c is the same as comparing r with −c. The lower carrier in the plot is −c: the mirror image. So the idea has a name.</li>
-      <li><b>⑤</b> Click: the lower carrier is now c − 1, a copy shifted down. Pulses move a little, the average does not. Leave the question open: “so why would anyone care?”</li>
+      <li><b>① “Why not one carrier?”</b> One comparator answers yes or no: two levels. Three levels need a second answer.</li>
+      <li><b>② “Which second answer?”</b> The sign of the reference picks the half. The labels in the plot show which carrier decides P/O and which O/N.</li>
+      <li><b>③</b> Point at the output: positive half only P/O pulses (+400/0), negative half only O/N (0/−400). Fundamental readout 360 V = 0.9 × 400, as on slide 5.</li>
+      <li><b>④</b> Click: the lower carrier flips. Pulses in the negative half move a little; the average does not. If asked about “one carrier per phase”: compare |r| with a 0 … 1 carrier and use the sign to pick P or N. That is exactly the mirrored lower carrier, POD.</li>
     </ul>
   </aside>
 </section>
@@ -360,16 +358,16 @@
   <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
     <div class="stack" style="gap:10px">
       <div><h3 style="font-size:20px;margin:0">① Five levels: four carriers, same rule</h3><p class="small" style="font-size:18px">Stack four carriers between −1 and +1. The level is how many carriers are below the reference: 0 → −400 V, … 4 → +400 V, in steps of 200 V. <span class="m">N</span> levels need <span class="m">N</span> − 1 carriers.</p></div>
-      <div data-step="1"><h3 style="font-size:20px;margin:0">② Four carriers, three ways to line them up</h3><p class="small" style="font-size:18px"><b>PD</b>: all in phase. <b>POD</b>: the two above zero mirrored against the two below. <b>APOD</b>: every carrier mirrored against its neighbour. Same fundamental each time; PD still gives the lowest line THD (try them).</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② PD still wins</h3><p class="small" style="font-size:18px">Mirror the lower two carriers (POD) and the line THD rises from 18 % to 30 %: same reason as the last slide, phases in opposite halves switch together.</p></div>
       <div data-step="2"><h3 style="font-size:20px;margin:0">③ Phase-shifted: side by side, not stacked</h3><p class="small" style="font-size:18px">Each carrier spans the whole −1 … +1 and drives one cell; the carriers are shifted in time by 360°/(<span class="m">N</span> − 1). The output steps more often, so the first harmonics move up to (<span class="m">N</span> − 1)·<span class="m">f</span><sub>c</sub> while each switch still runs at <span class="m">f</span><sub>c</sub>. Used for flying-capacitor and H-bridge cells (next talk).</p></div>
     </div>
-    <div data-sim="carrier" data-config='{"n":5,"arr":"PD","w":620,"simple":true,"sig":"ab","steps":{"0":{"arr":"PD","sig":"ab","onlyA":false,"n":5},"1":{"arr":"APOD","sig":"ab","onlyA":false,"n":5},"2":{"arr":"PS","sig":"ab","onlyA":false,"n":5}}}'></div>
+    <div data-sim="carrier" data-config='{"n":5,"arr":"PD","w":620,"simple":true,"sig":"ab","steps":{"0":{"arr":"PD","sig":"ab","onlyA":false,"n":5},"1":{"arr":"POD","sig":"ab","onlyA":false,"n":5},"2":{"arr":"PS","sig":"ab","onlyA":false,"n":5}}}'></div>
   </div>
   <aside class="notes">
-    <p><b>2.5 min.</b> Five levels, all three phases, line voltage. Click 1 shows APOD, click 2 phase-shifted.</p>
+    <p><b>2.5 min.</b> Five levels, all three phases, line voltage. Click 1 shows POD, click 2 phase-shifted.</p>
     <ul>
       <li><b>①</b> Same counting rule as for three levels, just more carriers. Point at the finer staircase in v<sub>ab</sub>.</li>
-      <li><b>②</b> Click through PD, POD, APOD with the buttons and read the THD: PD lowest, for the same reason as the last slide.</li>
+      <li><b>②</b> Read the THD: PD 18.1 %, POD 29.8 %. If asked about APOD (every carrier mirrored against its neighbour): with three levels it is identical to POD; with five it gives 28.5 %, almost the same as POD. That is why it is not on the slide; Elif names it for the CHB.</li>
       <li><b>③</b> Phase-shifted: the strongest harmonic moves to about 4 × 15 = 60. Elif builds the CHB on this; she also compares PS and level-shifted carriers there, so stop here.</li>
     </ul>
   </aside>
