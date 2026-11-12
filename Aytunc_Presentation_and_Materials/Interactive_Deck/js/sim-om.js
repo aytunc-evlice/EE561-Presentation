@@ -148,3 +148,89 @@
     return {};
   };
 })();
+
+/* One switching period of three-phase sine PWM with one shared carrier: the three legs switch one after another,
+   so the period is a sequence of switching states. A common offset r0 only moves time between NNN and PPP;
+   min-max makes them equal, which is the equal zero split of space-vector PWM. */
+(function () {
+  'use strict';
+  const { h } = K;
+  SIMS.svmeq = function (host, cfg) {
+    const N = 1800;
+    const P = { m: cfg.m != null ? cfg.m : 0.8, th: cfg.th != null ? cfg.th : 10, mode: cfg.mode || 'none' };
+    const cv = K.canvas(cfg.w || 880, 560);
+    const ctl = [
+      K.seg({ label: 'Common offset r₀', options: [['none', 'none'], ['mm', 'min-max']], value: P.mode, onChange: (v) => { P.mode = v; draw(); } }),
+      K.slider({ label: 'm', min: 0, max: 1.15, step: 0.01, value: P.m, fmt: (v) => v.toFixed(2), onInput: (v) => { P.m = v; draw(); } }),
+      K.slider({ label: 'θ', min: 0, max: 360, step: 1, value: P.th, fmt: (v) => v + '°', onInput: (v) => { P.th = v; draw(); } }),
+    ];
+    const tbl = h('table', { class: 'tb nocase', style: { fontSize: '17px' } });
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = (cfg.w || 880) + 'px 1fr';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, ctl.map((c) => c.el), tbl,
+      h('div', { class: 'tiny', html: 'Shared carrier, references held constant during the period (r ≈ constant, slide 4). Percentages are shares of the switching period T<sub>s</sub>.' })));
+    const car = (x) => 1 - 2 * K.tri(x);
+    function draw() {
+      const th = (P.th * Math.PI) / 180;
+      const r = [0, 1, 2].map((k) => P.m * Math.cos(th - (k * K.TAU) / 3));
+      const r0 = P.mode === 'mm' ? -(Math.max(...r) + Math.min(...r)) / 2 : 0;
+      const rp = r.map((v) => v + r0);
+      // states along the period
+      const segs = []; let last = null;
+      for (let q = 0; q < N; q++) {
+        const c = car((q + 0.5) / N), name = rp.map((v) => (v > c ? 'P' : 'N')).join('');
+        if (!last || last.name !== name) { last = { name, a: q / N, b: (q + 1) / N }; segs.push(last); } else last.b = (q + 1) / N;
+      }
+      const share = {}; segs.forEach((g) => { share[g.name] = (share[g.name] || 0) + (g.b - g.a); });
+      const ctx = cv.ctx; cv.clear();
+      const x0 = 70, w = cv.w - 90, X = (t) => x0 + t * w;
+      const ink = K.css('--ink'), mut = K.css('--muted'), cols = [K.css('--s2'), K.css('--s3'), K.css('--s4')];
+      // state band
+      const yb = 28, hb = 52;
+      segs.forEach((g) => {
+        const zero = g.name === 'PPP' || g.name === 'NNN';
+        ctx.fillStyle = zero ? (g.name === 'PPP' ? 'rgba(31,78,156,.16)' : 'rgba(31,78,156,.30)') : 'rgba(120,120,120,.08)';
+        ctx.fillRect(X(g.a), yb, X(g.b) - X(g.a), hb);
+        ctx.strokeStyle = K.css('--line'); ctx.lineWidth = 1; ctx.strokeRect(X(g.a) + 0.5, yb + 0.5, X(g.b) - X(g.a) - 1, hb - 1);
+        if (X(g.b) - X(g.a) > 34) {
+          ctx.fillStyle = ink; ctx.font = '700 15px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(g.name, (X(g.a) + X(g.b)) / 2, yb + 17);
+          ctx.fillStyle = mut; ctx.font = '600 13px ' + K.font;
+          ctx.fillText(((g.b - g.a) * 100).toFixed(1) + '%', (X(g.a) + X(g.b)) / 2, yb + 37);
+        }
+      });
+      ctx.fillStyle = mut; ctx.font = '600 13px ' + K.font; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('state', x0 - 8, yb + hb / 2);
+      // carrier and references
+      const cs = [], tx = [];
+      for (let q = 0; q <= 400; q++) { tx.push(q / 400); cs.push(car(q / 400)); }
+      const A = K.plot(ctx, { x: x0, y: 112, w, h: 230 }, {
+        xlim: [0, 1], ylim: [-1.15, 1.15], yticks: [[-1, '−1'], [0, '0'], [1, '+1']],
+        series: [{ x: tx, y: cs, color: mut, width: 2.2 }].concat(rp.map((v, k) => ({ x: [0, 1], y: [v, v], color: cols[k], width: 3 }))),
+        title: P.mode === 'mm' ? 'Carrier and the three references with the min-max offset' : 'Carrier and the three references (sine PWM)',
+        legend: [['r′_a', cols[0]], ['r′_b', cols[1]], ['r′_c', cols[2]]],
+      });
+      // gate rows
+      ['a', 'b', 'c'].forEach((ph, k) => {
+        const y = 372 + k * 56, hh = 34, ys = [], xs = [];
+        for (let q = 0; q <= N; q++) { const c = car(Math.min(q, N - 1) / N + 0.5 / N); xs.push(q / N); ys.push(rp[k] > c ? 1 : 0); }
+        K.plot(ctx, { x: x0, y, w, h: hh }, { xlim: [0, 1], ylim: [-0.2, 1.2], yticks: [[0, 'N'], [1, 'P']], series: [{ x: xs, y: ys, color: cols[k], width: 2.6, step: true }] });
+        ctx.fillStyle = cols[k]; ctx.font = '700 15px ' + K.font; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('leg ' + ph, x0 - 30, y + hh / 2);
+      });
+      ctx.fillStyle = mut; ctx.font = '600 13px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText('0', X(0), 372 + 2 * 56 + 40); ctx.fillText('T_s / 2', X(0.5), 372 + 2 * 56 + 40); ctx.fillText('T_s', X(1), 372 + 2 * 56 + 40);
+      // table of shares
+      const act = Object.keys(share).filter((k) => k !== 'PPP' && k !== 'NNN');
+      const f = (v) => (v == null ? '0.0' : (v * 100).toFixed(1)) + ' %';
+      const clip = rp.some((v) => Math.abs(v) > 1);
+      tbl.innerHTML = '<tr><th>state</th><th>share of T<sub>s</sub></th></tr>' +
+        act.map((k) => `<tr><td>${k} <small class="muted">active</small></td><td>${f(share[k])}</td></tr>`).join('') +
+        `<tr class="hl"><td>NNN <small class="muted">zero, start/end</small></td><td>${f(share.NNN)}</td></tr><tr class="hl"><td>PPP <small class="muted">zero, middle</small></td><td>${f(share.PPP)}</td></tr>` +
+        `<tr><td>offset r₀</td><td>${(r0 >= 0 ? '+' : '−') + Math.abs(r0).toFixed(3)}</td></tr>` +
+        (clip ? '<tr><td colspan="2"><span class="pill bad">a reference is outside ±1: a zero state has run out</span></td></tr>' : '');
+    }
+    K.onTheme(draw);
+    draw();
+    const MS = cfg.mmStep;
+    return { step(k) { if (MS == null) return; const v = k >= MS ? 'mm' : 'none'; if (v !== P.mode) { P.mode = v; ctl[0].set(v); draw(); } } };
+  };
+})();

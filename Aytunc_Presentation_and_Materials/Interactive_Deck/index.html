@@ -264,7 +264,7 @@
       <div data-step="2"><h3 style="font-size:21px;margin:0">③ So mix them in time</h3><p class="small" style="font-size:19px">In one switching period, stay a while on each of the <b>two corners next to v*</b> and the rest of the time on a <b>zero state</b>. The average arrow is <b>v</b>* (shaded triangle, time shares on the right).</p>
         <p class="small muted" style="font-size:17px"><span class="m">m</span> = 0.8 at 30°, half way between PNN and PPN: 34.6 % PNN, 34.6 % PPN, 30.7 % zero.</p></div>
       <div data-step="3"><h3 style="font-size:21px;margin:0">④ The limit is the inner circle</h3><p class="small" style="font-size:19px">No zero time left when <b>v</b>* touches the circle inside the hexagon: <span class="m">m</span> = 1.155, the min-max limit of slide 7.</p></div>
-      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Same pulses as min-max</h3><p class="small" style="font-size:19px">Split the zero time equally between NNN and PPP, and each leg’s pulses are exactly sine PWM plus the min-max offset.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Same pulses as min-max</h3><p class="small" style="font-size:19px">Split the zero time equally between NNN and PPP, and each leg’s pulses are exactly sine PWM plus the min-max offset. Next slide: why.</p></div>
     </div>
     <div data-sim="svm" data-config='{"n":2,"m":0.8,"ang":30}'></div>
   </div>
@@ -276,6 +276,32 @@
       <li><b>③ “Then how?”</b> The same trick as one leg on slide 4: switch fast and let the average do the work. Here the average of arrows. Drag v* around: the triangle and the three shares change. At 30°, m = 0.8: the two corners get equal time.</li>
       <li><b>④ “Why 1.155?”</b> Drag v* to the circle at 30°: the zero share becomes 0. The inner circle radius is (4/3)·cos 30° = 1.155.</li>
       <li><b>⑤</b> The equal split of zero time between NNN and PPP is a common shift of all three legs: the min-max r<sub>0</sub>. If asked: Zhou &amp; Wang 2002 prove the equivalence. For more levels (3-level button) there are more dots and the same idea; PD carriers with a modified offset give the same sequence (McGrath, Holmes &amp; Lipo 2003).</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Why min-max equals SVPWM">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · one switching period, three legs, one carrier · read: Zhou &amp; Wang, IEEE TIE 2002</div><h2>Why min-max gives the same pulses as SVPWM</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 1010px; gap:22px">
+    <div class="stack" style="gap:9px">
+      <div><h3 style="font-size:21px;margin:0">① One period, three legs, one carrier</h3><p class="small" style="font-size:19px">Each leg is P while its reference is above the carrier (slide 4). Over one period the references hardly move: three flat lines.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② The legs switch one after another</h3><p class="small" style="font-size:19px">So the period is a <b>sequence of states</b>: NNN → PNN → PPN → PPP → PPN → PNN → NNN. These are the two corners next to <b>v</b>* and the two zero states: the SVPWM ingredients.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ The active times are already right</h3><p class="small" style="font-size:19px">PNN lasts (<span class="m">r</span><sub>a</sub> − <span class="m">r</span><sub>b</sub>)/2, PPN (<span class="m">r</span><sub>b</sub> − <span class="m">r</span><sub>c</sub>)/2. They depend only on differences, so they give the right line voltages, the same times SVPWM computes.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ The offset only moves zero time</h3><p class="small" style="font-size:19px">Adding <span class="m">r</span><sub>0</sub> lifts all three lines together: the active states keep their length, and time moves between NNN (ends) and PPP (middle).</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Min-max splits the zero time equally</h3><p class="small" style="font-size:19px">NNN = PPP exactly when the lines are centred, <span class="m">r</span><sub>0</sub> = −(max + min)/2. That is SVPWM’s equal zero split: same states, same times, same order.</p></div>
+      <p class="small muted" data-step="4" style="font-size:17px">Without the offset one zero state runs out first, at <span class="m">m</span> = 1. With the equal split both run out together, at 1.155.</p>
+    </div>
+    <div data-sim="svmeq" data-config='{"m":0.8,"th":10,"w":700,"mmStep":4}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> m = 0.8, θ = 10° (inside the PNN–PPN sector). Point at the state band on top of the plot at each click.</p>
+    <ul>
+      <li><b>① “What does one period look like with three legs?”</b> Three flat references, one triangle.</li>
+      <li><b>② “Why that order?”</b> The carrier falls from +1: the highest reference (a) crosses first, then b, then c. Leg a turns on, then b, then c: NNN → PNN → PPN → PPP. On the way up they turn off in reverse.</li>
+      <li><b>③ The algebra:</b> leg x is P for (1 + r<sub>x</sub>)/2 of the period. PNN is the time a is P but b is not: (1 + r<sub>a</sub>)/2 − (1 + r<sub>b</sub>)/2 = (r<sub>a</sub> − r<sub>b</sub>)/2. Here 53.1 %. PPN: (r<sub>b</sub> − r<sub>c</sub>)/2 = 12.0 %. These are exactly the SVPWM shares (the hexagon on slide 9 gives the same numbers).</li>
+      <li><b>④</b> Without offset: NNN = (1 − r<sub>a</sub>)/2 = 10.6 %, PPP = (1 + r<sub>c</sub>)/2 = 24.3 %: unequal. Move θ or m: the active times change, the split stays unequal.</li>
+      <li><b>⑤</b> Click switches the offset to min-max: r<sub>0</sub> = −0.137, both zero states 17.4 %, active times unchanged. Setting NNN = PPP, (1 − r<sub>a</sub> − r<sub>0</sub>)/2 = (1 + r<sub>c</sub> + r<sub>0</sub>)/2, gives r<sub>0</sub> = −(r<sub>a</sub> + r<sub>c</sub>)/2: the min-max formula.</li>
+      <li>Limit: push m to 1.1 with offset none: a reference leaves ±1, one zero state is gone (red message), although the other still has time. With min-max both reach zero together only at 1.155.</li>
     </ul>
   </aside>
 </section>
