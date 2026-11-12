@@ -505,9 +505,9 @@
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① Equal voltages: no current</h3><p class="small" style="font-size:20px">The converter copies the grid voltage. Nothing across the inductor, nothing flows.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② A little ahead: power flows</h3><p class="small" style="font-size:20px">3° ahead: the current is in step with the grid voltage. Power goes into the grid.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A little bigger: reactive power</h3><p class="small" style="font-size:20px">5 % bigger: the current comes a quarter period late. No net power.</p></div>
-      <div class="callout" data-step="3" style="font-size:20px">A few volts move tens of amps. Too sensitive to set by hand.</div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Leading: active power</h3><p class="small" style="font-size:20px">3° ahead: the current is in step with the grid voltage. The leading side sends active power to the lagging side.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Higher voltage: reactive power</h3><p class="small" style="font-size:20px">5 % bigger: the current comes a quarter period late. The higher-voltage side sends reactive power.</p></div>
+      <div class="callout" data-step="3" style="font-size:19px"><b>AC power flow:</b> the angle sets the active power, the size sets the reactive power.</div>
     </div>
     <div data-sim="gridbasic" data-config='{"w":640,"steps":{"0":{"amp":100,"ang":0},"1":{"ang":3},"2":{"ang":0,"amp":105}}}'></div>
   </div>
@@ -516,7 +516,8 @@
       <li><b>①</b> Point at the middle plot: the difference is zero.</li>
       <li><b>②</b> 3° is a difference of about 17 V; it gives 27 A and 13 kW. Move the timing slider the other way: power comes back from the grid.</li>
       <li><b>③</b> The inductor delays the current a quarter period behind the voltage across it. Formulas if asked: P = 3·E·V·sin δ / (2X), Q ≈ 3·E·(V − E) / (2X), with peak values.</li>
-      <li>Play with both sliders: timing moves active power, size moves reactive power.</li>
+      <li>The rule holds for any two AC sources joined by an inductance (a line, a transformer): active power goes from the leading side to the lagging side, reactive power from the higher voltage to the lower. Play with both sliders to show it, in both directions.</li>
+      <li>Lead into the next slide: a few volts already move tens of amps, so the voltage cannot be set by hand.</li>
     </ul></aside>
 </section>
 
@@ -526,7 +527,7 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① By hand: it does not hold</h3><p class="small" style="font-size:20px">We pick the voltage for 30 A. Then the grid drops 5 %, and the current is far off.</p></div>
       <div data-step="1"><h3 style="font-size:22px;margin:0">② Measure and correct</h3><p class="small" style="font-size:20px">The PI compares the current with the wanted one and corrects the voltage. The drop is hardly seen.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ But always a little late</h3><p class="small" style="font-size:20px">A sine is a moving target. A small error stays (bottom plot).</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ But always a little late</h3><p class="small" style="font-size:20px">A sine is a moving target. A small error stays (bottom plot). The dq transformation fixes this.</p></div>
     </div>
     <div data-sim="gridpi" data-config='{"w":640,"steps":{"0":{"mode":"hand"},"1":{"mode":"pi"}}}'></div>
   </div>
@@ -538,23 +539,23 @@
     </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="dq: make the target stand still">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 5</div><h2>Make the target stand still</h2></div></div>
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="The dq transformation">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 5</div><h2>The dq transformation: sines become constants</h2></div></div>
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
-    <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① The current is a turning arrow</h3><p class="small" style="font-size:20px">Like the voltage arrow of slide 9. The three sines are this one arrow, turning with the grid.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② Turn along with it</h3><p class="small" style="font-size:20px">Seen from the grid arrow, nothing moves. The sines become two flat lines.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Two parts</h3><p class="small" style="font-size:20px"><span class="m">i</span><sub>d</sub>, along the grid arrow: active power. <span class="m">i</span><sub>q</sub>, across it: reactive power.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ One PI for each</h3><p class="small" style="font-size:20px">A flat target is easy: the error goes to zero.</p></div>
+    <div class="stack" style="gap:16px">
+      <div><h3 style="font-size:22px;margin:0">① Three sines, one turning arrow</h3><p class="small" style="font-size:20px">Like the voltage arrow of slide 9: the three currents are one arrow, turning at 50 Hz.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② The grid voltage is the reference</h3><p class="small" style="font-size:20px">The dq frame turns with the grid voltage, which lies on the d axis. In this frame the currents are two constants.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ <span class="m">i</span><sub>d</sub>: active, <span class="m">i</span><sub>q</sub>: reactive</h3><p class="small" style="font-size:20px"><span class="m">i</span><sub>d</sub> is in phase with the grid voltage: active power. <span class="m">i</span><sub>q</sub> is 90° away: reactive power.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ One PI for each</h3><p class="small" style="font-size:20px">Constant targets: the error goes to zero. The two PI outputs are transformed back to three phases for the PWM.</p></div>
     </div>
     <div data-sim="dqframe" data-config='{"w":700,"steps":{"0":{"dq":false,"id":30,"iq":0},"1":{"dq":true},"2":{"iq":-15}}}'></div>
   </div>
   <aside class="notes"><p><b>2.5 min.</b> Press P to pause the arrows.</p>
     <ul>
       <li><b>①</b> The red sine in the bottom plot is phase a; the grey ones are b and c.</li>
-      <li><b>②</b> This change of viewpoint is the Park (dq) transform. The grid angle comes from a PLL, which locks onto the grid voltage.</li>
-      <li><b>③</b> Move the sliders: i<sub>d</sub> changes the size of the sines, i<sub>q</sub> shifts them in time.</li>
-      <li><b>④</b> Same PI as before, but now on i<sub>d</sub> and i<sub>q</sub>: the integrator removes the constant error completely. In dq the two axes are coupled through ωL; the controller cancels that term.</li>
+      <li><b>②</b> How it works: a PLL locks onto the measured grid voltage and gives its angle θ. With θ we transform the grid voltage and the currents (abc → dq, the Park transform). The grid voltage becomes e<sub>d</sub> = 327 V, e<sub>q</sub> = 0: that is what “reference” means.</li>
+      <li><b>③</b> P = 3/2 · e<sub>d</sub> · i<sub>d</sub> and Q = −3/2 · e<sub>d</sub> · i<sub>q</sub> (the sign of Q depends on the convention). Move the sliders: i<sub>d</sub> changes P only, i<sub>q</sub> changes Q only. In the top-left picture, i<sub>d</sub> makes the arrow longer along the grid voltage, i<sub>q</sub> turns it away from it.</li>
+      <li><b>④</b> The whole chain: measure → abc to dq → PI on i<sub>d</sub> and PI on i<sub>q</sub> → v<sub>d</sub>, v<sub>q</sub> → dq to abc → references for the carriers. The d and q axes are coupled through ωL; the controller cancels that term. The wanted i<sub>d</sub> comes from the DC-voltage PI (next slide); the wanted i<sub>q</sub> is the reactive power we want, often zero.</li>
     </ul></aside>
 </section>
 
@@ -564,7 +565,7 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① The DC capacitor is a bucket</h3><p class="small" style="font-size:20px">Power in fills it, power out empties it. In = out: the voltage stays.</p></div>
       <div data-step="1"><h3 style="font-size:22px;margin:0">② More comes in</h3><p class="small" style="font-size:20px">Same current to the grid: the voltage climbs until the converter trips.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A PI watches the voltage</h3><p class="small" style="font-size:20px">Too high? It asks for more grid current. The voltage comes back to 800 V.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A PI watches the voltage</h3><p class="small" style="font-size:20px">Too high? It asks for more <span class="m">i</span><sub>d</sub>: more active power to the grid. The voltage comes back to 800 V.</p></div>
     </div>
     <div data-sim="dcbucket" data-config='{"w":640,"steps":{"0":{"ev":false,"mode":"fixed"},"1":{"ev":true},"2":{"mode":"pi"}}}'></div>
   </div>
@@ -584,11 +585,12 @@
       <style>.bd .a3{stroke:var(--ink2);stroke-width:2.2;fill:none;marker-end:url(#arrS)}</style>
       <g data-step="0">
         <g class="box acc"><rect x="20" y="190" width="230" height="80"/><text x="135" y="220">DC-voltage PI</text><text x="135" y="248" class="nt" style="text-anchor:middle">keep 800 V</text></g>
-        <path class="a3" d="M250,230 H330"/><text x="290" y="212" class="nt" style="text-anchor:middle">wanted i</text>
+        <path class="a3" d="M250,230 H330"/><text x="290" y="206" class="nt" style="text-anchor:middle">wanted i<tspan baseline-shift="sub" font-size="12">d</tspan></text>
         <text x="135" y="168" class="nt" style="text-anchor:middle">slow · slide 23</text>
       </g>
       <g data-step="1">
-        <g class="box acc"><rect x="330" y="190" width="220" height="80"/><text x="440" y="220">current PI</text><text x="440" y="248" class="nt" style="text-anchor:middle">follow the wanted current</text></g>
+        <g class="box acc"><rect x="330" y="190" width="220" height="80"/><text x="440" y="220">current PIs (dq)</text><text x="440" y="248" class="nt" style="text-anchor:middle">i<tspan baseline-shift="sub" font-size="12">d</tspan>: active · i<tspan baseline-shift="sub" font-size="12">q</tspan>: reactive</text></g>
+        <path class="a3" d="M440,330 V272"/><text x="440" y="350" class="nt" style="text-anchor:middle">wanted i<tspan baseline-shift="sub" font-size="12">q</tspan>: the reactive power we want</text>
         <path class="a3" d="M550,230 H640"/><text x="595" y="212" class="nt" style="text-anchor:middle">voltage</text>
         <g class="box"><rect x="640" y="190" width="200" height="80"/><text x="740" y="220">PWM</text><text x="740" y="248" class="nt" style="text-anchor:middle">carriers</text></g>
         <path class="a3" d="M840,230 H900"/><text x="945" y="234" class="nt" style="text-anchor:middle">switches</text>

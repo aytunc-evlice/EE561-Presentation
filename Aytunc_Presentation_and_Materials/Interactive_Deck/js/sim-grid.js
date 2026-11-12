@@ -105,11 +105,12 @@
   SIMS.dqframe = function (host, cfg) {
     const P = { id: 30, iq: 0, dq: false }; let th = 0.6;
     const cv = K.canvas(cfg.w || 700, 590);
-    const sD = K.slider({ label: 'Part along the grid arrow: i<sub>d</sub>', min: 0, max: 40, step: 1, value: P.id, fmt: (v) => v + ' A', onInput: (v) => { P.id = v; draw(); } });
-    const sQ = K.slider({ label: 'Part across it: i<sub>q</sub>', min: -30, max: 30, step: 1, value: P.iq, fmt: (v) => (v < 0 ? '−' + -v : v) + ' A', onInput: (v) => { P.iq = v; draw(); } });
+    const sD = K.slider({ label: 'i<sub>d</sub> (active)', min: 0, max: 40, step: 1, value: P.id, fmt: (v) => v + ' A', onInput: (v) => { P.id = v; draw(); } });
+    const sQ = K.slider({ label: 'i<sub>q</sub> (reactive)', min: -30, max: 30, step: 1, value: P.iq, fmt: (v) => (v < 0 ? '−' + -v : v) + ' A', onInput: (v) => { P.iq = v; draw(); } });
     host.classList.add('sim');
     host.style.gridTemplateColumns = (cfg.w || 700) + 'px 1fr'; host.style.gap = '18px';
-    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '14px' } }, sD.el, sQ.el, h('div', { class: 'tiny', html: 'The arrows really turn 50 times per second; here they are slowed down.' })));
+    const roP = K.readout('Active power into the grid', 'big'), roQ = K.readout('Reactive power into the grid', 'big');
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '14px' } }, sD.el, roP.el, sQ.el, roQ.el, h('div', { class: 'tiny', html: 'The arrows really turn 50 times per second; here they are slowed down.' })));
     function arrow(ctx, x0, y0, x1, y1, col, w, dash) {
       const a = Math.atan2(y1 - y0, x1 - x0), len = Math.hypot(x1 - x0, y1 - y0); if (len < 2) return;
       ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w; ctx.setLineDash(dash || []);
@@ -123,7 +124,7 @@
       const lab = (t, x, y, col, al, f) => { ctx.fillStyle = col; ctx.font = (f || '700 15px ') + K.font; ctx.textAlign = al || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); };
       const dial = (cx, title) => { ctx.strokeStyle = line; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(cx, cy, RC, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - RC, cy); ctx.lineTo(cx + RC, cy); ctx.moveTo(cx, cy - RC); ctx.lineTo(cx, cy + RC); ctx.stroke(); lab(title, cx, 18, ink, 'center', '650 15px '); };
       // left: seen from outside
-      dial(cxL, 'Seen from outside: both arrows turn');
+      dial(cxL, 'Fixed frame: the arrows turn at 50 Hz');
       const ex = Math.cos(th), ey = Math.sin(th), ix = P.id * ex - P.iq * ey, iy = P.id * ey + P.iq * ex;
       arrow(ctx, cxL, cy, cxL + 106 * ex, cy - 106 * ey, c1, 2.6);
       const lgY = cy + RC + 22; ctx.lineWidth = 4; ctx.strokeStyle = c1; ctx.beginPath(); ctx.moveTo(cxL - 120, lgY); ctx.lineTo(cxL - 96, lgY); ctx.stroke(); lab('grid voltage', cxL - 90, lgY, mut, 'left', '600 13px ');
@@ -132,7 +133,8 @@
       // right: seen from the turning frame
       const bxp = { x: half + 30, y: 30, w: half - 44, h: 2 * RC + 20 };
       if (P.dq) {
-        dial(cxR, 'Riding on the grid arrow: they stand still');
+        dial(cxR, 'dq frame: turns with the grid voltage');
+        lab('d', cxR + RC + 12, cy, mut); lab('q', cxR + 12, cy - RC + 10, mut);
         arrow(ctx, cxR, cy, cxR + 106, cy, c1, 2.6);
         const px = cxR + SC * P.id, py = cy - SC * P.iq, sd = P.iq < 0 ? -1 : 1, wr = K.css('--warn');
         if (P.id > 0.5) { arrow(ctx, cxR, cy + 7 * sd, px, cy + 7 * sd, c3, 3.4); lab('i_d', cxR + (SC * P.id) / 2, cy + 22 * sd, c3); }
@@ -140,16 +142,18 @@
         arrow(ctx, cxR, cy, px, py, c2, 4.2);
       } else {
         ctx.save(); ctx.strokeStyle = line; ctx.setLineDash([6, 6]); ctx.strokeRect(bxp.x, bxp.y, bxp.w, bxp.h + 4); ctx.restore();
-        lab('…and if we turn along with the grid arrow?', bxp.x + bxp.w / 2, bxp.y + bxp.h / 2, mut, 'center', '600 16px ');
+        lab('…and after the dq transformation?', bxp.x + bxp.w / 2, bxp.y + bxp.h / 2, mut, 'center', '600 16px ');
       }
+      const f = (x) => (Math.abs(x) < 0.05 ? '0' : (x < 0 ? '−' : '') + Math.abs(x).toFixed(1));
+      roP.set(f((1.5 * E * P.id) / 1000) + ' kW'); roQ.set(f((-1.5 * E * P.iq) / 1000) + ' kvar');
       // bottom plots
       const N = 240, a = [], b = [], c = [], fd = [], fq = [];
       for (let n = 0; n <= N; n++) { const x = (2 * TAU * n) / N; for (const [arr, s] of [[a, 0], [b, 1], [c, 2]]) { const y = x - (s * TAU) / 3; arr.push(P.id * Math.cos(y) - P.iq * Math.sin(y)); } fd.push(P.id); fq.push(P.iq); }
       const cur = ((((th % (2 * TAU)) + 2 * TAU) % (2 * TAU)) / (2 * TAU)) * 40, xt = [0, 10, 20, 30, 40].map((x) => [x, x + ' ms']), py0 = 2 * RC + 122, ph = 160;
       K.plot(ctx, { x: 50, y: py0, w: half - 64, h: ph }, { xlim: [0, 40], ylim: [-52, 52], yticks: [[-40, '−40'], [0, '0'], [40, '40']], xticks: xt, cursor: cur,
-        series: [{ y: a, x0: 0, dx: 40 / N, color: c2, width: 2.4 }, { y: b, x0: 0, dx: 40 / N, color: mut, width: 1.8 }, { y: c, x0: 0, dx: 40 / N, color: mut, width: 1.8, dash: [5, 4] }], title: 'The three phase currents [A]' });
+        series: [{ y: a, x0: 0, dx: 40 / N, color: c2, width: 2.4 }, { y: b, x0: 0, dx: 40 / N, color: mut, width: 1.8 }, { y: c, x0: 0, dx: 40 / N, color: mut, width: 1.8, dash: [5, 4] }], title: 'Phase currents i_a, i_b, i_c [A]' });
       if (P.dq) K.plot(ctx, { x: half + 50, y: py0, w: half - 64, h: ph }, { xlim: [0, 40], ylim: [-52, 52], yticks: [[-40, '−40'], [0, '0'], [40, '40']], xticks: xt, cursor: cur,
-        series: [{ y: fd, x0: 0, dx: 40 / N, color: c3, width: 3.4 }, { y: fq, x0: 0, dx: 40 / N, color: K.css('--warn'), width: 3.4 }], title: 'Two flat lines [A]', legend: [['i_d', c3], ['i_q', K.css('--warn')]] });
+        series: [{ y: fd, x0: 0, dx: 40 / N, color: c3, width: 3.4 }, { y: fq, x0: 0, dx: 40 / N, color: K.css('--warn'), width: 3.4 }], title: 'In the dq frame [A]', legend: [['i_d', c3], ['i_q', K.css('--warn')]] });
     }
     const loop = K.loop((dt) => { th += dt * TAU * 0.12; draw(); });
     K.onTheme(draw); draw();
