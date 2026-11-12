@@ -257,3 +257,73 @@
     return { step(k) { if (MS == null) return; const v = k >= MS ? 'mm' : 'none'; if (v !== P.mode) { P.mode = v; ctl[0].set(v); draw(); } } };
   };
 })();
+
+/* PD vs POD for a 3-level leg, seen in a few carrier periods: two phases at one instant, one in the upper band
+   and one in the lower band, their pole voltages and the line voltage between them. */
+(function () {
+  'use strict';
+  const { h } = K;
+  SIMS.pdpod = function (host, cfg) {
+    const VH = 400, NW = 1500, NPER = 3;
+    const P = { arr: cfg.arr || 'POD', th: cfg.th != null ? cfg.th : 60, m: 0.9 };
+    const cv = K.canvas(cfg.w || 700, 580);
+    const roJ = K.readout('Biggest jump in v<sub>ab</sub>', 'big'), roR = K.readout('Ripple of v<sub>ab</sub> (rms, this window)'), roT = K.readout('Line THD over a full cycle');
+    const ctl = [
+      K.seg({ label: 'Lower carrier', options: [['POD', 'mirrored (POD)'], ['PD', 'shifted down (PD)']], value: P.arr, onChange: (v) => { P.arr = v; draw(); } }),
+      K.slider({ label: 'θ (instant)', min: 0, max: 360, step: 1, value: P.th, fmt: (v) => v + '°', onInput: (v) => { P.th = v; draw(); } }),
+    ];
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = (cfg.w || 700) + 'px 1fr';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, ctl.map((c) => c.el), roJ.el, roR.el, roT.el,
+      h('div', { class: 'tiny', html: 'Three carrier periods; the references hardly move, so they are flat. All three phases share the same two carriers. m = 0.9, V<sub>dc</sub> = 800 V, f<sub>c</sub> = 15 f<sub>1</sub> for the THD.' })));
+    const cu = (t) => K.tri(t);                          // upper carrier 0 … 1
+    const cl = (t) => (P.arr === 'PD' ? K.tri(t) - 1 : -K.tri(t)); // lower carrier −1 … 0
+    const lev = (r, t) => (r >= 0 ? (r > cu(t) ? 1 : 0) : (r < cl(t) ? -1 : 0));
+    const thdCache = {};
+    function lineTHD(arr) {
+      if (thdCache[arr] != null) return thdCache[arr];
+      const S = 4096, mf = 15, v = new Float64Array(S);
+      const cL = (t) => (arr === 'PD' ? K.tri(t) - 1 : -K.tri(t));
+      const L = (r, t) => (r >= 0 ? (r > K.tri(t) ? 1 : 0) : (r < cL(t) ? -1 : 0));
+      for (let i = 0; i < S; i++) { const th = (K.TAU * i) / S, t = (mf * i) / S; v[i] = (L(P.m * Math.sin(th), t) - L(P.m * Math.sin(th - K.TAU / 3), t)) * VH; }
+      return (thdCache[arr] = K.thd(K.harmonics(v)));
+    }
+    function draw() {
+      const th = (P.th * Math.PI) / 180, ra = P.m * Math.sin(th), rb = P.m * Math.sin(th - K.TAU / 3);
+      const xs = [], cU = [], cL = [], va = [], vb = [], vab = [];
+      for (let q = 0; q <= NW; q++) {
+        const t = (NPER * q) / NW; xs.push(t); cU.push(cu(t)); cL.push(cl(t));
+        const a = lev(ra, t) * VH, b = lev(rb, t) * VH; va.push(a); vb.push(b); vab.push(a - b);
+      }
+      let jump = 0, mean = 0, s2 = 0;
+      for (let q = 1; q <= NW; q++) jump = Math.max(jump, Math.abs(vab[q] - vab[q - 1]));
+      for (let q = 0; q < NW; q++) mean += vab[q] / NW;
+      for (let q = 0; q < NW; q++) s2 += (vab[q] - mean) ** 2 / NW;
+      const ctx = cv.ctx; cv.clear();
+      const mut = K.css('--muted'), ca = K.css('--s2'), cb = K.css('--s3'), ink = K.css('--ink');
+      const xt = [[0, '0'], [1, 'T_s'], [2, '2 T_s'], [3, '3 T_s']];
+      K.plot(ctx, { x: 64, y: 28, w: cv.w - 80, h: 190 }, {
+        xlim: [0, NPER], ylim: [-1.1, 1.1], yticks: [[-1, '−1'], [0, '0'], [1, '+1']], xticks: xt,
+        series: [{ x: xs, y: cU, color: mut, width: 2 }, { x: xs, y: cL, color: mut, width: 2, dash: P.arr === 'POD' ? [6, 4] : null },
+          { x: [0, NPER], y: [ra, ra], color: ca, width: 3 }, { x: [0, NPER], y: [rb, rb], color: cb, width: 3 }],
+        title: P.arr === 'POD' ? 'Upper carrier and its mirror image (POD)' : 'Upper carrier and the same carrier shifted down (PD)',
+        legend: [['r_a', ca], ['r_b', cb]],
+      });
+      const row = (y, data, col, title, ylim, ticks) => K.plot(ctx, { x: 64, y, w: cv.w - 80, h: 62 }, { xlim: [0, NPER], ylim, yticks: ticks, xticks: [[0, ''], [1, ''], [2, ''], [3, '']], series: [{ x: xs, y: data, color: col, width: 2.6, step: true }], title });
+      row(262, va, ca, 'v_aO [V], leg a', [-480, 480], [[-400, '−400'], [0, '0'], [400, '+400']]);
+      row(360, vb, cb, 'v_bO [V], leg b', [-480, 480], [[-400, '−400'], [0, '0'], [400, '+400']]);
+      K.plot(ctx, { x: 64, y: 458, w: cv.w - 80, h: 90 }, {
+        xlim: [0, NPER], ylim: [-880, 880], yticks: [[-800, '−800'], [-400, '−400'], [0, '0'], [400, '400'], [800, '800']], xticks: xt,
+        series: [{ x: xs, y: vab, color: ink, width: 2.8, step: true }, { x: [0, NPER], y: [mean, mean], color: K.css('--s1'), width: 2, dash: [6, 4] }],
+        title: 'v_ab = v_aO − v_bO [V]: what the load sees (dashed: average)',
+      });
+      roJ.set(Math.round(jump) + ' V' + (jump > 600 ? ' <span class="pill bad">both legs switch together</span>' : jump > 0 ? ' <span class="pill ok">one leg at a time</span>' : ''));
+      roR.set(Math.round(Math.sqrt(s2)) + ' V');
+      roT.set('PD ' + (lineTHD('PD') * 100).toFixed(1) + ' % · POD ' + (lineTHD('POD') * 100).toFixed(1) + ' %');
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o && o !== P.arr) { P.arr = o; ctl[0].set(o); draw(); } } };
+  };
+})();

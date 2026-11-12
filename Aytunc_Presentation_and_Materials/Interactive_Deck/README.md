@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 58.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (28 slides, ≈ 63 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -37,31 +37,33 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 8 | ★ Switching states of a two-level inverter: P/N per leg, 8 states, line voltages, zero states, states as hexagon corners (simulation) | 2.5 |
 | 9 | ★ Space-vector PWM step by step: v* as a rotating arrow, mix the two nearest corners and a zero state, inner-circle limit 1.155, equal zero split = min-max | 2.5 |
 | 10 | ★ Why min-max equals SVPWM: one carrier period with three legs, the state sequence, active times fixed by the differences, the offset only moves zero time, min-max = equal split (simulation) | 3 |
-| 11 | Multilevel sine PWM, one carrier per step: two stacked carriers for three levels, count the carriers below the reference, PD vs POD/APOD in the line voltage, phase-shifted carriers (simulation, built step by step) | 4 |
-| 12 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
-| 13 | Why capacitors drift (recap of Sefer’s result) | 1 |
-| 14 | ★ Derivation: balancing authority ∝ cos φ | 3 |
-| 15 | Neutral-point balancing simulation | 3.5 |
-| 16 | Flying-capacitor balancing | 2 |
-| 17 | ★ MMC: arms of half-bridge submodules, arm equations (new) | 2.5 |
-| 18 | MMC: submodule sorting simulation (new) | 3 |
-| 19 | ★ MMC: circulating current and its control (new) | 2.5 |
-| 20 | ★ Averaged model for control | 2 |
-| 21 | Control structure | 2 |
-| 22 | dq current control (simulation) | 2.5 |
-| 23 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
-| 24 | Where multilevel lives today | 1.5 |
-| 25 | Three things to remember, handover to Elif | 1 |
-| 26 | References | |
+| 11 | ★ Three levels: why two carriers? One comparator gives two answers; one carrier used twice (|r|) = POD; shifted instead = PD (simulation, one leg) | 3 |
+| 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
+| 13 | More levels (5-level, PD/POD/APOD) and phase-shifted carriers (simulation) | 2.5 |
+| 14 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
+| 15 | Why capacitors drift (recap of Sefer’s result) | 1 |
+| 16 | ★ Derivation: balancing authority ∝ cos φ | 3 |
+| 17 | Neutral-point balancing simulation | 3.5 |
+| 18 | Flying-capacitor balancing | 2 |
+| 19 | ★ MMC: arms of half-bridge submodules, arm equations (new) | 2.5 |
+| 20 | MMC: submodule sorting simulation (new) | 3 |
+| 21 | ★ MMC: circulating current and its control (new) | 2.5 |
+| 22 | ★ Averaged model for control | 2 |
+| 23 | Control structure | 2 |
+| 24 | dq current control (simulation) | 2.5 |
+| 25 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
+| 26 | Where multilevel lives today | 1.5 |
+| 27 | Three things to remember, handover to Elif | 1 |
+| 28 | References | |
 
 ## Simulation models: what to say if asked
 
 - **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
-- **Neutral-point balancing (slide 15):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 14 (τ ≈ 33 ms at unity PF).
-- **Flying-capacitor balancing (slide 16):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
-- **dq control (slide 22):** an L-filter average model with a voltage limit and an optional one-sample delay.
-- **MMC sorting (slide 18):** one upper arm, 6 kV DC, N SMs of 3 mF, 200 A peak AC, nearest-level modulation every 100 µs. The arm current is imposed (circulating current assumed suppressed); a slow arm-energy loop sets its DC part. Modes: fixed order, full sort every period, or sort only on level changes with a ±5 % tolerance band.
-- **Grid filter (slide 23):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
+- **Neutral-point balancing (slide 17):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 16 (τ ≈ 33 ms at unity PF).
+- **Flying-capacitor balancing (slide 18):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
+- **dq control (slide 24):** an L-filter average model with a voltage limit and an optional one-sample delay.
+- **MMC sorting (slide 20):** one upper arm, 6 kV DC, N SMs of 3 mF, 200 A peak AC, nearest-level modulation every 100 µs. The arm current is imposed (circulating current assumed suppressed); a slow arm-energy loop sets its DC part. Modes: fixed order, full sort every period, or sort only on level changes with a ±5 % tolerance band.
+- **Grid filter (slide 25):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
 
 ## Printed handouts (`../quiz/`)
 
