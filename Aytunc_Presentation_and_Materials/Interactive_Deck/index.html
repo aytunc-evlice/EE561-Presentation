@@ -439,27 +439,25 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="How strong is the offset knob">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · what a small offset does to the midpoint current · read: Celanovic &amp; Boroyevich, IEEE TPEL 2000</div><h2>How strong is the offset knob? It depends on the power factor</h2></div></div>
-  <div class="body" style="grid-template-columns: 450px 1fr; gap:22px">
-    <div class="stack" style="gap:10px">
-      <div><h3 style="font-size:21px;margin:0">① Lift all three references a little</h3><p class="small" style="font-size:19px">Add a small <span class="m">r</span><sub>0</sub> &gt; 0. Legs with a positive reference move towards their peak: <b>less</b> time at O. Legs with a negative reference: <b>more</b> time at O.</p></div>
-      <div data-step="1"><h3 style="font-size:21px;margin:0">② So the midpoint current changes</h3><p class="small" style="font-size:19px">By −<span class="m">r</span><sub>0</sub> × (current of the positive legs − current of the negative legs). That bracket is the <b>strength</b> of the knob (plot).</p></div>
-      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Current in phase with voltage: strong</h3><p class="small" style="font-size:19px">The legs with a positive reference also carry positive current, so the strength is always positive. On average:</p>
-        <div><span class="eq box" style="font-size:22px">strength = (6/π) · <span class="m">I</span> · cos φ</span></div></div>
-      <div data-step="3"><h3 style="font-size:21px;margin:0">④ 90° out of phase: no grip</h3><p class="small" style="font-size:19px">Half the cycle it helps, half it hurts: the average is zero. The offset cannot balance at zero power factor.</p></div>
-      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Rectifier: the sign flips</h3><p class="small" style="font-size:19px">Same size, opposite sign. So the loop uses <span class="m">r</span><sub>0</sub> = <span class="m">K</span> · sign(<span class="m">P</span>) · (<span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>), and it gets slower as |cos φ| drops.</p></div>
+<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="How strong is the offset knob">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · when the offset can balance, and when not · read: Celanovic &amp; Boroyevich, IEEE TPEL 2000</div><h2>When does the offset work? It depends on the power factor</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:20px">
+      <div><h3 style="font-size:22px;margin:0">① The offset changes the midpoint current</h3><p class="small" style="font-size:20px">Add a small <span class="m">r</span><sub>0</sub> to all three references: the positive legs spend less time at O, the negative legs more. So the current through the midpoint changes, and C1 and C2 move.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Delivering power: it works</h3><p class="small" style="font-size:20px">Current in phase with the voltage: the push always goes the same way. A strong knob.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Reactive current: no effect</h3><p class="small" style="font-size:20px">Current 90° behind the voltage: half the cycle it pushes one way, half the other. It cancels.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ Rectifier: it pushes the wrong way</h3><p class="small" style="font-size:20px">Power flowing back: same size, opposite direction. So the controller flips the sign of the offset with the power direction.</p></div>
     </div>
-    <div data-sim="authority" data-config='{"w":620,"steps":{"0":0,"3":90,"4":180}}'></div>
+    <div data-sim="authority" data-config='{"w":620,"simple":true,"steps":{"0":0,"2":90,"3":180}}'></div>
   </div>
   <aside class="notes">
-    <p><b>3 min.</b> The plot shows the strength over one cycle and its average. Click 3 sets φ = 90°, click 4 sets φ = 180°; the buttons do the same.</p>
+    <p><b>2 min.</b> The curve is the strength of the knob versus φ, the lag of the current behind the voltage. The dot moves with the clicks: 0°, 90°, 180°. The buttons do the same.</p>
     <ul>
-      <li><b>①</b> Time at O is 1 − |r| (slide 15). Lifting a positive r makes |r| bigger; lifting a negative r makes |r| smaller.</li>
-      <li><b>②</b> Algebra if asked: i<sub>O</sub> = Σ(1 − |r<sub>x</sub> + r<sub>0</sub>|)·i<sub>x</sub>, so ∂i<sub>O</sub>/∂r<sub>0</sub> = −Σ sign(r<sub>x</sub>)·i<sub>x</sub>.</li>
-      <li><b>③</b> Average of sign(cos θ)·cos(θ − φ) is (2/π)·cos φ per phase; three phases give (6/π)·I·cos φ ≈ 95 A at 50 A peak (readout).</li>
-      <li><b>④</b> φ = 90°: the curve is half above, half below zero, average 0.</li>
-      <li><b>⑤</b> φ = 180°: the average is −95 A. A loop tuned on an inverter would push the wrong way in a rectifier, so multiply by sign(P). Closed-loop time constant τ = πC/(6·I·K·|cos φ|): with C = 4.7 mF, I = 50 A, K = 0.0015 per volt, τ ≈ 33 ms at unity PF. Next slide: the loop in action.</li>
+      <li><b>①</b> Time at O is 1 − |r|: lifting a positive r makes |r| bigger, lifting a negative r makes it smaller.</li>
+      <li><b>②</b> At 0° the legs with a positive reference also carry the positive current, so every leg pushes the same way.</li>
+      <li><b>③</b> At 90° the current changes sign in the middle of each half of the reference: the push reverses halfway. Net zero.</li>
+      <li><b>④</b> At 180° everything is mirrored. A loop tuned on an inverter would make things worse as a rectifier, so it uses r<sub>0</sub> = K·sign(P)·(v<sub>C1</sub> − v<sub>C2</sub>).</li>
+      <li>If asked for the formula: strength = (6/π)·I·cos φ, i.e. the curve is cos φ. Closed-loop time constant τ = πC/(6·I·K·|cos φ|): about 33 ms here at unity PF, infinite at 90°. Next slide shows all three cases live.</li>
     </ul>
   </aside>
 </section>

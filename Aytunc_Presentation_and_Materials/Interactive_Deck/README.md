@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 57 min)
+## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 56 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -43,7 +43,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
 | 15 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
 | 16 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
-| 17 | ★ How strong is the offset knob? Lifting the references changes time at O; strength = (6/π)·I·cos φ; no grip at 90°, sign flips in rectifier mode (simulation) | 3 |
+| 17 | ★ When does the offset work? It changes the midpoint current; works when delivering power, no effect with reactive current, wrong way as a rectifier (strength vs φ curve) | 2 |
 | 18 | Neutral-point balancing simulation | 3.5 |
 | 19 | Flying-capacitor balancing | 2 |
 | 20 | ★ Averaged model for control | 2 |

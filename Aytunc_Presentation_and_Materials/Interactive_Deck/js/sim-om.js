@@ -516,7 +516,25 @@
     host.style.gridTemplateColumns = (cfg.w || 680) + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, phS.el, quick, roA.el, roR.el,
       h('div', { class: 'tiny', html: 'Strength = Σ sign(r<sub>x</sub>)·i<sub>x</sub>: current of the legs with a positive reference minus current of the legs with a negative one. A small offset r<sub>0</sub> changes the midpoint current by −r<sub>0</sub> × strength. 50 A peak.' })));
+    const SIMPLE = !!cfg.simple;
+    if (SIMPLE) { host.querySelector('.tiny').innerHTML = 'How much a small offset moves the midpoint current, relative to an inverter at unity power factor. φ: how far the current lags the voltage.'; roA.el.remove(); }
     function draw() {
+      if (SIMPLE) {
+        const ctx = cv.ctx; cv.clear();
+        const xs = [], ys = []; for (let d = -180; d <= 180; d += 2) { xs.push(d); ys.push(100 * Math.cos((d * Math.PI) / 180)); }
+        const A = K.plot(ctx, { x: 70, y: 40, w: cv.w - 90, h: cv.h - 90 }, {
+          xlim: [-180, 180], ylim: [-115, 115], xticks: [-180, -90, 0, 90, 180].map((v) => [v, v + '°']), yticks: [[-100, '−100 %'], [0, '0'], [100, '100 %']],
+          bands: [{ y0: 0, y1: 115, color: 'rgba(46,125,50,.07)' }, { y0: -115, y1: 0, color: 'rgba(192,57,43,.07)' }],
+          series: [{ x: xs, y: ys, color: K.css('--ink2'), width: 2.6 }], title: 'Strength of the offset knob vs φ', xlabel: 'φ (current lag)',
+        });
+        const v = 100 * Math.cos((P.phi * Math.PI) / 180), col = v > 5 ? K.css('--good') : v < -5 ? K.css('--bad') : K.css('--warn');
+        ctx.save(); ctx.font = '700 15px ' + K.font; ctx.textAlign = 'center'; ctx.fillStyle = K.css('--muted');
+        ctx.textBaseline = 'middle';
+        [[0, 78, 'inverter'], [118, 14, 'reactive'], [-118, 14, 'reactive'], [158, -40, 'rectifier'], [-158, -40, 'rectifier']].forEach(([d, y, t]) => ctx.fillText(t, A.X(d), A.Y(y)));
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(A.X(P.phi), A.Y(v), 10, 0, K.TAU); ctx.fill(); ctx.restore();
+        roR.set(Math.round(v) + ' % ' + (v > 5 ? '<span class="pill ok">balances</span>' : v < -5 ? '<span class="pill bad">pushes the wrong way</span>' : '<span class="pill warn">no effect</span>'));
+        return;
+      }
       const phi = (P.phi * Math.PI) / 180, x = [], g = [];
       for (let q = 0; q <= N; q++) {
         const th = (K.TAU * q) / N; x.push((q / N) * 20);
