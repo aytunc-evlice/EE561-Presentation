@@ -209,7 +209,7 @@
         <div class="eq" style="font-size:23px"><span class="m">r</span><sub>0</sub> = −(max + min) / 2</div>
         <p class="small muted" style="font-size:17px"><span class="m">m</span> = 1.1, θ = 0: <span class="m">r</span> = (1.10, −0.55, −0.55) clips. <span class="m">r</span><sub>0</sub> = −0.275 → (0.825, −0.825, −0.825): inside ±1, same differences (table).</p></div>
       <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The gain: 1.155, or 15 %</h3><p class="small" style="font-size:19px">Worst instant: two phases equal and opposite, ±0.866 <span class="m">m</span>. Inside ±1 while <span class="m">m</span> ≤ 1/0.866 = 2/√3 ≈ 1.155. Up to there, no clipping and no 3rd, 5th, 7th.</p></div>
-      <div class="callout" data-step="5" style="font-size:19px"><b>This offset is space-vector PWM.</b> Sine PWM plus the min-max offset gives exactly the pulses of a space-vector modulator. Next slide: why.</div>
+      <div class="callout" data-step="5" style="font-size:19px"><b>This offset is space-vector PWM.</b> Sine PWM plus the min-max offset gives exactly the pulses of a space-vector modulator. Next two slides: why.</div>
     </div>
     <div data-sim="minmax" data-config='{"m":1.1,"th":0,"w":620,"h":400,"onStep":3}'></div>
   </div>
@@ -228,28 +228,54 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Min-max and space vectors">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Space-vector PWM = sine PWM + the min-max offset</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Switching states of a two-level inverter">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · before space vectors: what a switching state is</div><h2>Switching states: three legs, two positions each</h2></div></div>
+  <div class="body" style="grid-template-columns: 400px 1fr; gap:24px">
     <div class="stack" style="gap:10px">
-      <p class="small" style="font-size:19px">The offset of the last slide is what a space-vector modulator does. Same two-level converter as a map of its output voltages: 8 switch states → 7 vectors (6 active, 1 zero).</p>
-      <p class="small" style="font-size:19px"><b><b>v</b>* is the reference as one arrow.</b> Combine the three references (a = e<sup>j120°</sup>):</p>
-      <div class="eq" style="font-size:22px"><b>v</b>* = ⅔ (<span class="m">r</span><sub>a</sub> + a <span class="m">r</span><sub>b</sub> + a² <span class="m">r</span><sub>c</sub>) = <span class="m">m</span> e<sup>jθ</sup></div>
-      <p class="small" style="font-size:19px">Its length is <span class="m">m</span>. As θ = ω<span class="m">t</span> grows it <b>rotates</b>, one turn per output cycle: a phasor that turns in real time. In each switching period SVPWM builds it from the nearest vectors (shaded) and their time shares.</p>
-      <div class="callout" data-step="1" style="font-size:18px"><b>Same limit:</b> the dashed circle inscribed in the hexagon is |<b>v</b>*| = 2/√3 ≈ 1.155, the min-max limit of the last slide.</div>
-      <div class="callout" data-step="2" style="font-size:18px"><b>Same pulses:</b> centred SVPWM splits the zero time equally between NNN and PPP. That moves all three legs together, a common offset, and the equal split is exactly the min-max <span class="m">r</span><sub>0</sub>.</div>
-      <div class="callout" data-step="3" style="font-size:18px"><b>More levels:</b> more dots, closer together; still the three nearest. PD carriers plus a slightly modified offset give the same sequence, so from here on we stay with carriers.</div>
+      <div><h3 style="font-size:21px;margin:0">① Each leg is P or N</h3><p class="small" style="font-size:19px">Upper switch on: the leg output is at <b>P</b>, +<span class="m">V</span><sub>dc</sub>/2. Lower switch on: <b>N</b>, −<span class="m">V</span><sub>dc</sub>/2. Never both: that would short the DC link.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② A state names all three legs</h3><p class="small" style="font-size:19px">Three letters, in the order a, b, c. <b>PNN</b>: leg a at P, legs b and c at N. Two choices per leg: 2 × 2 × 2 = <b>8 states</b>.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ The load sees the differences</h3><p class="small" style="font-size:19px">PNN on an 800 V link: <span class="m">v</span><sub>ab</sub> = +800 V, <span class="m">v</span><sub>bc</sub> = 0, <span class="m">v</span><sub>ca</sub> = −800 V (table).</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Two states give nothing</h3><p class="small" style="font-size:19px"><b>PPP</b> and <b>NNN</b>: all legs at the same rail, so every line voltage is zero. These are the <b>zero states</b>; the other six are <b>active</b>.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Each state is one arrow</h3><p class="small" style="font-size:19px">Pack the three voltages into one arrow (the same way as the reference on the next slide). The 6 active states give 6 arrows of equal length, 60° apart: the corners of a <b>hexagon</b>. The zero states sit in the centre.</p></div>
+      <p class="small muted" data-step="4" style="font-size:17px">A three-level leg has a third position, <b>O</b> (the DC midpoint): 3 × 3 × 3 = 27 states.</p>
     </div>
-    <div data-sim="svm" data-config='{"n":2,"levelStep":3}'></div>
+    <div data-sim="states2l" data-config='{"state":"PNN"}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> No dwell-time algebra needed. Drag the tip of v* on the hexagon: the shaded triangle shows the nearest vectors and the bar their time shares.</p>
+    <p><b>2.5 min.</b> Build the vocabulary before any space vectors. Click the P/N buttons live, or press “Next state”.</p>
     <ul>
-      <li><b>“What is v*?”</b> The three references at one instant, packed into one complex number. For balanced sines r<sub>x</sub> = m cos(θ − k·120°) the sum gives exactly m e<sup>jθ</sup>: length m, angle θ. Press <b>Rotate v*</b>: the arrow turns once per 20 ms cycle, and the shaded triangle changes as it moves. A phasor is the same arrow frozen at t = 0; v* is the one that actually turns (it is called a space vector). Its tip on the α axis is r<sub>a</sub>, so projecting it back gives the three sine references.</li>
-      <li><b>Opening line:</b> “Last slide we added r<sub>0</sub> by hand. A space-vector modulator gets the same pulses from a different picture.” Then point at the hexagon.</li>
-      <li>Starts two-level, right after min-max: push m to 1.1, still inside the dashed circle, still linear, exactly like min-max.</li>
-      <li>If asked how SVPWM computes the times: volt-second balance, d<sub>1</sub><b>V</b><sub>1</sub> + d<sub>2</sub><b>V</b><sub>2</sub> + d<sub>0</sub><b>V</b><sub>0</sub> = <b>v</b>*, d<sub>1</sub> + d<sub>2</sub> + d<sub>0</sub> = 1. Two-level equivalence with min-max: Zhou &amp; Wang 2002.</li>
-      <li>Click 3 switches the map to three levels: 19 vectors; inner dots have two states each (e.g. POO / ONN). Multilevel equivalence with PD carriers: McGrath, Holmes &amp; Lipo 2003. Keep the pairs in mind: they come back two slides later as the balancing knob.</li>
+      <li><b>① “What can one leg do?”</b> Two positions only. The red box is the switch that is on.</li>
+      <li><b>② “How many combinations?”</b> 2³ = 8. The name is just the list of positions, a then b then c.</li>
+      <li><b>③</b> The table: pole voltages from O, line voltages between the legs. Only the second row reaches the load.</li>
+      <li><b>④</b> Set PPP, then NNN: the arrow disappears, all line voltages are zero. Two ways to make zero: this choice comes back on the next slide.</li>
+      <li><b>⑤</b> Press “Next state” through PNN → PPN → NPN → NPP → NNP → PNP: the arrow jumps 60° each time. The packing is v = ⅔(v<sub>aO</sub> + a v<sub>bO</sub> + a² v<sub>cO</sub>), a = e<sup>j120°</sup>; for PNN it gives ⅔ · 800 V = 533 V at 0°.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Min-max and space vectors">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · space-vector PWM, step by step · read: Holmes &amp; Lipo; Zhou &amp; Wang, IEEE TIE 2002</div><h2>Space-vector PWM: build the reference from the nearest states</h2></div></div>
+  <div class="body" style="grid-template-columns: 450px 1fr; gap:22px">
+    <div class="stack" style="gap:9px">
+      <div><h3 style="font-size:21px;margin:0">① The reference as one arrow</h3><p class="small" style="font-size:19px">Pack the three references the same way (a = e<sup>j120°</sup>):</p>
+        <div class="eq" style="font-size:22px"><b>v</b>* = ⅔ (<span class="m">r</span><sub>a</sub> + a <span class="m">r</span><sub>b</sub> + a² <span class="m">r</span><sub>c</sub>) = <span class="m">m</span> e<sup>jθ</sup></div>
+        <p class="small" style="font-size:19px">Length <span class="m">m</span>; as θ = ω<span class="m">t</span> grows it rotates, one turn per output cycle.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② The inverter has only 7 dots</h3><p class="small" style="font-size:19px">The states of the last slide. <b>v</b>* is almost always between them.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So mix them in time</h3><p class="small" style="font-size:19px">In one switching period, stay a while on each of the <b>two corners next to v*</b> and the rest of the time on a <b>zero state</b>. The average arrow is <b>v</b>* (shaded triangle, time shares on the right).</p>
+        <p class="small muted" style="font-size:17px"><span class="m">m</span> = 0.8 at 30°, half way between PNN and PPN: 34.6 % PNN, 34.6 % PPN, 30.7 % zero.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ The limit is the inner circle</h3><p class="small" style="font-size:19px">No zero time left when <b>v</b>* touches the circle inside the hexagon: <span class="m">m</span> = 1.155, the min-max limit of slide 7.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Same pulses as min-max</h3><p class="small" style="font-size:19px">Split the zero time equally between NNN and PPP, and each leg’s pulses are exactly sine PWM plus the min-max offset.</p></div>
+    </div>
+    <div data-sim="svm" data-config='{"n":2,"m":0.8,"ang":30}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> One question per click.</p>
+    <ul>
+      <li><b>① “What is v*?”</b> The three references at one instant, packed into one arrow, the same packing as the states on the last slide. For balanced sines the result is exactly m e<sup>jθ</sup>. Press <b>Rotate v*</b>: it turns once per 20 ms. A phasor is this arrow frozen at t = 0; v* actually turns (a space vector). Its projection on the horizontal axis is r<sub>a</sub>.</li>
+      <li><b>② “Can the inverter make v* directly?”</b> No: only the 7 dots. Scale: the corners are at 4/3 in units of V<sub>dc</sub>/2, i.e. 533 V.</li>
+      <li><b>③ “Then how?”</b> The same trick as one leg on slide 4: switch fast and let the average do the work. Here the average of arrows. Drag v* around: the triangle and the three shares change. At 30°, m = 0.8: the two corners get equal time.</li>
+      <li><b>④ “Why 1.155?”</b> Drag v* to the circle at 30°: the zero share becomes 0. The inner circle radius is (4/3)·cos 30° = 1.155.</li>
+      <li><b>⑤</b> The equal split of zero time between NNN and PPP is a common shift of all three legs: the min-max r<sub>0</sub>. If asked: Zhou &amp; Wang 2002 prove the equivalence. For more levels (3-level button) there are more dots and the same idea; PD carriers with a modified offset give the same sequence (McGrath, Holmes &amp; Lipo 2003).</li>
     </ul>
   </aside>
 </section>

@@ -174,7 +174,7 @@
 
   // ---------- space-vector hexagon ----------
   SIMS.svm = function (host, cfg) {
-    const P = { n: cfg.n || 3, m: 0.8, ang: 20, play: false, speed: 20 };
+    const P = { n: cfg.n || 3, m: cfg.m != null ? cfg.m : 0.8, ang: cfg.ang != null ? cfg.ang : 20, play: false, speed: 20 };
     const W = 640, cv = K.canvas(W, W);
     const info = h('div', { class: 'stack', style: { gap: '10px' } });
     const ctl = [
