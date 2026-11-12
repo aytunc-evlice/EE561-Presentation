@@ -424,7 +424,7 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:21px;margin:0">① Ideal case: only the wiggle</h3><p class="small" style="font-size:19px">Last slide: with a balanced load the midpoint current has no average. The two voltages wiggle at 150 Hz around 400 V and stay there.</p></div>
       <div data-step="1"><h3 style="font-size:21px;margin:0">② But nothing pulls them back</h3><p class="small" style="font-size:19px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
-      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next slide: how strong that knob is.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next slide: closing the loop.</p></div>
     </div>
     <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"1":{"bleed":1}}}'></div>
   </div>
@@ -439,29 +439,6 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="How strong is the offset knob">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · when the offset can balance, and when not · read: Celanovic &amp; Boroyevich, IEEE TPEL 2000</div><h2>When does the offset work? It depends on the power factor</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
-    <div class="stack" style="gap:20px">
-      <div><h3 style="font-size:22px;margin:0">① The offset changes the midpoint current</h3><p class="small" style="font-size:20px">Add a small <span class="m">r</span><sub>0</sub> to all three references: the positive legs spend less time at O, the negative legs more. So the current through the midpoint changes, and C1 and C2 move.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② Delivering power: it works</h3><p class="small" style="font-size:20px">Current in phase with the voltage: the push always goes the same way. A strong knob.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Reactive current: no effect</h3><p class="small" style="font-size:20px">Current 90° behind the voltage: half the cycle it pushes one way, half the other. It cancels.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ Rectifier: it pushes the wrong way</h3><p class="small" style="font-size:20px">Power flowing back: same size, opposite direction. So the controller flips the sign of the offset with the power direction.</p></div>
-    </div>
-    <div data-sim="authority" data-config='{"w":620,"simple":true,"steps":{"0":0,"2":90,"3":180}}'></div>
-  </div>
-  <aside class="notes">
-    <p><b>2 min.</b> The curve is the strength of the knob versus φ, the lag of the current behind the voltage. The dot moves with the clicks: 0°, 90°, 180°. The buttons do the same.</p>
-    <ul>
-      <li><b>①</b> Time at O is 1 − |r|: lifting a positive r makes |r| bigger, lifting a negative r makes it smaller.</li>
-      <li><b>②</b> At 0° the legs with a positive reference also carry the positive current, so every leg pushes the same way.</li>
-      <li><b>③</b> At 90° the current changes sign in the middle of each half of the reference: the push reverses halfway. Net zero.</li>
-      <li><b>④</b> At 180° everything is mirrored. A loop tuned on an inverter would make things worse as a rectifier, so it uses r<sub>0</sub> = K·sign(P)·(v<sub>C1</sub> − v<sub>C2</sub>).</li>
-      <li>If asked for the formula: strength = (6/π)·I·cos φ, i.e. the curve is cos φ. Closed-loop time constant τ = πC/(6·I·K·|cos φ|): about 33 ms here at unity PF, infinite at 90°. Next slide shows all three cases live.</li>
-    </ul>
-  </aside>
-</section>
-
 <section class="slide" data-part="2" data-section="balance" data-min="3.5" data-title="Neutral-point balancing simulation">
   <div class="sh"><div><div class="kicker"><b>Balance</b> · simulation · 3-phase NPC, switching-period average model</div><h2>Balancing the midpoint with an offset</h2></div></div>
   <div class="body" data-sim="npbal" data-config='{"dv0":40}'></div>
@@ -471,7 +448,7 @@
       <li>Loop off → ΔV stays offset (no natural restoring force). Add 1 A leakage → it drifts.</li>
       <li>Loop on → r<sub>0</sub> moves, average i<sub>O</sub> goes negative, ΔV returns with τ ≈ 33 ms. PI removes the leakage offset.</li>
       <li>φ = 90° → authority ≈ 0 %: kick ΔV and watch it stay.</li>
-      <li>φ = 180° with the <b>naive</b> sign → positive feedback → trip. With sign(P) it works. (Printed quiz, question 2c.)</li>
+      <li>φ = 180° with the <b>naive</b> sign → positive feedback → trip. With sign(P) it works.</li>
     </ol>
   </aside>
 </section>
@@ -614,7 +591,7 @@
     <div class="card" data-step="3"><p class="lead"><b>3 · To the controller, any leg is a voltage source behind a filter.</b> More levels mean smaller steps, so a smaller filter for the same ripple; an LCL needs its resonance damped.</p></div>
     <div class="callout" data-step="4"><b>Next talk:</b> Elif applies phase-shifted and level-shifted carriers cell by cell in the <b>cascaded H-bridge</b>, where every cell has its own isolated source.</div>
   </div>
-  <aside class="notes"><p><b>1 min.</b> Then hand over to Elif. The printed quiz is handed out at the end of the module.</p></aside>
+  <aside class="notes"><p><b>1 min.</b> Then hand over to Elif.</p></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="outlook" data-min="0" data-title="References">
