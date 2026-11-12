@@ -10,7 +10,7 @@
 <style>
 :root{
   --paper:#FFFFFF; --surface:#F5F6F8; --ink:#111418; --ink2:#3B4048; --muted:#6B717B; --rule:#D9DCE1; --faint:#EEF0F3;
-  --c1:#156082; --c2:#E97132; --c3:#196B24; --c4:#A02B93; --carrier:#AAB0B9;
+  --c1:#156082; --c2:#E97132; --c3:#196B24; --c4:#A02B93; --carrier:#AAB0B9; --accent:#CF0A2C;
   --font:Aptos, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
   color-scheme:light; box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
@@ -18,12 +18,12 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --paper:#121417; --surface:#1B1E23; --ink:#ECEEF1; --ink2:#C9CDD3; --muted:#959BA5; --rule:#33373E; --faint:#24272D;
-    --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; color-scheme:dark;
+    --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; --accent:#FF4D63; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#121417; --surface:#1B1E23; --ink:#ECEEF1; --ink2:#C9CDD3; --muted:#959BA5; --rule:#33373E; --faint:#24272D;
-  --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; color-scheme:dark;
+  --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; --accent:#FF4D63; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -86,18 +86,32 @@ button:focus-visible{outline:3px solid var(--c1); outline-offset:2px}
 @media (prefers-reduced-motion: reduce){ .bar i{transition:none} }
 
 /* footer */
-#foot{position:absolute; left:110px; right:60px; bottom:28px; display:flex; justify-content:space-between; align-items:flex-end; font-size:16px; color:var(--muted); pointer-events:none}
+#foot{position:absolute; left:110px; right:60px; bottom:18px; display:flex; justify-content:space-between; align-items:flex-end; font-size:16px; color:var(--muted); pointer-events:none}
+#foot .fl{display:flex; flex-direction:column; gap:6px}
+#fline{font-size:15px}
 #foot > *{pointer-events:auto}
 #nav{display:none; gap:6px} @media (hover:none){ #nav{display:flex} }
 #nav button{font:inherit; font-size:16px; color:var(--muted); background:transparent; border:1px solid var(--rule); border-radius:8px; padding:4px 12px}
 #drawer{position:absolute; left:50%; transform:translateX(-50%); bottom:76px; width:1100px; background:var(--paper); border:1.5px solid var(--rule); border-radius:14px; padding:18px 24px; font-size:21px; line-height:1.45; color:var(--ink2); display:none; box-shadow:0 14px 34px rgba(0,0,0,.14)}
 #drawer.open{display:block}
 
-/* title slide */
-#s-title{justify-content:center; align-items:center; text-align:center}
-#s-title h1{font-size:84px; font-weight:700; line-height:1.08; margin:0; letter-spacing:-0.015em}
-#s-title .who{font-size:32px; margin-top:44px}
-#s-title .course{font-size:22px; color:var(--muted); margin-top:10px}
+/* title slide: same layout as the other two talks of the module */
+#s-title{padding:40px 64px; justify-content:space-between}
+.tlogos{display:flex; justify-content:space-between; align-items:center}
+.tlogos .odtu{height:64px} .tlogos .pl{height:40px}
+.tcenter{text-align:center; display:flex; flex-direction:column; gap:14px; align-items:center}
+.tcenter .course{font-size:64px; font-weight:300; line-height:1}
+.tcenter .cname{font-size:34px; font-weight:700; line-height:1.2}
+.tcenter .topic{font-size:46px; font-weight:300; line-height:1.15; margin-top:18px}
+.tcenter h1{font-size:30px; font-weight:400; line-height:1.3; margin:0; color:var(--accent)}
+.tcenter .by{font-size:30px; font-weight:300; color:var(--ink2); margin-top:18px}
+.tfoot{display:flex; justify-content:space-between; font-size:17px; color:var(--muted)}
+#stage:has(#s-title.active) #count, #stage:has(#s-title.active) #fline{visibility:hidden}
+/* logos in the top-right corner of every slide (stacked, so long titles keep one line) */
+.logos{position:absolute; top:22px; right:28px; display:flex; flex-direction:column; align-items:flex-end; gap:8px}
+.logos img{display:block} .logos .em{height:44px} .logos .pl{height:24px}
+:root[data-theme="dark"] .logos, :root[data-theme="dark"] .tlogos{background:#fff; border-radius:8px; padding:6px 12px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logos, :root:not([data-theme="light"]) .tlogos{background:#fff; border-radius:8px; padding:6px 12px} }
 
 /* schematic */
 .w{stroke:var(--ink); stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round}
@@ -139,10 +153,16 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
 
 <!-- 1 title -->
 <section class="slide" id="s-title" data-ref="">
-  <h1>Cascaded H-Bridge<br>Multilevel Inverters</h1>
-  <div class="who">Elif Topaloğlu</div>
-  <div class="course">EE561 Advanced Static Power Conversion, ODTÜ</div>
-  <aside class="notes">From one H-bridge cell to the full CHB inverter, its modulation schemes and where it is used. Main reference: Wu and Narimani, Chapter 7.</aside>
+  <div class="tlogos"><img class="odtu" src="img/odtu_logo.svg" alt="ODTÜ — Middle East Technical University"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="tcenter">
+    <div class="course">EE561</div>
+    <div class="cname">Advanced Static Power Conversion</div>
+    <div class="topic">Multilevel Converters</div>
+    <h1>Cascaded H-Bridge Multilevel Inverters</h1>
+    <div class="by">Elif Topaloğlu</div>
+  </div>
+  <div class="tfoot"><span>Department of Electrical and Electronics Engineering · METU PowerLab</span><span>Fall 2026</span></div>
+  <aside class="notes">Third of the three talks: Sefer built the levels, Aytunç ran them with carriers, balancing and control. This talk applies those carriers cell by cell. From one H-bridge cell to the full CHB inverter, its modulation schemes and where it is used. Main reference: Wu and Narimani, Chapter 7.</aside>
 </section>
 
 <!-- 2 H-bridge cell -->
@@ -497,7 +517,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Simulations use ideal switches and a 60 Hz fundamental.</aside>
 </section>
 
-<div id="foot"><div id="ref"></div><div style="display:flex; gap:14px; align-items:center"><span id="nav"><button id="bPrev" aria-label="Previous slide">◀</button><button id="bNext" aria-label="Next slide">▶</button></span><span id="count"></span></div></div>
+<div id="foot"><div class="fl"><div id="ref"></div><div id="fline">EE561 Advanced Static Power Conversion · Multilevel Converters · Cascaded H-bridge · Elif Topaloğlu</div></div><div style="display:flex; gap:14px; align-items:center"><span id="nav"><button id="bPrev" aria-label="Previous slide">◀</button><button id="bNext" aria-label="Next slide">▶</button></span><span id="count"></span></div></div>
 <div id="drawer" role="note"><div id="noteText"></div></div>
 </div></div>
 <script>
@@ -1271,6 +1291,7 @@ D.register('stair', el => {
   return { draw };
 });
 
+document.querySelectorAll(".slide:not(#s-title)").forEach(h => h.insertAdjacentHTML("beforeend", '<div class="logos"><img class="em" src="img/odtu_emblem.svg" alt="ODTÜ"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>'));
 D.boot();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => D.redraw());
 </script>
