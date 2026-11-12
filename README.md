@@ -13,7 +13,7 @@ METU EE561, Fall 2026 · Presenters: **Sefer İdacı**, **Mustafa Aytunç Evlice
 | `lab-demo/` | Lab demo plan, setup photos, measurements |
 | `quiz/` | Post-presentation quiz and exam questions |
 | `Sefer_Presentation_and_Materials/` | Sefer’s part: interactive HTML deck, printed quiz and potential final questions, reference paper (see its [README](Sefer_Presentation_and_Materials/README.md)) |
-| `Aytunc_Presentation_and_Materials/` | Aytunç’s part (second talk): modulation, capacitor balancing, MMC and grid control slides, printed quiz and potential final questions (see its [README](Aytunc_Presentation_and_Materials/README.md)) |
+| `Aytunc_Presentation_and_Materials/` | Aytunç’s part (second talk): modulation, capacitor balancing and grid control slides; quiz to be written (see its [README](Aytunc_Presentation_and_Materials/README.md)) |
 | `Elif_Presentation_and_Materials/` | Elif’s part (third talk): cascaded H-bridge multilevel inverters, interactive HTML deck (see its [README](Elif_Presentation_and_Materials/README.md)) |
 | `private/` | Local only, git-ignored: instructor's slides, syllabus, course admin |
 

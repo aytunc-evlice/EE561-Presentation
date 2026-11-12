@@ -17,10 +17,11 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `F` | Fullscreen |
 | `D` | Dark or light theme; light is better for a lit room |
 | `B` | Black screen |
+| Click a figure | Enlarge it over the slide; click again or `Esc` to close. Draggable plots show a ⤢ button instead and stay live when enlarged |
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (22 slides, ≈ 46 min)
+## Outline: Running the levels: Modulate · Balance · Control (28 slides, ≈ 59 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -28,42 +29,47 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | --: | --- | --: |
 | 1 | Title | 0.5 |
 | 2 | Learning objectives | 0.5 |
-| 3 | ★ Basics: sine-triangle PWM: carrier, reference, comparator, duty cycle, local average (animated) | 2 |
-| 4 | ★ Basics: modulation index m<sub>a</sub> and frequency ratio m<sub>f</sub>: linear range, overmodulation, sideband clusters | 2 |
-| 5 | Reference → level → state → gates | 1.5 |
-| 6 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
+| 3 | ★ Basics: one comparator, from DC-DC to sine PWM: carrier, DC reference (buck), comparator, average, then a sine reference (inverter leg) | 2.5 |
+| 4 | ★ One switching period: two leg voltages, what r is, why the on-time is (1 + r)/2, why the average is r·V<sub>dc</sub>/2 (figure, built step by step) | 3 |
+| 5 | ★ From one period to the sine: m<sub>a</sub>, the fundamental m<sub>a</sub>·V<sub>dc</sub>/2, overmodulation, m<sub>f</sub> and the harmonics (simulation) | 2.5 |
+| 6 | ★ Overmodulation, step by step: on-time saturates, clipped sine, Fourier coefficient, why > 400 V, square-wave limit 4/π, harmonics 3/5/7 (simulation) | 3 |
 | 7 | Min-max injection | 3 |
-| 8 | Min-max on Sefer’s hexagon: same limit, same pulses, redundancy = offset (new; replaces three SVM slides) | 2 |
-| 9 | Why capacitors drift (recap of Sefer’s result) | 1 |
-| 10 | ★ Derivation: balancing authority ∝ cos φ | 3 |
-| 11 | Neutral-point balancing simulation | 3.5 |
-| 12 | Flying-capacitor balancing | 2 |
-| 13 | ★ MMC: arms of half-bridge submodules, arm equations (new) | 2.5 |
-| 14 | MMC: submodule sorting simulation (new) | 3 |
-| 15 | ★ MMC: circulating current and its control (new) | 2.5 |
-| 16 | ★ Averaged model for control | 2 |
-| 17 | Control structure | 2 |
-| 18 | dq current control (simulation) | 2.5 |
-| 19 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
-| 20 | Where multilevel lives today | 1.5 |
-| 21 | Three things to remember, handover to Elif | 1 |
-| 22 | References | |
+| 8 | ★ Switching states of a two-level inverter: P/N per leg, 8 states, line voltages, zero states, states as hexagon corners (simulation) | 2.5 |
+| 9 | ★ Space-vector PWM step by step: v* as a rotating arrow, mix the two nearest corners and a zero state, inner-circle limit 1.155, equal zero split = min-max | 2.5 |
+| 10 | ★ Why min-max equals SVPWM: one carrier period with three legs, the state sequence, active times fixed by the differences, the offset only moves zero time, min-max = equal split (simulation) | 3 |
+| 11 | ★ Three levels: one carrier for each half (upper P/O, lower O/N), same rule inside each half; PD = shifted copy, POD = mirror image (simulation, one leg) | 2.5 |
+| 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
+| 13 | More levels: five levels, four carriers, same rule; PD vs POD (simulation) | 1.5 |
+| 14 | The filter, from pulses to a sine: the leg output is pulses, an inductor keeps only the average, 3-level halves the ripple, LCL removes most of it, an LCL rings after a kick and a resistor calms it (simulation) | 2.5 |
+| 15 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
+| 16 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
+| 17 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
+| 18 | ★ How the offset pushes charge into or out of the midpoint: one instant, time at P/O/N per leg, r₀ = 0, +0.1, −0.1 (simulation) | 2.5 |
+| 19 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
+| 20 | Flying capacitor: two ways to make 0 V (10 / 01), one charges the capacitor and one discharges it, taking turns leaves an error, choosing by the error removes it (schematic + period-by-period plot) | 2 |
+| 21 | Grid step 1 of 4, what makes the current flow: equal voltages give no current; the leading side sends active power to the lagging side; the higher-voltage side sends reactive power (simulation with size and timing sliders) | 2.5 |
+| 22 | Grid step 2 of 4, let a PI controller set the voltage: set by hand it fails when the grid drops 5 %, the PI corrects it, but a small error stays on a sine (simulation) | 2.5 |
+| 23 | Grid step 3 of 4, the dq transformation: the frame turns with the grid voltage (the reference, on the d axis), the sine currents become two constants, i_d for active and i_q for reactive power, one PI each (animation with sliders, P and Q readouts) | 2.5 |
+| 24 | Grid step 4 of 4, who decides the wanted current: the DC capacitor as a bucket, more power in makes it overflow, a PI on the DC voltage asks for more grid current (simulation) | 2 |
+| 25 | All together: three PI controllers (DC voltage, current, midpoint) in one block diagram | 1 |
+| 26 | Where multilevel converters are used (three cards) | 1 |
+| 27 | Three things to remember, handover to Elif | 1 |
+| 28 | References | |
 
 ## Simulation models: what to say if asked
 
-- **SPWM basics (slides 3–4):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
-- **Neutral-point balancing (slide 11):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 10 (τ ≈ 33 ms at unity PF).
-- **Flying-capacitor balancing (slide 12):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
-- **dq control (slide 18):** an L-filter average model with a voltage limit and an optional one-sample delay.
-- **MMC sorting (slide 14):** one upper arm, 6 kV DC, N SMs of 3 mF, 200 A peak AC, nearest-level modulation every 100 µs. The arm current is imposed (circulating current assumed suppressed); a slow arm-energy loop sets its DC part. Modes: fixed order, full sort every period, or sort only on level changes with a ±5 % tolerance band.
-- **Grid filter (slide 19):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
+- **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
+- **Neutral-point balancing (slide 19):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
+- **Flying-capacitor balancing (slide 20):** a simple leg schematic that highlights the current path in state 10 or 01, and the capacitor voltage period by period after a −60 V disturbance, with the states alternated or chosen by the error.
+- **Grid basics (slide 21):** steady-state phasors, per phase: grid 327 V peak, L = 2 mH, no resistance; i = (v − e)/(jωL).
+- **PI current control (slide 22):** one phase, L = 2 mH, R = 0.1 Ω. By hand: the voltage that gives 30 A at the nominal grid. PI: measured grid voltage + PI correction, 400 Hz bandwidth. The grid drops 5 % at 50 ms.
+- **dq transformation (slide 23):** pure geometry: the current arrow is (i<sub>d</sub> + j·i<sub>q</sub>) turned by the grid angle; the phase currents are its projections. P = 3/2·e<sub>d</sub>·i<sub>d</sub>, Q = −3/2·e<sub>d</sub>·i<sub>q</sub> with e<sub>d</sub> = 327 V.
+- **DC voltage (slide 24):** energy balance of a 2 mF capacitor at 800 V, C·v·dv/dt = P<sub>in</sub> − P<sub>out</sub>; the current loop is taken as instant. PI: 0.5 A/V and 40 A/(V·s).
+- **Grid filter (slide 14):** the phase voltage of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) is passed through the complex filter admittance by FFT and inverse FFT; the result is the ripple added to a clean 102 A sine. The kick view is a time-domain simulation of a 200 V, 20 µs pulse on the converter side, with and without the 1.5 Ω resistor in series with the capacitor.
 
-## Printed handouts (`../quiz/`)
+## Printed handouts
 
-- **`Quiz - Modulation and Balancing.pdf`:** one A4 page, two questions (DC-bus utilization and min-max injection; neutral-point balancing), 50 points.
-- **`Quiz Answer Key - Modulation and Balancing.pdf`:** worked solutions and marking. For the presenter and the instructor only.
-- **`Potential Final Questions - Modulation and Balancing.pdf`:** carrier-based PWM of a 3-level NPC and its offset; designing a neutral-point balancing loop, with solutions.
-- **Sources:** in `../quiz/src/`. Edit the HTML, then run `build_pdfs.ps1` to regenerate the PDFs with Edge.
+To be written once the slides are final (see `../quiz/README.md`).
 
 ## Assets
 
@@ -74,4 +80,4 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 
 - **Slides:** each slide is a `<section class="slide">` in `index.html`. Speaker notes are in its `<aside class="notes">`, and the time slot is in `data-min`.
 - **Build steps:** elements with `data-step="k"` appear on the k-th click.
-- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing, dq control), `js/sim-mmc.js` (MMC sorting, L/LCL filter), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.
+- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing; also a detailed dq sim, unused), `js/sim-mmc.js` (a detailed L/LCL sim and an MMC sorting sim, both unused), `js/sim-om.js` (overmodulation, states, PD/POD, midpoint ripple, flying capacitor, grid filter), `js/sim-grid.js` (grid basics, PI current control, dq transformation, DC voltage), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.

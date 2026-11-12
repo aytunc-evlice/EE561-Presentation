@@ -29,461 +29,621 @@
   <div class="sh"><div><div class="kicker">This talk</div><h2>Learning objectives</h2></div></div>
   <div class="body" style="align-content:start">
     <p class="lead">After this talk you should be able to:</p>
-    <ol style="gap:12px">
-      <li>Define carrier, reference, m<sub>a</sub> and m<sub>f</sub>, and predict the fundamental and the harmonic clusters of sine-triangle PWM.</li>
-      <li>Generate the level sequence of a multilevel leg with carriers (PD, POD, APOD, phase-shifted).</li>
-      <li>Compute the min-max offset and the linear limit, and explain why it is the space-vector modulator in carrier form.</li>
-      <li>Explain why the split DC link drifts, and design an offset-based balancing loop, including its limits.</li>
-      <li>Choose flying-capacitor states and MMC submodules in closed loop, and explain why an MMC needs circulating-current control.</li>
-      <li>Place modulation and balancing inside a grid current controller, and compare L and LCL filters for 2- and 3-level legs.</li>
+    <ol style="gap:14px">
+      <li>Explain how sine PWM turns fast pulses into a slow average voltage.</li>
+      <li>Get 15 % more voltage with min-max injection, and see why it is the same as space-vector PWM.</li>
+      <li>Drive a three-level leg with two carriers, and say why PD is used.</li>
+      <li>Explain why the DC-link midpoint drifts, and how a PI controller brings it back.</li>
+      <li>See the converter as a voltage source in a grid current controller, with an L or LCL filter.</li>
     </ol>
   </div>
   <aside class="notes"><p>30 s.</p></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Basics: sine-triangle PWM">
-  <div class="sh"><div><div class="kicker"><b>Basics</b> · carrier-based PWM of one leg · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Basics: sine-triangle PWM (SPWM)</h2></div></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: carrier PWM, DC and sine reference">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · carrier-based PWM of one leg · read: Mohan, Undeland &amp; Robbins, Ch. 7–8</div><h2>Basics: one comparator, from DC-DC to sine PWM</h2></div></div>
   <div class="body" style="grid-template-columns: 560px 1fr">
     <div class="stack" style="gap:12px">
-      <p class="small"><b>Carrier</b> <span class="m">c</span>(<span class="m">t</span>): a triangle between −1 and +1 at the switching frequency <span class="m">f</span><sub>c</sub>.</p>
-      <p class="small" data-step="1"><b>Reference</b> (modulating signal) <span class="m">r</span>(<span class="m">t</span>) = <span class="m">m</span><sub>a</sub> sin ω<sub>1</sub><span class="m">t</span>: the wanted pole voltage, normalized to <span class="m">V</span><sub>dc</sub>/2.</p>
-      <p class="small" data-step="2"><b>Comparator:</b> <span class="m">S</span><sub>1</sub> = 1 while <span class="m">r</span> &gt; <span class="m">c</span>, so <span class="m">v</span><sub>aO</sub> = ±<span class="m">V</span><sub>dc</sub>/2. The pulse width follows the reference.</p>
-      <p class="small" data-step="3"><b>Duty cycle</b> in one carrier period (<span class="m">r</span> ≈ constant), by similar triangles:</p>
-      <div class="eq" data-step="3"><span class="m">d</span> = (1 + <span class="m">r</span>)/2</div>
-      <div data-step="3"><span class="eq box" style="font-size:23px">⟨<span class="m">v</span><sub>aO</sub>⟩ = <span class="m">d</span> · <span class="m">V</span><sub>dc</sub>/2 + (1 − <span class="m">d</span>)(−<span class="m">V</span><sub>dc</sub>/2) = <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</span></div>
-      <p class="small" data-step="3">The <b>local average</b> (blue) reproduces the reference. Everything else is harmonics near multiples of <span class="m">f</span><sub>c</sub>.</p>
-      <div class="callout" data-step="4" style="font-size:19px"><span class="qlabel">Question:</span> 800 V link, <span class="m">r</span> = 0.5 at this instant. What are the duty cycle and the average pole voltage? <span class="ans" data-step="5"><span class="m">d</span> = 0.75 and ⟨v<sub>aO</sub>⟩ = 0.5 · 400 V = +200 V.</span></div>
+      <p class="small"><b>Carrier:</b> a triangle at the switching frequency <span class="m">f</span><sub>c</sub>.</p>
+      <p class="small" data-step="1"><b>Reference:</b> the voltage we want, as a fraction of the DC link. Start with a constant, a <b>DC reference</b>, as in a buck converter.</p>
+      <p class="small" data-step="2"><b>Comparator:</b> the switch is on while the reference is above the carrier. The output jumps between the two rails; only the pulse width changes.</p>
+      <p class="small" data-step="3"><b>Average</b> over one switching period (blue) equals the reference: a reference of 0.6 gives 60 % on-time, and 480 V on an 800 V link. This is the DC-DC converter you already know.</p>
+      <p class="small" data-step="4"><b>Now let the reference move:</b> a sine, slow compared with the carrier, and a carrier from −1 to +1 around the DC-link midpoint. Same comparator: the pulse width follows the sine and the local average reproduces it. That is an <b>inverter leg</b>. Everything else is harmonics near multiples of <span class="m">f</span><sub>c</sub>.</p>
     </div>
-    <div data-sim="spwm" data-config='{"m":0.8,"mf":9}'></div>
+    <div data-sim="spwm" data-config='{"m":0.8,"mf":9,"D":0.6,"mode":"dc","sineStep":4}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> Build it click by click: carrier → reference → comparator → duty cycle and local average. Then press <b>P</b> to run time: the zoom window follows the cursor and the pulse width breathes with the sine. Drag on the top plot to place the cursor by hand.</p>
+    <p><b>2.5 min.</b> Build it click by click: carrier → DC reference → comparator → average (buck). Click 4 switches the same simulation to a sine reference. Press <b>P</b> to run time: in DC mode the pulses are all the same width; in sine mode the pulse width breathes with the sine and the zoom window follows the cursor. Drag on the top plot to place the cursor by hand.</p>
     <ul>
-      <li>Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the local average clips at ±400 V (next slide).</li>
-      <li>Recap of the undergraduate leg; Sefer used it on the two-level leg. The multilevel carrier lab generalizes the comparator: N − 1 carriers, count how many the reference exceeds.</li>
+      <li>DC mode: move D and watch the average and the readout (on-time × 800 V). The output is measured from the negative rail, as in a buck converter.</li>
+      <li>Sine mode: the pole voltage is measured from the midpoint, so it swings ±400 V. Push m<sub>a</sub> above 1: the reference leaves the carrier, pulses drop out and the average clips at ±400 V (slides 5 and 6).</li>
+      <li>Message: the modulator does not care what the reference is. DC gives a DC-DC converter, a sine gives an inverter, and the controller later on simply hands it whatever voltage it needs.</li>
+      <li>Sefer used the same leg; the multilevel carrier lab generalizes the comparator to N − 1 carriers.</li>
     </ul>
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Basics: modulation index and frequency ratio">
-  <div class="sh"><div><div class="kicker"><b>Basics</b> · m<sub>a</sub>, m<sub>f</sub> and the PWM spectrum · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Basics: modulation index and frequency ratio</h2></div></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="One switching period">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · one switching period, step by step · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>One switching period: why the average is <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 640px; gap:28px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:21px;margin:0">① The leg makes only two voltages</h3><p class="small" style="font-size:19px">Measured from the DC-link midpoint O: upper switch on gives +<span class="m">V</span><sub>dc</sub>/2, lower switch on gives −<span class="m">V</span><sub>dc</sub>/2. Nothing in between.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② <span class="m">r</span> is the voltage we want</h3><p class="small" style="font-size:19px">Written as a fraction of <span class="m">V</span><sub>dc</sub>/2: <span class="m">r</span> = +1 means +<span class="m">V</span><sub>dc</sub>/2, <span class="m">r</span> = 0 means 0 V, <span class="m">r</span> = −1 means −<span class="m">V</span><sub>dc</sub>/2. Rule from the last slide: upper switch on while <span class="m">r</span> is above the carrier, lower switch on otherwise.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Inside one period, <span class="m">r</span> is a constant</h3><p class="small" style="font-size:19px">The carrier is much faster than the sine (e.g. 15 carrier periods per sine cycle), so during one carrier period the sine barely moves. Take <span class="m">r</span> = 0.5 for this period.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Why the switch is on for (1 + <span class="m">r</span>)/2 of the period</h3><p class="small" style="font-size:19px">The carrier is a straight line between −1 and +1, so it spends equal time at every height. The switch is on while the carrier is below <span class="m">r</span>: the stretch from −1 up to <span class="m">r</span>, which is 1 + <span class="m">r</span> out of a total height of 2.</p>
+        <div class="eq" style="font-size:24px"><span class="m">d</span> = (1 + <span class="m">r</span>)/2 &nbsp;<span class="small muted" style="font-size:18px;font-family:var(--font)"><span class="m">r</span> = 0.5 → 75 % · <span class="m">r</span> = 0 → 50 % · <span class="m">r</span> = 1 → 100 %</span></div></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The average is <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</h3><p class="small" style="font-size:19px">The load (an inductor, a motor) is too slow to follow the pulses; it responds to their average over the period:</p>
+        <div class="eq" style="font-size:24px"><span class="m">d</span> · (+<span class="m">V</span><sub>dc</sub>/2) + (1 − <span class="m">d</span>) · (−<span class="m">V</span><sub>dc</sub>/2) = (2<span class="m">d</span> − 1) · <span class="m">V</span><sub>dc</sub>/2 = <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2</div>
+        <p class="small muted" style="font-size:18px">800 V link, <span class="m">r</span> = 0.5: 0.75 × 400 V − 0.25 × 400 V = +200 V.</p></div>
+    </div>
+    <div class="stack" style="gap:6px">
+      <svg viewBox="0 0 640 220" style="width:640px;height:220px" aria-label="One leg across a split DC link">
+        <style>.lg line,.lg path{stroke:var(--ink2);stroke-width:2.2;fill:none} .lg rect{fill:var(--panel);stroke:var(--ink2);stroke-width:2} .lg text{font:600 17px var(--font);fill:var(--ink);dominant-baseline:middle} .lg .mu{fill:var(--muted);font-size:15px} .lg circle.n{fill:var(--ink2)} .lg .hi{fill:var(--s2)}</style>
+        <g class="lg">
+          <line x1="40" y1="20" x2="330" y2="20"/><line x1="40" y1="200" x2="330" y2="200"/>
+          <text x="345" y="20">+V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text><text x="345" y="200">−V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
+          <line x1="80" y1="20" x2="80" y2="62"/><line x1="60" y1="62" x2="100" y2="62"/><line x1="60" y1="72" x2="100" y2="72"/><line x1="80" y1="72" x2="80" y2="148"/>
+          <line x1="60" y1="148" x2="100" y2="148"/><line x1="60" y1="158" x2="100" y2="158"/><line x1="80" y1="158" x2="80" y2="200"/>
+          <circle class="n" cx="80" cy="110" r="5"/><text x="56" y="110">O</text>
+          <line x1="230" y1="20" x2="230" y2="40"/><rect x="200" y="40" width="60" height="44"/><text x="230" y="62" text-anchor="middle">upper</text>
+          <line x1="230" y1="84" x2="230" y2="136"/><rect x="200" y="136" width="60" height="44"/><text x="230" y="158" text-anchor="middle">lower</text>
+          <line x1="230" y1="180" x2="230" y2="200"/>
+          <circle class="n" cx="230" cy="110" r="5"/><line x1="230" y1="110" x2="300" y2="110"/><circle cx="306" cy="110" r="6" style="fill:var(--paper);stroke:var(--ink2);stroke-width:2"/><text x="318" y="110">a</text>
+          <text x="420" y="74">upper on:</text><text x="420" y="98" class="hi">v<tspan baseline-shift="sub" font-size="12">aO</tspan> = +V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
+          <text x="420" y="134">lower on:</text><text x="420" y="158" class="hi">v<tspan baseline-shift="sub" font-size="12">aO</tspan> = −V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
+          <text x="110" y="110" class="mu">midpoint</text>
+        </g>
+      </svg>
+      <svg viewBox="0 0 640 420" style="width:640px;height:420px" aria-label="One carrier period with a constant reference">
+        <style>.cp line,.cp path,.cp polyline{fill:none} .cp text{font:600 16px var(--font);fill:var(--ink2);dominant-baseline:middle} .cp .grid{stroke:var(--grid);stroke-width:1} .cp .ax{stroke:var(--line);stroke-width:1.4} .cp .car{stroke:var(--muted);stroke-width:2.6} .cp .ref{stroke:var(--s2);stroke-width:3} .cp .rt{fill:var(--s2);font-weight:700} .cp .br{stroke:var(--ink2);stroke-width:1.8} .cp .pl{stroke:var(--ink);stroke-width:2.6} .cp .av{stroke:var(--s1);stroke-width:3;stroke-dasharray:7 5} .cp .bt{fill:var(--s1);font-weight:700}</style>
+        <g class="cp">
+          <text x="80" y="14" style="font-weight:700;fill:var(--ink)">One switching period T<tspan baseline-shift="sub" font-size="11">s</tspan></text>
+          <line class="grid" x1="80" y1="40.0" x2="520" y2="40.0"/><line class="grid" x1="80" y1="150.0" x2="520" y2="150.0"/><line class="grid" x1="80" y1="260.0" x2="520" y2="260.0"/>
+          <line class="ax" x1="80" y1="30.0" x2="80" y2="270.0"/>
+          <text x="68" y="40.0" text-anchor="end">+1</text><text x="68" y="150.0" text-anchor="end">0</text><text x="68" y="260.0" text-anchor="end">−1</text>
+          <g data-step="3"><rect x="135.0" y="30.0" width="330.0" height="240.0" style="fill:var(--s1);opacity:.10"/></g>
+          <polyline class="car" points="80,40.0 300.0,260.0 520,40.0"/>
+          <text x="300.0" y="282.0" text-anchor="middle" style="fill:var(--muted)">carrier</text>
+          <g data-step="2"><line class="ref" x1="80" y1="95.0" x2="520" y2="95.0"/><text class="rt" x="300.0" y="81.0" text-anchor="middle">r = 0.5</text></g>
+          <g data-step="3">
+            <path class="br" d="M542,260.0 h8 V95.0 h-8"/><text x="558" y="167.5">1 + r</text><text x="558" y="189.5">= 1.5</text>
+            <path class="br" d="M612,260.0 h8 V40.0 h-8"/><text x="628" y="150.0">2</text>
+          </g>
+          <g data-step="3">
+            <text x="68" y="318" text-anchor="end">+V<tspan baseline-shift="sub" font-size="11">dc</tspan>/2</text><text x="68" y="368" text-anchor="end">−V<tspan baseline-shift="sub" font-size="11">dc</tspan>/2</text>
+            <polyline class="pl" points="80,368 135.0,368 135.0,318 465.0,318 465.0,368 520,368"/>
+            <text x="542" y="343" style="fill:var(--muted)">v<tspan baseline-shift="sub" font-size="11">aO</tspan></text>
+            <path class="br" d="M135.0,392 v8 H465.0 v-8"/><text x="300.0" y="412" text-anchor="middle">on: 75 % of T<tspan baseline-shift="sub" font-size="11">s</tspan></text>
+          </g>
+          <g data-step="4"><line class="av" x1="80" y1="330.5" x2="520" y2="330.5"/><text class="bt" x="542" y="322">average</text><text class="bt" x="542" y="300">+200 V</text></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> One question per click; ask it out loud before you click.</p>
+    <ul>
+      <li><b>① “What can the leg output?”</b> Only two values. Everything else is built from time: how long we stay at each.</li>
+      <li><b>② “What is r?”</b> Just the wanted voltage, scaled so that ±1 is the most the leg can give. On the last slide (buck) the carrier went 0 … 1; here it goes −1 … +1 because the output must also go negative.</li>
+      <li><b>③ “Why can we treat r as constant?”</b> One carrier period is 1/15 of the sine cycle (m<sub>f</sub> = 15). The bigger m<sub>f</sub>, the better this is.</li>
+      <li><b>④ “Why (1 + r)/2?”</b> Point at the figure: the carrier falls from +1 to −1 and rises back, at constant speed. The fraction of time it is below r equals the fraction of its height below r: 1.5 of 2 → 75 %. Check the ends: r = 1 → always on; r = −1 → never on. Same as the buck on the last slide, where the carrier went 0 … 1 and the on-time was simply D.</li>
+      <li><b>⑤ “Why the average?”</b> An inductor current changes with the voltage’s area over time; if the pulses are fast, it only sees the net area per period, i.e. the average. Substitute ④: 2d − 1 = r.</li>
+      <li>Close: “Average output = r × V<sub>dc</sub>/2, in every switching period.” Next slide lets r be a sine.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Basics: modulation index and frequency ratio">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · m<sub>a</sub>, m<sub>f</sub> and the PWM spectrum · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>From one period to the sine: <span class="m">m</span><sub>a</sub>, <span class="m">m</span><sub>f</sub> and the fundamental</h2></div></div>
   <div class="body" style="grid-template-columns: 560px 1fr">
     <div class="stack" style="gap:12px">
-      <div class="eq"><span class="m">m</span><sub>a</sub> = <span class="m">V̂</span><sub>r</sub> / <span class="m">V̂</span><sub>c</sub> &nbsp; <span class="small muted">amplitude modulation index</span></div>
-      <div class="eq"><span class="m">m</span><sub>f</sub> = <span class="m">f</span><sub>c</sub> / <span class="m">f</span><sub>1</sub> &nbsp; <span class="small muted">frequency modulation ratio</span></div>
-      <p class="small"><b>Linear range</b>, <span class="m">m</span><sub>a</sub> ≤ 1: the fundamental is exactly</p>
-      <div><span class="eq box"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span></div>
-      <p class="small" data-step="1"><b>Overmodulation</b>, <span class="m">m</span><sub>a</sub> &gt; 1: pulses drop out, <span class="m">V̂</span><sub>1</sub> grows more slowly than <span class="m">m</span><sub>a</sub>, and low-order harmonics (3, 5, 7) appear. The limit is the square wave, <span class="m">V̂</span><sub>1</sub> = (4/π) <span class="m">V</span><sub>dc</sub>/2.</p>
-      <p class="small" data-step="2"><b>Harmonics</b> sit in clusters at <span class="m">h</span> = <span class="m">j m</span><sub>f</sub> ± <span class="m">k</span> (<span class="m">j</span> odd: <span class="m">k</span> even; <span class="m">j</span> even: <span class="m">k</span> odd). Choose <span class="m">m</span><sub>f</sub> <b>odd</b> (no even harmonics) and a <b>multiple of 3</b> (the carrier harmonic is common mode and cancels in <span class="m">v</span><sub>ab</sub>).</p>
-      <div class="callout" data-step="3" style="font-size:19px"><span class="qlabel">Question:</span> <span class="m">f</span><sub>1</sub> = 50 Hz, <span class="m">m</span><sub>f</sub> = 15. Where is the first cluster, and what is left of it in <span class="m">v</span><sub>ab</sub>? <span class="ans" data-step="4">Around 750 Hz: h = 13, 15, 17. h = 15 is triplen and cancels in v<sub>ab</sub>; 650 Hz and 850 Hz remain.</span></div>
+      <div><h3 style="font-size:21px;margin:0">⑥ Let <span class="m">r</span> follow a sine</h3><p class="small" style="font-size:19px"><span class="m">r</span> = <span class="m">m</span><sub>a</sub> sin ω<span class="m">t</span>. <b><span class="m">m</span><sub>a</sub></b> is the sine’s peak compared with the carrier’s peak (1); here <span class="m">m</span><sub>a</sub> = 0.8.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">⑦ Why the fundamental is <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</h3><p class="small" style="font-size:19px">Every switching period gives its own average <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2 (last slide). Put the periods side by side: the averages trace <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2 · sin ω<span class="m">t</span>, the blue curve.</p>
+        <div><span class="eq box" style="font-size:24px"><span class="m">V̂</span><sub>1</sub> = <span class="m">m</span><sub>a</sub> · <span class="m">V</span><sub>dc</sub>/2</span> &nbsp;<span class="small muted" style="font-size:18px">800 V, <span class="m">m</span><sub>a</sub> = 0.8 → 320 V peak</span></div>
+        <p class="small" style="font-size:19px">What is left (pulses minus their average) averages to zero in every period, so it only holds fast frequencies: the red groups in the spectrum, near <span class="m">m</span><sub>f</sub>, 2<span class="m">m</span><sub>f</sub>, … Nothing lands on the fundamental.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">⑧ What happens when <span class="m">m</span><sub>a</sub> &gt; 1</h3><p class="small" style="font-size:19px">Sweep <span class="m">m</span><sub>a</sub> above 1: the red dot leaves the straight line, the curve bends towards 1.27, and harmonics 3, 5, 7 appear. Next slide: why.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">⑨ <span class="m">m</span><sub>f</sub>: carrier periods per sine cycle</h3><p class="small" style="font-size:19px">Bigger <span class="m">m</span><sub>f</sub>: the red groups move higher (easier to filter), and “<span class="m">r</span> is constant within a period” is more accurate.</p></div>
     </div>
     <div data-sim="mindex" data-config='{"m":0.8,"mf":15}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> Sweep m<sub>a</sub> from 0.5 to 3: the red dot leaves the straight line at 1 and creeps up to 4/π. In the spectrum, nothing appears below the carrier cluster in the linear range; above 1, the 3rd, 5th and 7th appear.</p>
+    <p><b>2.5 min.</b> One question per click.</p>
     <ul>
-      <li>m<sub>f</sub> 15 → 16: even harmonics appear (no half-wave symmetry). Then switch pole ↔ line-to-line: h = 15 disappears from v<sub>ab</sub>.</li>
-      <li>Rule of thumb (Mohan): for small m<sub>f</sub> keep it an odd integer and a multiple of 3 (synchronous PWM); above about 21 asynchronous PWM is acceptable.</li>
-      <li>In three-phase, min-max injection extends the linear range to 2/√3 ≈ 1.155 (min-max slide, three slides later).</li>
+      <li><b>⑥ “What is m<sub>a</sub>?”</b> The size of the sine relative to the carrier. m<sub>a</sub> = 1: the sine just touches the carrier’s peaks.</li>
+      <li><b>⑦ “Why is the fundamental m<sub>a</sub>·V<sub>dc</sub>/2?”</b> Last slide gave the average per period; a sine of averages is a sine. In the simulation the readout shows 320 V and the red dot sits on the straight line. “Why does nothing else land on f<sub>1</sub>?” The remainder has zero area in every switching period, so it changes much faster than the sine: its frequencies are around the carrier and its multiples (red bars).</li>
+      <li><b>⑧</b> Only show it here: sweep m<sub>a</sub> to 3, the dot leaves the line, 3rd/5th/7th appear. The why is the next slide.</li>
+      <li><b>⑨ m<sub>f</sub>:</b> change it and watch the groups move. If asked: with m<sub>f</sub> a multiple of 3, the harmonic exactly at m<sub>f</sub> cancels in the line-to-line voltage (pole ↔ line-to-line button).</li>
+      <li>Three-phase min-max injection extends the linear range to 1.155: two slides later.</li>
     </ul>
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="1.5" data-title="From reference to gate signals">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b></div><h2>From a reference to gate signals</h2></div></div>
-  <div class="body" style="grid-template-rows: auto 1fr; gap:26px">
-    <svg class="bd" viewBox="0 0 1472 230" style="height:230px">
-      <defs>
-        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker>
-      </defs>
-      <g class="box"><rect x="10" y="70" width="190" height="80"/><text x="105" y="100">controller</text><text x="105" y="126" class="sig">v*(t)</text></g>
-      <path class="ar" d="M200,110 H280"/>
-      <g class="box acc" data-step="1"><rect x="280" y="50" width="330" height="120"/><text x="445" y="90">① Level selection</text><text x="445" y="122" class="nt" style="text-anchor:middle">carriers · nearest level (MMC)</text></g>
-      <path class="ar" d="M610,110 H690" data-step="1"/><text x="650" y="96" class="sig" data-step="1">k</text>
-      <g class="box acc" data-step="2"><rect x="690" y="50" width="380" height="120"/><text x="880" y="90">② State selection</text><text x="880" y="122" class="nt" style="text-anchor:middle">redundancy → midpoint, V_fc, losses</text></g>
-      <path class="ar" d="M1070,110 H1150" data-step="2"/>
-      <g class="box" data-step="2"><rect x="1150" y="70" width="300" height="80"/><text x="1300" y="100">gate signals</text><text x="1300" y="126" class="nt" style="text-anchor:middle">+ dead time, safe transitions</text></g>
-    </svg>
-    <div class="cols-2" style="display:grid;gap:24px">
-      <div class="card stack" data-step="1"><h3>① Which level, when?</h3><p>The modulator turns a continuous reference into a sequence of levels whose <b>switching-period average</b> equals the reference.</p>
-        <div class="callout" style="font-size:20px"><b>Example:</b> 3L NPC, reference r = 0.6. Within one carrier period the leg sits in <span class="lvP">P</span> for 60 % and in O for 40 % of the time → average 0.6 · V<sub>dc</sub>/2 = 240 V on an 800 V link.</div>
-        <p class="small muted">Carrier comparison and space vectors are two views of the same averaging.</p></div>
-      <div class="card stack" data-step="2"><h3>② Which state for that level?</h3><p>When several states give the same level, the choice is free for the output — so we spend it on something else: <b>midpoint balance, V<sub>fc</sub>, or losses</b>.</p>
-        <div class="callout" style="font-size:20px"><b>From Sefer’s talk:</b> ANPC zero → O<sub>U</sub> or O<sub>L</sub>. FC zero → 10 (charges C<sub>fc</sub> if i<sub>a</sub> &gt; 0) or 01 (discharges). 5L-ANPC +200 V → “a” or “b”.</div>
-        <p class="small muted">Rule: decide the level from the reference, then the state from the capacitor error and the current sign.</p></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Overmodulation, step by step">
+  <div class="sh"><div><div class="kicker"><b>Basics</b> · overmodulation in the average picture · read: Mohan, Undeland &amp; Robbins, Ch. 8</div><h2>Overmodulation: why the fundamental bends, and where it stops</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 700px; gap:28px">
+    <div class="stack" style="gap:9px">
+      <div><h3 style="font-size:21px;margin:0">① The on-time cannot exceed 100 %</h3><p class="small" style="font-size:19px">When <span class="m">r</span> &gt; 1 the reference is above the whole carrier, so the switch stays on for the whole period. The average stays at +<span class="m">V</span><sub>dc</sub>/2 = 400 V, not <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② So the average is a clipped sine</h3><p class="small" style="font-size:19px"><span class="m">m</span><sub>a</sub> = 1.3 asks for 520 V peak. Below 400 V the average follows the sine; around the peak it is held flat at 400 V (blue).</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ How much fundamental is in a wave?</h3><p class="small" style="font-size:19px">Multiply the wave by a sine and add up the area:</p>
+        <div class="eq" style="font-size:23px"><span class="m">V̂</span><sub>1</sub> = (1/π) ∫<sub>0</sub><sup>2π</sup> <span class="m">v</span>(θ) · sin θ dθ</div>
+        <p class="small muted" style="font-size:17px">Check: a pure sine of peak <span class="m">V</span> gives (1/π) ∫ <span class="m">V</span> sin²θ dθ = <span class="m">V</span>.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Why the clipped wave gives more than 400 V</h3><p class="small" style="font-size:19px">Compare it with a 400 V sine (grey), point by point over the positive half:</p>
+        <ul class="small" style="font-size:19px; gap:2px"><li>flanks: <span class="m">m</span><sub>a</sub> · 400 sin θ &gt; 400 sin θ, because <span class="m">m</span><sub>a</sub> &gt; 1</li><li>flat top: 400 ≥ 400 sin θ, because sin θ ≤ 1</li></ul>
+        <p class="small" style="font-size:19px">It is never below the grey sine (the negative half mirrors this), so in ③ its area is larger: <b><span class="m">V̂</span><sub>1</sub> &gt; 400 V</b>. At 1.3: 453 V, less than the 520 V asked for.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The limit is a square wave</h3>
+        <div class="eq" style="font-size:22px">(1/π) [ ∫<sub>0</sub><sup>π</sup> 400 sin θ dθ − ∫<sub>π</sub><sup>2π</sup> 400 sin θ dθ ] = 1600/π ≈ 509 V</div>
+        <p class="small" style="font-size:19px">= (4/π) · <span class="m">V</span><sub>dc</sub>/2 = 1.27 · <span class="m">V</span><sub>dc</sub>/2: the most this leg can give, because it is already at ±400 V all the time. It is reached only as <span class="m">m</span><sub>a</sub> → ∞; <span class="m">m</span><sub>a</sub> = 1.27 gives just 450 V.</p></div>
+      <div data-step="5"><h3 style="font-size:21px;margin:0">⑥ The price: harmonics 3, 5, 7</h3><p class="small" style="font-size:19px">The clipped wave is not a sine. Its two halves are mirror images, so only odd multiples appear: 150, 250, 350 Hz, too close to 50 Hz to filter.</p></div>
+    </div>
+    <div class="stack" style="gap:10px">
+      <div data-sim="overmod" data-config='{"m":1.3}'></div>
+      <table class="tb nocase" style="font-size:17px" data-step="4">
+        <tr><th><span class="m">m</span><sub>a</sub></th><td class="c">1</td><td class="c">1.27</td><td class="c">1.5</td><td class="c">2</td><td class="c">3</td><td class="c">10</td><td class="c">∞</td></tr>
+        <tr><th><span class="m">V̂</span><sub>1</sub></th><td class="c">400 V</td><td class="c">450 V</td><td class="c">469 V</td><td class="c">487 V</td><td class="c">500 V</td><td class="c">508 V</td><td class="c">509 V</td></tr>
+      </table>
     </div>
   </div>
-  <aside class="notes"><p><b>1.5 min.</b> The two-stage picture is the key idea of this talk: separate the output decision (level) from the internal decision (state). For a 2-level leg the first stage is exactly the SPWM comparator of the last two slides.</p></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="modulate" data-min="4.5" data-title="Carrier-based PWM lab">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · carrier-based PWM · read: Holmes &amp; Lipo</div><h2>Carrier lab: PD, POD, APOD, phase-shifted</h2></div></div>
-  <div class="body" data-sim="carrier" data-config='{"n":3,"arr":"PD"}'></div>
   <aside class="notes">
-    <p><b>4.5 min.</b> Chain: compare reference with N−1 carriers → count how many it exceeds → that is the level k. Same m and f<sub>c</sub>/f<sub>1</sub> as on the basics slides.</p>
+    <p><b>3 min.</b> One question per click, asked out loud.</p>
     <ul>
-      <li><span class="say">Question: 5-level, PD vs POD — which gives lower line-to-line THD?</span> PD: its carrier-frequency harmonics are in phase in all three legs, so they cancel in v<sub>ab</sub>. Show v<sub>aO</sub> vs v<sub>ab</sub>.</li>
-      <li>For 3 levels POD and APOD are identical (only two carriers).</li>
-      <li>This is the module’s main treatment of carrier PWM: define PD/POD/APOD and phase-shifted here in full. Elif’s CHB talk builds on it (cell-by-cell phase shift, band rotation, PS vs LS on the CHB), so she can refer back to this slide.</li>
-      <li>Phase-shifted (flying-capacitor cells): the first carrier cluster appears near (N−1)·f<sub>c</sub>.</li>
-      <li>m &gt; 1 without injection: the reference clips → low-order harmonics. Turn on min-max → clean again up to m ≈ 1.155.</li>
+      <li><b>① “What happens to (1 + r)/2 when r = 1.2?”</b> It says 110 %: impossible. The switch is simply on all period.</li>
+      <li><b>② “So what does the average look like?”</b> The sim at m<sub>a</sub> = 1.3: red dashed is what we asked for, blue is what we get.</li>
+      <li><b>③ “How do we measure the fundamental of a non-sine?”</b> The Fourier coefficient. The check with a pure sine shows it gives back the peak.</li>
+      <li><b>④ “Why is 453 V more than 400 V?”</b> The blue curve is everywhere at or above the grey 400 V sine. Same weight sin θ, more area, bigger fundamental. Clipping took area from the 520 V sine, but what is left still beats a 400 V sine.</li>
+      <li><b>⑤ “What is the most we can get?”</b> Click: the sim shows the square wave, 509 V. Point at the table: the fundamental creeps towards 509 V, only as m<sub>a</sub> → ∞. Do not confuse the 1.27 here (fundamental / (V<sub>dc</sub>/2)) with an m<sub>a</sub> value. With real pulses the last thin pulses near the zero crossings vanish at a large but finite m<sub>a</sub>.</li>
+      <li><b>⑥</b> Point at the harmonic bars: 3rd, 5th, 7th. Odd only, because the wave satisfies v(θ + π) = −v(θ). Formula behind the table, if asked: V̂<sub>1</sub>/(V<sub>dc</sub>/2) = (2/π)[m<sub>a</sub>·asin(1/m<sub>a</sub>) + √(1 − 1/m<sub>a</sub>²)].</li>
+      <li>Message: above m<sub>a</sub> = 1 you trade waveform quality for at most 27 % more voltage. Min-max injection (next slide) gets 15 % of it for free, without these harmonics.</li>
     </ul>
   </aside>
 </section>
 
 <section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Zero-sequence injection">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · zero-sequence injection · read: imperix, SPWM vs SVPWM</div><h2>15 % more voltage for free: min-max injection</h2></div></div>
-  <div class="body" data-sim="minmax" data-config='{"m":1.005}'></div>
-  <aside class="notes">
-    <p><b>3 min.</b> r<sub>0</sub> = −[max(r<sub>a</sub>,r<sub>b</sub>,r<sub>c</sub>) + min(…)]/2 is added to all three phases. A three-wire load cannot see a common-mode voltage: line-to-line voltages are unchanged (table column).</p>
-    <p>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</p>
-    <p><b>Worked example (on screen):</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub>.</p>
-  </aside>
-</section>
-
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Min-max and space vectors">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Min-max on Sefer’s hexagon: the same modulator</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
-    <div class="stack" style="gap:14px">
-      <p class="small">Sefer’s map: 27 states → 19 vectors. A space-vector modulator builds <b>v</b>* from the <b>three nearest vectors</b> (shaded triangle) and their time shares.</p>
-      <div class="callout" data-step="1" style="font-size:19px"><b>Same limit:</b> the dashed circle inscribed in the hexagon is |<b>v</b>*| = 2/√3 ≈ 1.155, the min-max limit of the last slide.</div>
-      <div class="callout" data-step="2" style="font-size:19px"><b>Same pulses:</b> two-level centred SVPWM is sine-triangle PWM plus the min-max offset. For more levels, PD carriers plus a slightly modified offset give the nearest-three-vector sequence.</div>
-      <div class="callout" data-step="3" style="font-size:19px"><b>Redundancy is the offset:</b> POO and ONN differ only by moving all three legs one level, a common-mode shift. Moving time between them is changing r<sub>0</sub>. So we balance with the offset, in the carrier world.</div>
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · three phases, zero-sequence injection · read: imperix, SPWM vs SVPWM</div><h2>15 % more voltage for free: min-max injection</h2></div></div>
+  <div class="body" style="grid-template-columns: 470px 1fr; gap:24px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:21px;margin:0">① Three legs, three references</h3><p class="small" style="font-size:19px"><span class="m">r</span><sub>a</sub>, <span class="m">r</span><sub>b</sub>, <span class="m">r</span><sub>c</sub>: three sines 120° apart. Each leg follows its own reference (slide 4), measured from the DC midpoint O.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② The load only sees differences</h3><p class="small" style="font-size:19px">A three-wire load is connected between the legs, so it only sees <span class="m">v</span><sub>ab</sub> = <span class="m">v</span><sub>aO</sub> − <span class="m">v</span><sub>bO</sub>, and so on. Adding the <b>same number</b> to all three references cancels in every difference.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ That number is <span class="m">r</span><sub>0</sub></h3><p class="small" style="font-size:19px"><span class="m">r</span><sub>0</sub> is a common offset (zero-sequence) added to all three: <span class="m">r</span>′<sub>x</sub> = <span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>. The load does not see it; only the legs’ limit of ±1 does. So we can use it to keep all three inside ±1.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Min-max: centre the three</h3><p class="small" style="font-size:19px">Shift so the highest and lowest are equal and opposite:</p>
+        <div class="eq" style="font-size:23px"><span class="m">r</span><sub>0</sub> = −(max + min) / 2</div>
+        <p class="small muted" style="font-size:17px"><span class="m">m</span> = 1.1, θ = 0: <span class="m">r</span> = (1.10, −0.55, −0.55) clips. <span class="m">r</span><sub>0</sub> = −0.275 → (0.825, −0.825, −0.825): inside ±1, same differences (table).</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ The gain: 1.155, or 15 %</h3><p class="small" style="font-size:19px">Worst instant: two phases equal and opposite, ±0.866 <span class="m">m</span>. Inside ±1 while <span class="m">m</span> ≤ 1/0.866 = 2/√3 ≈ 1.155. Up to there, no clipping and no 3rd, 5th, 7th.</p></div>
+      <div class="callout" data-step="5" style="font-size:19px"><b>This offset is space-vector PWM.</b> Sine PWM plus the min-max offset gives exactly the pulses of a space-vector modulator. Next two slides: why.</div>
     </div>
-    <div data-sim="svm" data-config='{"n":3}'></div>
+    <div data-sim="minmax" data-config='{"m":1.1,"th":0,"w":620,"h":400,"onStep":3}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> No dwell-time algebra needed in this talk. Drag the tip of v* on the hexagon: the shaded triangle shows the three nearest vectors, the bar their time shares, and the table the midpoint current of each state (POO: −i<sub>a</sub>, ONN: +i<sub>a</sub>).</p>
+    <p><b>3 min.</b> One question per click.</p>
     <ul>
-      <li>Push m to 1.1: still inside the dashed circle, so still linear, exactly like min-max.</li>
-      <li>If asked how SVPWM computes the times: volt-second balance, d<sub>1</sub><b>V</b><sub>1</sub> + d<sub>2</sub><b>V</b><sub>2</sub> + d<sub>3</sub><b>V</b><sub>3</sub> = <b>v</b>*, d<sub>1</sub> + d<sub>2</sub> + d<sub>3</sub> = 1. The panel shows the result. Two-level equivalence: Zhou &amp; Wang 2002. Multilevel: McGrath, Holmes &amp; Lipo 2003 (PD carriers with a modified common-mode offset).</li>
-      <li>Why carriers here: one comparator per leg, and the offset r<sub>0</sub> is directly the balancing knob of the next slides.</li>
+      <li><b>① “What changes with three phases?”</b> Nothing per leg: each leg still follows its own reference.</li>
+      <li><b>② “What does the load see?”</b> Only line-to-line voltages. Show the table: the last column r′<sub>a</sub> − r′<sub>b</sub> is the same with and without injection.</li>
+      <li><b>③ “What is r<sub>0</sub>?”</b> One number, added to all three references at each instant. It moves the DC-midpoint-to-load-neutral voltage, which a three-wire load cannot see. It is free, as long as no reference leaves ±1.</li>
+      <li><b>④</b> Click switches injection on at m = 1.1, θ = 0: the numbers on the slide appear in the table. Press “Sweep θ”: the bold curves stay inside the band; the dashed r<sub>0</sub> is a triangle-like wave at 3f<sub>1</sub>.</li>
+      <li><b>⑤ “Why 1.155?”</b> At θ = 30° two references are ±0.866 m and the third is 0: min-max cannot help there, so 0.866 m ≤ 1. Move θ to 30° and m to 1.155 to show it.</li>
+      <li><b>Worked example:</b> 650 V DC link, 400 V<sub>LL,rms</sub> grid → phase peak 326.6 V → m = 326.6/325 = 1.005. Sine PWM clips (max 398 V<sub>LL</sub>); with min-max the limit is 460 V<sub>LL</sub> (readout, change V<sub>dc</sub>).</li>
+      <li>Third-harmonic injection reaches the same limit: a third harmonic of amplitude m/6 also allows m = 2/√3; min-max is the flat-topped version of the same idea. Mention it here; Elif uses it on the CHB.</li>
+      <li><b>Click 5, transition:</b> “What we just did by hand, adding r<sub>0</sub>, is what a space-vector modulator does automatically.” Careful with the wording: it is the <i>min-max</i> offset that gives exactly the SVPWM pulses. A pure third harmonic (m/6) reaches the same 1.155 limit, but its pulses are slightly different; it is a close cousin, not SVPWM itself.</li>
     </ul>
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="1" data-title="Why capacitors drift">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · recap of Sefer’s ⟨i<sub>O</sub>⟩ = (1 − |r|) i<sub>a</sub></div><h2>Why capacitors drift</h2></div></div>
-  <div class="body cols-2" style="grid-template-rows: 1fr auto">
-    <div class="card stack" data-step="1"><h3>Split DC link (NPC, T-type, ANPC, 5L)</h3>
-      <div class="eq"><span class="m">V</span><sub>dc</sub> = <span class="m">v</span><sub>C1</sub> + <span class="m">v</span><sub>C2</sub> &nbsp;&nbsp; Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub></div>
-      <div class="eq"><span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = <span class="m">i</span><sub>O</sub> &nbsp;&nbsp; <span class="m">i</span><sub>O</sub> = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub>|) <span class="m">i</span><sub>x</sub></div>
-      <p class="small">Ideal, balanced operation gives zero <i>average</i> i<sub>O</sub> but a ripple at 3f<sub>1</sub>. Device mismatch, leakage, transients and unbalanced loads integrate into drift.</p>
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Switching states of a two-level inverter">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · before space vectors: what a switching state is</div><h2>Switching states: three legs, two positions each</h2></div></div>
+  <div class="body" style="grid-template-columns: 400px 1fr; gap:24px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:21px;margin:0">① Each leg is P or N</h3><p class="small" style="font-size:19px">Upper switch on: the leg output is at <b>P</b>, +<span class="m">V</span><sub>dc</sub>/2. Lower switch on: <b>N</b>, −<span class="m">V</span><sub>dc</sub>/2. Never both: that would short the DC link.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② A state names all three legs</h3><p class="small" style="font-size:19px">Three letters, in the order a, b, c. <b>PNN</b>: leg a at P, legs b and c at N. Two choices per leg: 2 × 2 × 2 = <b>8 states</b>.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ The load sees the differences</h3><p class="small" style="font-size:19px">PNN on an 800 V link: <span class="m">v</span><sub>ab</sub> = +800 V, <span class="m">v</span><sub>bc</sub> = 0, <span class="m">v</span><sub>ca</sub> = −800 V (table).</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Two states give nothing</h3><p class="small" style="font-size:19px"><b>PPP</b> and <b>NNN</b>: all legs at the same rail, so every line voltage is zero. These are the <b>zero states</b>; the other six are <b>active</b>.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Each state is one arrow</h3><p class="small" style="font-size:19px">Pack the three voltages into one arrow (the same way as the reference on the next slide). The 6 active states give 6 arrows of equal length, 60° apart: the corners of a <b>hexagon</b>. The zero states sit in the centre.</p></div>
+      <p class="small muted" data-step="4" style="font-size:17px">A three-level leg has a third position, <b>O</b> (the DC midpoint): 3 × 3 × 3 = 27 states.</p>
     </div>
-    <div class="card stack" data-step="2"><h3>Flying capacitor (FC, 5L-ANPC)</h3>
-      <div class="eq"><span class="m">C</span><sub>fc</sub> d<span class="m">V</span><sub>fc</sub>/d<span class="m">t</span> = (<span class="m">S</span><sub>1</sub> − <span class="m">S</span><sub>2</sub>) <span class="m">i</span><sub>a</sub></div>
-      <p class="small">Every redundant state moves charge. Alternating them keeps the average at zero but does not remove an existing error.</p>
-      <p class="small">An off-target V<sub>fc</sub> distorts the levels (P − V<sub>fc</sub> ≠ 0) and overstresses the devices that block it.</p>
-    </div>
-    <div class="callout" data-step="3" style="grid-column:1/-1"><b>Sum ≠ difference.</b> The DC-voltage controller (or source) fixes v<sub>C1</sub> + v<sub>C2</sub>. Only current through O — chosen by the modulator — moves ΔV. Same for V<sub>fc</sub>: only the redundant-state choice moves it.</div>
+    <div data-sim="states2l" data-config='{"state":"PNN"}'></div>
   </div>
-  <aside class="notes"><p><b>1 min.</b> Do not re-derive: Sefer left ⟨i<sub>O</sub>⟩ = (1 − |r|)·i<sub>a</sub> and i<sub>fc</sub> = (S<sub>1</sub> − S<sub>2</sub>)·i<sub>a</sub> on the board; summing over the three phases gives the left box. The message is the bottom line: balancing is a <i>modulator</i> job, not a DC-controller job.</p></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Derivation: balancing authority">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · analysis · read: Celanovic &amp; Boroyevich, IEEE TPEL 2000</div><h2>Why an offset can balance the midpoint — and when it cannot</h2></div></div>
-  <div class="body cols-2">
-    <div class="stack">
-      <p>Add a common offset <span class="m">r</span><sub>0</sub> to all three references (line-to-line voltages unchanged):</p>
-      <div class="eq"><span class="m">i</span><sub>O</sub> = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>|) <span class="m">i</span><sub>x</sub></div>
-      <p data-step="1">Sensitivity to a small offset:</p>
-      <div class="eq" data-step="1">∂<span class="m">i</span><sub>O</sub>/∂<span class="m">r</span><sub>0</sub> = −Σ<sub>x</sub> sign(<span class="m">r</span><sub>x</sub>) <span class="m">i</span><sub>x</sub></div>
-      <p data-step="2">Average over a period with <span class="m">r</span><sub>x</sub> = <span class="m">m</span> cos θ<sub>x</sub>, <span class="m">i</span><sub>x</sub> = <span class="m">I</span> cos(θ<sub>x</sub> − φ):</p>
-      <div class="eq" data-step="2">⟨sign(cos θ) cos(θ − φ)⟩ = (2/π) cos φ</div>
-      <div data-step="2"><span class="eq box">⟨∂<span class="m">i</span><sub>O</sub>/∂<span class="m">r</span><sub>0</sub>⟩ = −(6/π) <span class="m">I</span> cos φ</span></div>
-    </div>
-    <div class="stack" data-step="3">
-      <p>Close the loop with <span class="m">r</span><sub>0</sub> = <span class="m">K</span> · sign(<span class="m">P</span>) · Δ<span class="m">V</span>:</p>
-      <div class="eq"><span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = −(6/π) <span class="m">I</span> <span class="m">K</span> |cos φ| Δ<span class="m">V</span></div>
-      <div><span class="eq box">τ = π<span class="m">C</span> / (6 <span class="m">I K</span> |cos φ|)</span></div>
-      <p class="small">C = 4.7 mF, I = 50 A, K = 0.0015 V<sup>−1</sup> → τ ≈ 33 ms at unity PF; τ → ∞ at PF = 0.</p>
-      <ul class="small">
-        <li>The authority is proportional to active power: it is lost at low power factor.</li>
-        <li>Its sign follows the power direction: a fixed-sign gain is unstable in rectifier mode.</li>
-      </ul>
-      <div class="callout"><span class="qlabel">Question:</span> check both claims in the simulation on the next slide.</div>
-    </div>
-  </div>
-  <aside class="notes"><p><b>3 min.</b> Derive on the board; the simulation then confirms it (set φ = 90°, then φ = 180° with the naive sign).</p></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="balance" data-min="3.5" data-title="Neutral-point balancing simulation">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · simulation · 3-phase NPC, switching-period average model</div><h2>Balancing the midpoint with an offset</h2></div></div>
-  <div class="body" data-sim="npbal" data-config='{"dv0":40}'></div>
   <aside class="notes">
-    <p><b>3.5 min.</b> 2 × 4.7 mF, 50 A peak. Starts at 420 / 380 V with the loop on. Speed ×0.1 so the 150 Hz ripple is visible.</p>
-    <ol style="padding-left:22px">
-      <li>Loop off → ΔV stays offset (no natural restoring force). Add 1 A leakage → it drifts.</li>
-      <li>Loop on → r<sub>0</sub> moves, average i<sub>O</sub> goes negative, ΔV returns with τ ≈ 33 ms. PI removes the leakage offset.</li>
-      <li>φ = 90° → authority ≈ 0 %: kick ΔV and watch it stay.</li>
-      <li>φ = 180° with the <b>naive</b> sign → positive feedback → trip. With sign(P) it works. (Printed quiz, question 2c.)</li>
-    </ol>
+    <p><b>2.5 min.</b> Build the vocabulary before any space vectors. Click the P/N buttons live, or press “Next state”.</p>
+    <ul>
+      <li><b>① “What can one leg do?”</b> Two positions only. The red box is the switch that is on.</li>
+      <li><b>② “How many combinations?”</b> 2³ = 8. The name is just the list of positions, a then b then c.</li>
+      <li><b>③</b> The table: pole voltages from O, line voltages between the legs. Only the second row reaches the load.</li>
+      <li><b>④</b> Set PPP, then NNN: the arrow disappears, all line voltages are zero. Two ways to make zero: this choice comes back on the next slide.</li>
+      <li><b>⑤</b> Press “Next state” through PNN → PPN → NPN → NPP → NNP → PNP: the arrow jumps 60° each time. The packing is v = ⅔(v<sub>aO</sub> + a v<sub>bO</sub> + a² v<sub>cO</sub>), a = e<sup>j120°</sup>; for PNN it gives ⅔ · 800 V = 533 V at 0°.</li>
+    </ul>
   </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Min-max and space vectors">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · space-vector PWM, step by step · read: Holmes &amp; Lipo; Zhou &amp; Wang, IEEE TIE 2002</div><h2>Space-vector PWM: build the reference from the nearest states</h2></div></div>
+  <div class="body" style="grid-template-columns: 450px 1fr; gap:22px">
+    <div class="stack" style="gap:9px">
+      <div><h3 style="font-size:21px;margin:0">① The reference as one arrow</h3><p class="small" style="font-size:19px">Pack the three references the same way (a = e<sup>j120°</sup>):</p>
+        <div class="eq" style="font-size:22px"><b>v</b>* = ⅔ (<span class="m">r</span><sub>a</sub> + a <span class="m">r</span><sub>b</sub> + a² <span class="m">r</span><sub>c</sub>) = <span class="m">m</span> e<sup>jθ</sup></div>
+        <p class="small" style="font-size:19px">Length <span class="m">m</span>; as θ = ω<span class="m">t</span> grows it rotates, one turn per output cycle.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② The inverter has only 7 dots</h3><p class="small" style="font-size:19px">The states of the last slide. <b>v</b>* is almost always between them.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So mix them in time</h3><p class="small" style="font-size:19px">In one switching period, stay a while on each of the <b>two corners next to v*</b> and the rest of the time on a <b>zero state</b>. The average arrow is <b>v</b>* (shaded triangle, time shares on the right).</p>
+        <p class="small muted" style="font-size:17px"><span class="m">m</span> = 0.8 at 30°, half way between PNN and PPN: 34.6 % PNN, 34.6 % PPN, 30.7 % zero.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ The limit is the inner circle</h3><p class="small" style="font-size:19px">No zero time left when <b>v</b>* touches the circle inside the hexagon: <span class="m">m</span> = 1.155, the min-max limit of slide 7.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Same pulses as min-max</h3><p class="small" style="font-size:19px">Split the zero time equally between NNN and PPP, and each leg’s pulses are exactly sine PWM plus the min-max offset. Next slide: why.</p></div>
+    </div>
+    <div data-sim="svm" data-config='{"n":2,"m":0.8,"ang":30}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> One question per click.</p>
+    <ul>
+      <li><b>① “What is v*?”</b> The three references at one instant, packed into one arrow, the same packing as the states on the last slide. For balanced sines the result is exactly m e<sup>jθ</sup>. Press <b>Rotate v*</b>: it turns once per 20 ms. A phasor is this arrow frozen at t = 0; v* actually turns (a space vector). Its projection on the horizontal axis is r<sub>a</sub>.</li>
+      <li><b>② “Can the inverter make v* directly?”</b> No: only the 7 dots. Scale: the corners are at 4/3 in units of V<sub>dc</sub>/2, i.e. 533 V.</li>
+      <li><b>③ “Then how?”</b> The same trick as one leg on slide 4: switch fast and let the average do the work. Here the average of arrows. Drag v* around: the triangle and the three shares change. At 30°, m = 0.8: the two corners get equal time.</li>
+      <li><b>④ “Why 1.155?”</b> Drag v* to the circle at 30°: the zero share becomes 0. The inner circle radius is (4/3)·cos 30° = 1.155.</li>
+      <li><b>⑤</b> The equal split of zero time between NNN and PPP is a common shift of all three legs: the min-max r<sub>0</sub>. If asked: Zhou &amp; Wang 2002 prove the equivalence. For more levels (3-level button) there are more dots and the same idea; PD carriers with a modified offset give the same sequence (McGrath, Holmes &amp; Lipo 2003).</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="Why min-max equals SVPWM">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · one switching period, three legs, one carrier · read: Zhou &amp; Wang, IEEE TIE 2002</div><h2>Why min-max gives the same pulses as SVPWM</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 1010px; gap:22px">
+    <div class="stack" style="gap:9px">
+      <div><h3 style="font-size:21px;margin:0">① One period, three legs, one carrier</h3><p class="small" style="font-size:19px">Each leg is P while its reference is above the carrier (slide 4). Over one period the references hardly move: three flat lines.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② The legs switch one after another</h3><p class="small" style="font-size:19px">So the period is a <b>sequence of states</b>: NNN → PNN → PPN → PPP → PPN → PNN → NNN. These are the two corners next to <b>v</b>* and the two zero states: the SVPWM ingredients.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ The active times are already right</h3><p class="small" style="font-size:19px">PNN lasts (<span class="m">r</span><sub>a</sub> − <span class="m">r</span><sub>b</sub>)/2, PPN (<span class="m">r</span><sub>b</sub> − <span class="m">r</span><sub>c</sub>)/2. They depend only on differences, so they give the right line voltages, the same times SVPWM computes.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ The offset only moves zero time</h3><p class="small" style="font-size:19px">Adding <span class="m">r</span><sub>0</sub> lifts all three lines together: the active states keep their length, and time moves between NNN (ends) and PPP (middle).</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Min-max splits the zero time equally</h3><p class="small" style="font-size:19px">NNN = PPP exactly when the lines are centred, <span class="m">r</span><sub>0</sub> = −(max + min)/2. That is SVPWM’s equal zero split: same states, same times, same order.</p></div>
+      <p class="small muted" data-step="4" style="font-size:17px">Without the offset one zero state runs out first, at <span class="m">m</span> = 1. With the equal split both run out together, at 1.155.</p>
+    </div>
+    <div data-sim="svmeq" data-config='{"m":0.8,"th":10,"w":700,"mmStep":4}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> m = 0.8, θ = 10° (inside the PNN–PPN sector). Point at the state band on top of the plot at each click.</p>
+    <ul>
+      <li><b>① “What does one period look like with three legs?”</b> Three flat references, one triangle.</li>
+      <li><b>② “Why that order?”</b> The carrier falls from +1: the highest reference (a) crosses first, then b, then c. Leg a turns on, then b, then c: NNN → PNN → PPN → PPP. On the way up they turn off in reverse.</li>
+      <li><b>③ The algebra:</b> leg x is P for (1 + r<sub>x</sub>)/2 of the period. PNN is the time a is P but b is not: (1 + r<sub>a</sub>)/2 − (1 + r<sub>b</sub>)/2 = (r<sub>a</sub> − r<sub>b</sub>)/2. Here 53.1 %. PPN: (r<sub>b</sub> − r<sub>c</sub>)/2 = 12.0 %. These are exactly the SVPWM shares (the hexagon on slide 9 gives the same numbers).</li>
+      <li><b>④</b> Point at the dashed lines: dark blue marks the NNN ends, light blue the PPP middle; the line under the plot compares them. Without offset: NNN = (1 − r<sub>a</sub>)/2 = 10.6 %, PPP = (1 + r<sub>c</sub>)/2 = 24.3 %: unequal (red). Move θ or m: the active times change, the split stays unequal.</li>
+      <li><b>⑤</b> Click switches the offset to min-max: the dashed PPP lines move closer together (PPP shrinks), the NNN lines move inwards (NNN grows), and the line turns green: NNN 17.4 % = PPP 17.4 %. r<sub>0</sub> = −0.137; the active times between the dashed lines are unchanged. Setting NNN = PPP, (1 − r<sub>a</sub> − r<sub>0</sub>)/2 = (1 + r<sub>c</sub> + r<sub>0</sub>)/2, gives r<sub>0</sub> = −(r<sub>a</sub> + r<sub>c</sub>)/2: the min-max formula.</li>
+      <li>Limit: push m to 1.1 with offset none: a reference leaves ±1, one zero state is gone (red message), although the other still has time. With min-max both reach zero together only at 1.155.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Three levels: why two carriers">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · sine PWM for a three-level leg · read: Holmes &amp; Lipo</div><h2>Three levels: one carrier for each half</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
+    <div class="stack" style="gap:14px">
+      <div><h3 style="font-size:21px;margin:0">① Two levels: one carrier</h3><p class="small" style="font-size:19px">Reference above the carrier → P, below → N. One yes/no answer picks one of two levels (slide 4).</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② Three levels: split into two halves</h3><p class="small" style="font-size:19px">The leg can also sit at O, the midpoint (0 V). Positive reference: switch between P and O. Negative: between O and N. Each half gets its own carrier: <b>upper</b> 0 … +1, <b>lower</b> −1 … 0.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Inside each half: the same rule</h3><p class="small" style="font-size:19px">Above the upper carrier → P, otherwise O. Below the lower carrier → N, otherwise O. Each half is slide 4 again, so the average is still <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2, with jumps of only <span class="m">V</span><sub>dc</sub>/2.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ Two ways to draw the lower carrier</h3><p class="small" style="font-size:19px">A shifted copy of the upper one (<b>PD</b>), or its mirror image (<b>POD</b>; that is using the same carrier for both halves). For one leg the result is the same. Next slide: why PD is used.</p></div>
+    </div>
+    <div data-sim="carrier" data-config='{"n":3,"arr":"PD","w":620,"simple":true,"noPS":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"PD","sig":"a","onlyA":true,"n":3},"3":{"arr":"POD","sig":"a","onlyA":true,"n":3}}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> Only leg a is shown. Click 3 switches the lower carrier from shifted (PD) to mirrored (POD).</p>
+    <ul>
+      <li><b>① “Why not one carrier?”</b> One comparator answers yes or no: two levels. Three levels need a second answer.</li>
+      <li><b>② “Which second answer?”</b> The sign of the reference picks the half. The labels in the plot show which carrier decides P/O and which O/N.</li>
+      <li><b>③</b> Point at the output: positive half only P/O pulses (+400/0), negative half only O/N (0/−400). Fundamental readout 360 V = 0.9 × 400, as on slide 5.</li>
+      <li><b>④</b> Click: the lower carrier flips. Pulses in the negative half move a little; the average does not. If asked about “one carrier per phase”: compare |r| with a 0 … 1 carrier and use the sign to pick P or N. That is exactly the mirrored lower carrier, POD.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="3" data-title="PD or POD: two phases at one instant">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · why PD is the usual choice · read: Holmes &amp; Lipo; McGrath &amp; Holmes, IEEE TIE 2002</div><h2>PD or POD? Look at two phases at the same instant</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
+    <div class="stack" style="gap:8px">
+      <div><h3 style="font-size:20px;margin:0">① All phases share the same carriers</h3><p class="small" style="font-size:18px">One set of carriers for the whole converter. Each phase compares its own reference with it.</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② One phase up, one phase down</h3><p class="small" style="font-size:18px">At θ = 60°: <span class="m">r</span><sub>a</sub> = +0.78 uses the upper carrier, <span class="m">r</span><sub>b</sub> = −0.78 the lower one. The load sees the difference, <span class="m">v</span><sub>ab</sub> = <span class="m">v</span><sub>aO</sub> − <span class="m">v</span><sub>bO</sub>.</p></div>
+      <div data-step="2"><h3 style="font-size:20px;margin:0">③ POD: both legs switch together</h3><p class="small" style="font-size:18px">The lower carrier is the mirror image, so leg a goes to P exactly when leg b goes to N. v<sub>ab</sub> jumps 0 ↔ 800 V at once.</p></div>
+      <div data-step="3"><h3 style="font-size:20px;margin:0">④ PD: one leg at a time</h3><p class="small" style="font-size:18px">The lower carrier is a shifted copy, with the same timing. Legs a and b switch at different instants: v<sub>ab</sub> steps 400 ↔ 800 V. Half the jump, less ripple.</p></div>
+      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ Over a full cycle</h3><p class="small" style="font-size:18px">Lower line-voltage THD with PD (readout). Same fundamental, smaller ripple, smaller filter: that is why PD is the standard choice.</p></div>
+    </div>
+    <div data-sim="pdpod" data-config='{"arr":"POD","th":60,"w":680,"steps":{"0":"POD","3":"PD"}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> Three carrier periods at θ = 60°. Clicks 0–2 show POD, click 3 switches to PD.</p>
+    <ul>
+      <li><b>① “Does each phase get its own carriers?”</b> No: one set, shared. That is what makes the comparison between phases possible.</li>
+      <li><b>② “Which carrier does each phase use?”</b> At 60° a is positive and b negative, so they use different carriers. That is the case where PD and POD differ.</li>
+      <li><b>③</b> Point at the two pole-voltage rows: the pulses line up, and v<sub>ab</sub> goes 0 → 800 V in one step. Read the “biggest jump” readout: 800 V.</li>
+      <li><b>④</b> Click: the lower carrier is now a copy. b’s pulses move by half a period relative to a’s, so v<sub>ab</sub> only steps by 400 V; ripple readout drops.</li>
+      <li><b>⑤</b> Full-cycle readout: PD vs POD line THD. Move θ to 100°: both a and b positive, same carrier, no difference. The difference comes only from phases in opposite halves, which happens all the time in three-phase.</li>
+      <li>Why “in phase” is the name: with PD all carriers move up and down together; for a single phase the pulses are the same as POD, for the line voltage they are not.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="1.5" data-title="Carrier-based PWM lab">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · more levels · read: Holmes &amp; Lipo</div><h2>More levels: more carriers, same rule</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:20px;margin:0">① Five levels: four carriers, same rule</h3><p class="small" style="font-size:18px">Stack four carriers between −1 and +1. The level is how many carriers are below the reference: 0 → −400 V, … 4 → +400 V, in steps of 200 V. <span class="m">N</span> levels need <span class="m">N</span> − 1 carriers.</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② PD still wins</h3><p class="small" style="font-size:18px">Mirror the lower two carriers (POD) and the line THD rises from 18 % to 30 %: same reason as the last slide, phases in opposite halves switch together.</p></div>
+    
+    </div>
+    <div data-sim="carrier" data-config='{"n":5,"arr":"PD","w":620,"simple":true,"noPS":true,"sig":"ab","steps":{"0":{"arr":"PD","sig":"ab","onlyA":false,"n":5},"1":{"arr":"POD","sig":"ab","onlyA":false,"n":5}}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>1.5 min.</b> Five levels, all three phases, line voltage. Click 1 switches to POD.</p>
+    <ul>
+      <li><b>①</b> Same counting rule as for three levels, just more carriers. Point at the finer staircase in v<sub>ab</sub>.</li>
+      <li><b>②</b> Read the THD: PD 18.1 %, POD 29.8 %. If asked about APOD (every carrier mirrored against its neighbour): with three levels it is identical to POD; with five it gives 28.5 %, almost the same as POD.</li>
+      <li>Phase-shifted carriers are left to Elif’s CHB talk.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="From pulses to a sine: the filter">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · from pulses to a sine</div><h2>The filter: from pulses to a sine</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:16px">
+      <div><h3 style="font-size:22px;margin:0">① The output is pulses</h3><p class="small" style="font-size:20px">The leg only jumps between levels (top plot). Only its average is a sine.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② An inductor smooths the current</h3><p class="small" style="font-size:20px">It cannot follow the fast jumps, only the slow average. The current is a sine with a small zig-zag.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Three levels: half the ripple</h3><p class="small" style="font-size:20px">Half the voltage jump, half the zig-zag. Same inductor.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ LCL: almost none</h3><p class="small" style="font-size:20px">Add a capacitor in the middle: it takes the ripple.</p></div>
+      <div data-step="4"><h3 style="font-size:22px;margin:0">⑤ But an LCL can ring</h3><p class="small" style="font-size:20px">After a kick it rings like a bell. A small resistor calms it.</p></div>
+    </div>
+    <div data-sim="gridfilter" data-config='{"w":640,"steps":{"0":{"topo":2,"filt":"l","view":"ripple","cur":false},"1":{"cur":true},"2":{"topo":3},"3":{"filt":"lcl"},"4":{"filt":"lcld","view":"kick"}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2.5 min.</b> 400 V, 50 kVA (102 A peak), 800 V DC, 10 kHz. L = 1.3 mH; LCL: 1 mH + 0.3 mH with 10 µF; R = 1.5 Ω.</p><ul>
+    <li><b>①</b> The top plot is the phase voltage of the converter (line to neutral): fast pulses; the dashed line is its average, the sine we asked the modulator for.</li>
+    <li><b>②</b> This is why the following slides can draw sine currents: from here on, “the converter voltage” means the average, and the filter takes care of the rest.</li>
+    <li>Numbers: ripple about 7 A peak to peak (2-level, L) → 3.4 A (3-level, L) → below 1 A (LCL).</li>
+    <li><b>⑤</b> The ringing frequency is the LCL resonance, about 3.3 kHz here. Undamped, it can be excited by the switching or by the controller. The resistor costs only a few watts; it can also be damped in the controller (active damping).</li>
+    <li>Design rules if asked (Liserre, Blaabjerg &amp; Hansen, IEEE TIA 2005): resonance between 10× grid frequency and half the switching frequency; capacitor reactive power below 5 % of the rating.</li></ul></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Same output, two ways">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> → <b>Balance</b> · the free choice that balances the capacitors</div><h2>Same output, two ways: the free choice</h2></div></div>
+  <div class="body" style="grid-template-columns: 430px 1fr; gap:22px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:20px;margin:0">① The DC link is two capacitors</h3><p class="small" style="font-size:18px">In a three-level converter the DC link is split: C1 on top, C2 below, and the midpoint O between them. Each leg can connect its output to P, O or N.</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② Two states, the same output</h3><p class="small" style="font-size:18px"><b>POO</b>: leg a at P, legs b and c at O. <b>ONN</b>: leg a at O, legs b and c at N. The load sees exactly the same line voltages (table): +400 V, 0, −400 V.</p></div>
+      <div data-step="2"><h3 style="font-size:20px;margin:0">③ Why they look the same</h3><p class="small" style="font-size:18px">ONN is POO with every leg moved down by one level. Moving all legs together is the common offset <span class="m">r</span><sub>0</sub> of slide 7: the load cannot see it.</p></div>
+      <div data-step="3"><h3 style="font-size:20px;margin:0">④ But the midpoint can</h3><p class="small" style="font-size:18px">A leg at O takes its current from the midpoint. POO: b and c are at O, 10 A flows <b>into</b> O. ONN: a is at O, 10 A flows <b>out of</b> O. One state charges C1 and discharges C2, the other does the opposite.</p></div>
+      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ So the modulator decides twice</h3><p class="small" style="font-size:18px">First which <b>voltage</b> (the carriers of the last slides). Then, where two states give it, which <b>state</b>: the one that pushes the capacitor voltages back to equal. In carrier terms that is a small <span class="m">r</span><sub>0</sub>: the balancing knob of the next slides.</p></div>
+    </div>
+    <div data-sim="states3l" data-config='{"state":"POO","steps":{"0":"POO","3":"ONN"}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> The figure is one instant: i<sub>a</sub> = +10 A, i<sub>b</sub> = i<sub>c</sub> = −5 A. Click 3 switches from POO to ONN; you can also press the POO / ONN buttons or set each leg by hand.</p>
+    <ul>
+      <li><b>① “Where is O?”</b> Point at the two capacitors: 400 V each on an 800 V link. O is the node between them; each leg is a three-position switch.</li>
+      <li><b>② “Can two different states give the same output?”</b> Read the table for POO, then press ONN: the second row does not change.</li>
+      <li><b>③ “Why?”</b> Every pole voltage drops by 400 V; differences stay. Same idea as r<sub>0</sub> on slide 7, now in whole levels.</li>
+      <li><b>④ “So what is different?”</b> Point at the blue midpoint rail. POO: legs b and c hang on O and their −5 A + −5 A come back into O. ONN: leg a hangs on O and draws its +10 A out of O. Readout: which capacitor rises.</li>
+      <li><b>⑤</b> The rule for the rest of the talk: decide the voltage from the reference, then the state from the capacitor error and the current direction. The same choice exists inside one flying-capacitor leg (states 10 / 01), which comes after the neutral-point slides.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="balance" data-min="1.5" data-title="Why the capacitors wiggle at 150 Hz">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · the normal ripple</div><h2>Why the capacitor voltages wiggle at 150 Hz</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:20px">
+      <div><h3 style="font-size:22px;margin:0">① The midpoint current goes up and down</h3><p class="small" style="font-size:20px">Legs at O send their current through the midpoint (slide 15). Over one cycle this current rises and falls (plot).</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② It repeats three times per cycle</h3><p class="small" style="font-size:20px">The three phases are identical, just shifted by a third of a cycle. So what they make together repeats every third of a cycle: 3 × 50 Hz = <b>150 Hz</b>.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ The capacitors follow it</h3><p class="small" style="font-size:20px">C1 and C2 wiggle at 150 Hz, a few volts, in opposite directions. It averages to zero, so it never grows. Bigger capacitors, smaller wiggle.</p></div>
+    </div>
+    <div data-sim="npripple" data-config='{"w":680,"simple":true}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>1.5 min.</b> One output cycle, 20 ms; 50 A, m = 0.8, unity power factor.</p>
+    <ul>
+      <li><b>①</b> Just show the shape. No formula needed.</li>
+      <li><b>② “Why three?”</b> Click: the dashed lines cut the cycle into thirds; the curve is the same in each. Phase b is phase a delayed by a third of a cycle, phase c by two thirds. Anything built equally from all three cannot tell the difference after a third of a cycle, so it repeats. (The same reason the min-max offset on slide 7 repeats at 150 Hz.)</li>
+      <li><b>③</b> Click: the capacitor voltages. Readout about 4.6 V peak-to-peak with 4.7 mF each. Drag C down: the wiggle grows. This is normal and handled by choosing C; the balancing loop does not try to remove it.</li>
+      <li>Formula if asked: a leg is at O for (1 − |r|) of each period, so i<sub>O</sub> = Σ (1 − |r<sub>x</sub>|)·i<sub>x</sub>.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="Why capacitors drift">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · why the midpoint needs a controller</div><h2>Why the two capacitors drift apart</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:21px;margin:0">① Ideal case: only the wiggle</h3><p class="small" style="font-size:19px">Last slide: with a balanced load the midpoint current has no average. The two voltages wiggle at 150 Hz around 400 V and stay there.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② But nothing pulls them back</h3><p class="small" style="font-size:19px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 15 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next: how it moves the charge.</p></div>
+    </div>
+    <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"1":{"bleed":1}}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2 min.</b> No balancing in this simulation; we only watch the two capacitor voltages (2 × 4.7 mF, 50 A peak, unity power factor, speed ×0.1).</p>
+    <ul>
+      <li><b>①</b> Point at the two lines: the 150 Hz wiggle of the last slide, no trend.</li>
+      <li><b>②</b> Click: 1 A of leakage on the top capacitor. C1 sinks, C2 rises, until the trip line. With leakage 0, press “Kick”: the voltages just stay where they were pushed. No restoring force, like a ball on a flat table.</li>
+      <li><b>③</b> The DC controller only sees v<sub>C1</sub> + v<sub>C2</sub>. The difference needs its own knob: the midpoint current, chosen by the modulator.</li>
+      <li>If asked for the formula: a leg sits at O for (1 − |r|) of each period, so ⟨i<sub>O</sub>⟩ = Σ (1 − |r<sub>x</sub>|)·i<sub>x</sub>, and C·d(v<sub>C1</sub> − v<sub>C2</sub>)/dt = ⟨i<sub>O</sub>⟩.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="balance" data-min="2.5" data-title="How the offset moves charge">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · what the offset does inside one switching period</div><h2>How the offset pushes charge into or out of the midpoint</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 960px; gap:22px">
+    <div class="stack" style="gap:14px">
+      <div><h3 style="font-size:22px;margin:0">① One instant, no offset</h3><p class="small" style="font-size:19px">Leg c is positive (+43 A), leg b negative (−43 A). Both sit at O for 31 % of the period, so their currents through O cancel: no midpoint current.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Lift all references: <span class="m">r</span><sub>0</sub> = +0.1</h3><p class="small" style="font-size:19px">Every leg moves up. Leg c: more time at P, less at O. Leg b: less time at N, more at O. Now b’s negative current wins: current flows <b>into</b> the midpoint. C1 goes down, C2 goes up.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Lower them: <span class="m">r</span><sub>0</sub> = −0.1</h3><p class="small" style="font-size:19px">The opposite: c spends more time at O, b less. Current flows <b>out of</b> the midpoint. C1 goes up, C2 goes down.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ The load sees nothing</h3><p class="small" style="font-size:19px">All legs moved together, so the line voltages do not change (slide 7). So: C1 too high → <span class="m">r</span><sub>0</sub> &gt; 0; C2 too high → <span class="m">r</span><sub>0</sub> &lt; 0. That is exactly what the PI controller on the next slide does.</p></div>
+    </div>
+    <div data-sim="r0explain" data-config='{"w":680,"th":0,"steps":{"0":0,"1":0.1,"2":-0.1}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> One instant, when leg a crosses zero (r = 0, no current, so it does not matter where it sits). Each bar is one switching period: red P, grey O, blue N. The dashed box marks the time at O without offset. Clicks set r<sub>0</sub> = 0, +0.1, −0.1; the slider and buttons do the same.</p>
+    <ul>
+      <li><b>①</b> Time at O is 1 − |r| (slide 11): 1 − 0.69 = 31 % for both b and c. +43 A × 31 % and −43 A × 31 % cancel.</li>
+      <li><b>②</b> c: r = 0.79, O 21 %, +9 A through O. b: r = −0.59, O 41 %, −18 A. Sum −9 A: into O.</li>
+      <li><b>③</b> The mirror image: +9 A, out of O.</li>
+      <li><b>④</b> This works because, while delivering power, the positive leg carries the positive current. With reactive current or as a rectifier the push changes or reverses; the controller then uses r<sub>0</sub> = sign(P)·PI(ΔV).</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Neutral-point balancing simulation">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · closing the loop with a PI controller</div><h2>Balancing the midpoint with a PI controller</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① Measure the difference</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>. The goal is zero.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② A PI controller makes the offset</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> goes into a PI controller; its output is the offset <span class="m">r</span><sub>0</sub> added to all three references (last slide). The P part reacts at once, the I part keeps pushing until Δ<span class="m">V</span> is exactly zero.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Loop on: the voltages come back</h3><p class="small" style="font-size:20px">C1 and C2 return to 400 V within a few cycles. The 150 Hz wiggle stays: it is normal (slide 16).</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ A leak? The I part handles it</h3><p class="small" style="font-size:20px">With a 1 A leak the I part settles at the small offset that cancels it, and Δ<span class="m">V</span> stays at zero.</p></div>
+    </div>
+    <div data-sim="npbal" data-config='{"dv0":40,"on":false,"simple":true,"loopCtl":true,"showR0":true,"w":640,"steps":{"0":{"on":false,"bleed":0},"2":{"on":true},"3":{"bleed":1}}}'></div>
+  </div>
+  <aside class="notes"><p><b>3 min.</b> Starts at 420 / 380 V with the loop off: the voltages just stay apart (slide 17). Click 2 switches the PI loop on, click 3 adds 1 A of leakage. Speed ×0.1.</p>
+    <ul>
+      <li><b>②</b> Gains: K<sub>p</sub> = 0.0015 per volt, K<sub>i</sub> = 0.03 per volt-second; the offset is limited to ±0.2 so it never pushes a reference out of the carrier band.</li>
+      <li><b>③</b> Point at the lower plot: r<sub>0</sub> jumps, then decays as ΔV closes. Time constant about 33 ms here.</li>
+      <li><b>④</b> Without the I part a leak would leave a small permanent ΔV; with it, r<sub>0</sub> settles at a small constant value.</li>
+      <li>If asked: the offset only has grip when the converter delivers active power (strength ∝ I·cos φ). With pure reactive current it cannot balance, and as a rectifier the push reverses, so the controller multiplies by sign(P): r<sub>0</sub> = sign(P)·PI(ΔV). The full lab (button “Loop” and φ) is in the source if you want to show it.</li>
+    </ul></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="balance" data-min="2" data-title="Flying-capacitor balancing">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · flying capacitor in operation</div><h2>Flying capacitor: three ways to choose</h2></div></div>
-  <div class="body" style="grid-template-rows: 1fr auto; gap:12px">
-    <div data-sim="leg" data-config='{"topo":"fc","mode":"run","lockMode":true,"pol":"alt","m":0.8,"plotAH":236,"plotBH":206,"steps":{"0":{"pol":"alt"},"2":{"pol":"10"},"3":{"pol":"bal"}}}'></div>
-    <div class="strip">
-      <div class="callout" data-step="1"><b>Alternate</b> 10/01: zero net charge per pair — but press <i>Disturb</i>: the error stays.</div>
-      <div class="callout" data-step="2"><b>Always 10</b>: V<sub>fc</sub> follows the current — a swing at the fundamental frequency.</div>
-      <div class="callout" data-step="3"><b>Balance</b>: sign(i<sub>a</sub>)·(V<sub>fc</sub>* − V<sub>fc</sub>) picks the state — the error is gone within a few switching periods.</div>
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · the same idea inside one leg</div><h2>Flying capacitor: two ways to make 0 V</h2></div></div>
+  <div class="body" style="grid-template-columns: 380px 1fr; gap:24px">
+    <div class="stack" style="gap:16px">
+      <div><h3 style="font-size:22px;margin:0">① Two ways to make 0 V</h3><p class="small" style="font-size:20px">A capacitor sits between the switch pairs, charged to 400 V. State 10 and state 01 both put the output at 0 V.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② They push it opposite ways</h3><p class="small" style="font-size:20px">Follow the current: in 10 it charges the capacitor, in 01 it discharges it. Same output, opposite effect.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Just taking turns</h3><p class="small" style="font-size:20px">After a disturbance the capacitor is 60 V low. Taking 10 and 01 in turn does not fix it: the error stays.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ Choose by the error</h3><p class="small" style="font-size:20px">Too low? Pick the state that charges it. Too high? The one that discharges it. Back at 400 V in a few periods.</p></div>
     </div>
+    <div data-sim="fcsimple" data-config='{"w2":500,"steps":{"0":{"st":"10","mode":null},"1":{"st":"01"},"2":{"mode":"alt"},"3":{"mode":"bal"}}}'></div>
   </div>
-  <aside class="notes"><p><b>2 min.</b> Sefer showed that equal duties give zero net charge; this slide shows why that is not enough. With an ideal current source, phase-shifted PWM has no restoring force; “natural balancing” in real converters comes from the load impedance at the switching frequency and is slow. Active selection is fast.</p></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="MMC" data-min="2.5" data-title="MMC: arms of submodules">
-  <div class="sh"><div><div class="kicker"><b>MMC</b> · modular multilevel converter · read: Lesnicar &amp; Marquardt 2003; Debnath et al., IEEE TPEL 2015</div><h2>MMC: one cell type, stacked into arms</h2></div></div>
-  <div class="body" style="grid-template-columns: 600px 1fr; gap:30px">
-    <svg viewBox="0 0 600 680" style="width:600px;height:100%" aria-label="One MMC phase leg and a half-bridge submodule">
-      <style>
-        .mm line, .mm path, .mm polyline { stroke: var(--ink2); stroke-width: 2.2; fill: none; }
-        .mm rect.sm { fill: var(--panel); stroke: var(--ink2); stroke-width: 2; }
-        .mm text { font: 600 17px var(--font); fill: var(--ink); dominant-baseline: middle; }
-        .mm text.m { font: italic 600 18px var(--math); }
-        .mm text.mut { fill: var(--muted); font-size: 15px; }
-        .mm .cur { stroke: var(--s2); fill: var(--s2); }
-        .mm circle.n { fill: var(--ink2); }
-      </style>
-      <g class="mm">
-        <line x1="40" y1="30" x2="240" y2="30"/><text x="44" y="14">+V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
-        <line x1="40" y1="650" x2="240" y2="650"/><text x="44" y="670">−V<tspan baseline-shift="sub" font-size="12">dc</tspan>/2</text>
-        <line x1="160" y1="30" x2="160" y2="62"/>
-        <rect class="sm" x="110" y="62" width="100" height="44"/><text x="160" y="84" text-anchor="middle">SM 1</text>
-        <line x1="160" y1="106" x2="160" y2="120"/>
-        <rect class="sm" x="110" y="120" width="100" height="44"/><text x="160" y="142" text-anchor="middle">SM 2</text>
-        <text x="160" y="180" text-anchor="middle">⋮</text>
-        <line x1="160" y1="164" x2="160" y2="170"/><line x1="160" y1="192" x2="160" y2="200"/>
-        <rect class="sm" x="110" y="200" width="100" height="44"/><text x="160" y="222" text-anchor="middle">SM N</text>
-        <line x1="160" y1="244" x2="160" y2="256"/>
-        <path d="M160,256 c14,0 14,16 0,16 c14,0 14,16 0,16 c14,0 14,16 0,16 c14,0 14,16 0,16"/>
-        <text x="182" y="288" class="m">L</text><text x="194" y="294" class="mut">arm</text>
-        <line x1="160" y1="320" x2="160" y2="360"/>
-        <circle class="n" cx="160" cy="340" r="5"/><line x1="160" y1="340" x2="270" y2="340"/><circle cx="276" cy="340" r="6" style="fill:var(--paper);stroke:var(--ink2);stroke-width:2"/><text x="290" y="340" class="m">a</text>
-        <path class="cur" d="M232,330 l14,10 l-14,10 z"/><text x="222" y="318" class="m" style="fill:var(--s2)">i</text><text x="230" y="324" class="mut" style="fill:var(--s2)">a</text>
-        <path d="M160,360 c14,0 14,16 0,16 c14,0 14,16 0,16 c14,0 14,16 0,16 c14,0 14,16 0,16"/>
-        <line x1="160" y1="424" x2="160" y2="436"/>
-        <rect class="sm" x="110" y="436" width="100" height="44"/><text x="160" y="458" text-anchor="middle">SM 1</text>
-        <line x1="160" y1="480" x2="160" y2="494"/>
-        <rect class="sm" x="110" y="494" width="100" height="44"/><text x="160" y="516" text-anchor="middle">SM 2</text>
-        <text x="160" y="554" text-anchor="middle">⋮</text>
-        <line x1="160" y1="538" x2="160" y2="544"/><line x1="160" y1="566" x2="160" y2="574"/>
-        <rect class="sm" x="110" y="574" width="100" height="44"/><text x="160" y="596" text-anchor="middle">SM N</text>
-        <line x1="160" y1="618" x2="160" y2="650"/>
-        <path class="cur" d="M92,74 l10,0 l-5,14 z"/><text x="70" y="70" class="m" style="fill:var(--s2)">i</text><text x="78" y="76" class="mut" style="fill:var(--s2)">u</text>
-        <path class="cur" d="M92,448 l10,0 l-5,14 z"/><text x="70" y="444" class="m" style="fill:var(--s2)">i</text><text x="78" y="450" class="mut" style="fill:var(--s2)">l</text>
-        <text x="20" y="160" class="mut">upper</text><text x="20" y="180" class="mut">arm</text>
-        <text x="20" y="530" class="mut">lower</text><text x="20" y="550" class="mut">arm</text>
-        <!-- half-bridge submodule -->
-        <rect x="330" y="60" width="250" height="330" rx="4" style="fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:6 6"/>
-        <text x="345" y="82" class="mut">HALF-BRIDGE SUBMODULE</text>
-        <line x1="420" y1="110" x2="530" y2="110"/><line x1="420" y1="290" x2="530" y2="290"/>
-        <line x1="420" y1="110" x2="420" y2="130"/>
-        <rect class="sm" x="395" y="130" width="50" height="40"/><text x="420" y="150" text-anchor="middle">S₁</text>
-        <line x1="420" y1="170" x2="420" y2="230"/>
-        <rect class="sm" x="395" y="230" width="50" height="40"/><text x="420" y="250" text-anchor="middle">S₂</text>
-        <line x1="420" y1="270" x2="420" y2="290"/>
-        <line x1="530" y1="110" x2="530" y2="190"/><line x1="510" y1="190" x2="550" y2="190"/><line x1="510" y1="204" x2="550" y2="204"/><line x1="530" y1="204" x2="530" y2="290"/>
-        <text x="558" y="197" class="m">C</text>
-        <circle class="n" cx="420" cy="200" r="4.5"/><line x1="420" y1="200" x2="350" y2="200"/><circle cx="346" cy="200" r="5" style="fill:var(--paper);stroke:var(--ink2);stroke-width:2"/>
-        <circle class="n" cx="420" cy="290" r="4.5"/><line x1="420" y1="290" x2="350" y2="290" /><circle cx="346" cy="290" r="5" style="fill:var(--paper);stroke:var(--ink2);stroke-width:2"/>
-        <text x="345" y="336" class="mut">S₁ on: inserted, v<tspan baseline-shift="sub" font-size="11">SM</tspan> = V<tspan baseline-shift="sub" font-size="11">C</tspan></text>
-        <text x="345" y="362" class="mut">S₂ on: bypassed, v<tspan baseline-shift="sub" font-size="11">SM</tspan> = 0</text>
-        <path d="M212,84 L330,110" style="stroke:var(--line);stroke-dasharray:5 5"/>
-      </g>
-    </svg>
-    <div class="stack" style="gap:14px">
-      <p class="small">Each arm: <span class="m">N</span> half-bridge submodules (SMs) and an arm inductor. Each SM capacitor holds <span class="m">V</span><sub>C</sub> ≈ <span class="m">V</span><sub>dc</sub>/<span class="m">N</span>.</p>
-      <div class="eq" style="font-size:25px"><span class="m">v</span><sub>u</sub> = Σ<sub>k</sub> <span class="m">S</span><sub>k</sub><span class="m">v</span><sub>Ck</sub> ≈ <span class="m">n</span><sub>u</sub><span class="m">V</span><sub>C</sub>, &nbsp; <span class="m">v</span><sub>l</sub> ≈ <span class="m">n</span><sub>l</sub><span class="m">V</span><sub>C</sub></div>
-      <div class="eq" style="font-size:25px"><span class="m">v</span><sub>a</sub> = (<span class="m">v</span><sub>l</sub> − <span class="m">v</span><sub>u</sub>)/2 − (<span class="m">L</span><sub>arm</sub>/2) d<span class="m">i</span><sub>a</sub>/d<span class="m">t</span></div>
-      <p class="small" data-step="1">Keep <span class="m">n</span><sub>u</sub> + <span class="m">n</span><sub>l</sub> = <span class="m">N</span>, so <span class="m">v</span><sub>u</sub> + <span class="m">v</span><sub>l</sub> ≈ <span class="m">V</span><sub>dc</sub>. Nearest level: <span class="m">n</span><sub>u</sub> = round(<span class="m">N</span>(1 − <span class="m">r</span>)/2) gives <span class="m">N</span> + 1 levels (or phase-shifted carriers, one per SM).</p>
-      <div class="eq" data-step="2" style="font-size:25px"><span class="m">i</span><sub>u</sub> = <span class="m">i</span><sub>a</sub>/2 + <span class="m">i</span><sub>c</sub>, &nbsp; <span class="m">i</span><sub>l</sub> = −<span class="m">i</span><sub>a</sub>/2 + <span class="m">i</span><sub>c</sub>, &nbsp; <span class="m">i</span><sub>c</sub> = <span class="m">I</span><sub>dc</sub>/3 + <span class="m">i</span><sub>circ</sub></div>
-      <p class="small" data-step="2">Every arm carries half the AC current plus its DC share: its capacitors charge and discharge every cycle. The balancing problem moves <b>inside the arm</b>.</p>
-      <div class="callout" data-step="3" style="font-size:19px"><b>Compared with the legs so far:</b> no clamp diodes, no flying capacitors, no isolated sources (the CHB of the next talk needs them). One cell type, hundreds per arm in HVDC. The price: <span class="m">N</span> capacitors per arm to keep equal, and an internal current <span class="m">i</span><sub>c</sub> to control.</div>
-    </div>
-  </div>
-  <aside class="notes">
-    <p><b>2.5 min.</b> Sign convention: i<sub>u</sub> flows from +V<sub>dc</sub>/2 down through the upper arm, i<sub>l</sub> from node a down to −V<sub>dc</sub>/2; a positive arm current charges the inserted capacitors. Then i<sub>a</sub> = i<sub>u</sub> − i<sub>l</sub>.</p>
+  <aside class="notes"><p><b>2 min.</b> Same idea as POO / ONN on the NPC, but inside one leg.</p>
     <ul>
-      <li>KVL: v<sub>a</sub> = V<sub>dc</sub>/2 − v<sub>u</sub> − L di<sub>u</sub>/dt = −V<sub>dc</sub>/2 + v<sub>l</sub> + L di<sub>l</sub>/dt. Adding both gives the output equation on the slide; subtracting gives the circulating-current equation (slide after next).</li>
-      <li>Same two-stage idea as before: the modulator decides how many SMs (the level), the balancing decides which ones (the state).</li>
-    </ul>
-  </aside>
+      <li><b>①</b> State 10 = S1 and S2′ on; state 01 = S2 and S1′ on. In both, the output sits at +400 − 400 = 0 V (through the capacitor).</li>
+      <li><b>②</b> Click shows state 01: the current now flows through the capacitor the other way. For i<sub>a</sub> &gt; 0, 10 charges and 01 discharges; when the current reverses, the rule flips.</li>
+      <li><b>③</b> Alternating keeps the average charge zero, so an error that is already there is never removed.</li>
+      <li><b>④</b> The rule: pick 10 if sign(i<sub>a</sub>)·(V<sub>fc</sub>* − V<sub>fc</sub>) &gt; 0, else 01. In practice ΔV per period = i·t<sub>0</sub>/C<sub>fc</sub>; the plot uses 10 V per period for clarity.</li>
+    </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="MMC" data-min="3" data-title="MMC: sorting the submodules">
-  <div class="sh"><div><div class="kicker"><b>MMC</b> · simulation · one upper arm, nearest-level modulation · read: Tu, Xu &amp; Xu, IEEE TPWRD 2011</div><h2>MMC: which <span class="m">n</span> of the <span class="m">N</span> submodules? Sort them.</h2></div></div>
-  <div class="body" data-sim="mmc" data-config='{"mode":"sort"}'></div>
-  <aside class="notes">
-    <p><b>3 min.</b> 6 kV DC link, N = 6 SMs of 1 kV, 3 mF each, 200 A peak AC, unity PF. The modulator gives n (how many); the rule picks which: if the arm current charges (i<sub>u</sub> &gt; 0), insert the n lowest; if it discharges, the n highest.</p>
-    <ol style="padding-left:22px">
-      <li>Starts with <b>sort every period</b>: all six SMs move together; only the common ripple at f<sub>1</sub> and 2f<sub>1</sub> remains. Point at the switching readout: about 2 kHz per SM, far more often than the level changes.</li>
-      <li>Set speed to ×0.03, then <b>fixed order</b>: SM 1 is inserted almost all the time and collects the DC share of i<sub>u</sub>, so it charges; SM 6 is only in near the arm-voltage peak, where the arm current discharges it. They separate within about one cycle and trip; the frozen trace shows how. Same physics as the NPC midpoint: no natural restoring force. Reset.</li>
-      <li><b>On level change, ±5 % band</b> (Tu, Xu &amp; Xu): only the SM entering or leaving is chosen by voltage, plus a full sort when the spread leaves the band. The spread now stays within a few percent, and each SM switches at about 100–200 Hz instead of 2 kHz. That is the trade-off: capacitor ripple against switching loss.</li>
-      <li>φ = 180° (rectifier): sorting still works, because it uses the sign of the <i>arm current</i>, not the power direction. Compare with sign(P) in the NPC loop.</li>
-      <li>Disturb SM 1 by −10 %, or age SM 2 (C −20 %): sorting absorbs both.</li>
-    </ol>
-  </aside>
-</section>
-
-<section class="slide" data-part="2" data-section="MMC" data-min="2.5" data-title="MMC: circulating current">
-  <div class="sh"><div><div class="kicker"><b>MMC</b> · the internal current · read: Tu, Xu &amp; Xu, IEEE TPWRD 2011; Debnath et al., IEEE TPEL 2015</div><h2>MMC: the circulating current, and why it is controlled</h2></div></div>
-  <div class="body cols-2" style="grid-template-rows: 1fr auto">
-    <div class="stack">
-      <p>Add the two arm equations of one phase:</p>
-      <div><span class="eq box"><span class="m">L</span><sub>arm</sub> d<span class="m">i</span><sub>c</sub>/d<span class="m">t</span> = <span class="m">V</span><sub>dc</sub>/2 − (<span class="m">v</span><sub>u</sub> + <span class="m">v</span><sub>l</sub>)/2</span></div>
-      <p class="small" data-step="1"><span class="m">v</span><sub>u</sub> + <span class="m">v</span><sub>l</sub> is the sum of the inserted SM voltages. Their ripple (last slide) puts a <b>2<span class="m">f</span><sub>1</sub></b> term in it, so <span class="m">i</span><sub>c</sub> gets a 2<span class="m">f</span><sub>1</sub>, negative-sequence component.</p>
-      <ul class="small" data-step="1">
-        <li>It flows between the phases: invisible at the AC output and in the DC current.</li>
-        <li>It raises the arm rms current: more conduction loss, more capacitor ripple, larger devices.</li>
-      </ul>
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="Grid basics: what makes the current flow">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 1 of 4</div><h2>Grid connection: what makes the current flow?</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① Equal voltages: no current</h3><p class="small" style="font-size:20px">The converter (its average, slide 14) copies the grid voltage. Nothing across the inductor, nothing flows.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Leading: active power</h3><p class="small" style="font-size:20px">3° ahead: the current is in step with the grid voltage. The leading side sends active power to the lagging side.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Higher voltage: reactive power</h3><p class="small" style="font-size:20px">5 % bigger: the current comes a quarter period late. The higher-voltage side sends reactive power.</p></div>
+      <div class="callout" data-step="3" style="font-size:19px"><b>AC power flow:</b> the angle sets the active power, the size sets the reactive power.</div>
     </div>
-    <div class="stack" data-step="2">
-      <p>Give <span class="m">i</span><sub>c</sub> its own voltage <span class="m">v</span><sub>c</sub>*, common to both arms:</p>
-      <div class="eq" style="font-size:25px"><span class="m">v</span><sub>u</sub>* = <span class="m">V</span><sub>dc</sub>/2 − <span class="m">v</span><sub>a</sub>* − <span class="m">v</span><sub>c</sub>*, &nbsp; <span class="m">v</span><sub>l</sub>* = <span class="m">V</span><sub>dc</sub>/2 + <span class="m">v</span><sub>a</sub>* − <span class="m">v</span><sub>c</sub>*</div>
-      <div class="eq" style="font-size:25px">→ <span class="m">L</span><sub>arm</sub> d<span class="m">i</span><sub>c</sub>/d<span class="m">t</span> = <span class="m">v</span><sub>c</sub>*, &nbsp; <span class="m">v</span><sub>a</sub> unchanged</div>
-      <p class="small">An inductor driven by a voltage we choose: the same plant as the grid current loop.</p>
-      <ul class="small">
-        <li><b>Suppression:</b> PI in a −2ω frame, or a resonant controller at 2<span class="m">f</span><sub>1</sub>, drives the 2<span class="m">f</span><sub>1</sub> part to zero.</li>
-        <li><b>Energy:</b> the DC part of <span class="m">i</span><sub>c</sub> sets the total arm energy (the slow loop in the simulation); its <span class="m">f</span><sub>1</sub> part moves energy between upper and lower arm.</li>
-      </ul>
-    </div>
-    <div class="callout" data-step="3" style="grid-column:1/-1"><b>The same pattern as the NPC:</b> the sum (DC voltage or total energy) and the difference (balance between capacitors) are separate loops, and the balancing uses an internal quantity the load never sees: the midpoint current there, the circulating current here.</div>
+    <div data-sim="gridbasic" data-config='{"w":640,"steps":{"0":{"amp":100,"ang":0},"1":{"ang":3},"2":{"ang":0,"amp":105}}}'></div>
   </div>
-  <aside class="notes">
-    <p><b>2.5 min.</b> Derivation: subtract the two KVL equations of the previous slide’s notes, with i<sub>u</sub> + i<sub>l</sub> = 2i<sub>c</sub>. Adding a common v<sub>c</sub>* to both arm references cancels in v<sub>a</sub> = (v<sub>l</sub> − v<sub>u</sub>)/2.</p>
-    <p>Why negative sequence at 2f<sub>1</sub>: the 2f<sub>1</sub> ripple of phases a, b, c is shifted by 2 · 120°, which is the abc → acb order. In a dq frame rotating at −2ω it becomes DC, so a PI removes it (the CCSC of Tu, Xu &amp; Xu).</p>
-  </aside>
+  <aside class="notes"><p><b>2.5 min.</b> Per phase: grid 327 V peak (400 V line-to-line), L = 2 mH (0.63 Ω at 50 Hz). The converter voltage here is the average over a switching period (slide 4): the pulses are forgotten.</p>
+    <ul>
+      <li><b>①</b> Point at the middle plot: the difference is zero.</li>
+      <li><b>②</b> 3° is a difference of about 17 V; it gives 27 A and 13 kW. Move the timing slider the other way: power comes back from the grid.</li>
+      <li><b>③</b> The inductor delays the current a quarter period behind the voltage across it. Formulas if asked: P = 3·E·V·sin δ / (2X), Q ≈ 3·E·(V − E) / (2X), with peak values.</li>
+      <li>The rule holds for any two AC sources joined by an inductance (a line, a transformer): active power goes from the leading side to the lagging side, reactive power from the higher voltage to the lower. Play with both sliders to show it, in both directions.</li>
+      <li>Lead into the next slide: a few volts already move tens of amps, so the voltage cannot be set by hand.</li>
+    </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="control" data-min="2" data-title="Averaged model for control">
-  <div class="sh"><div><div class="kicker"><b>Control</b> · modelling (same local averaging as the Control &amp; Modelling module)</div><h2>Averaged model: what the current controller sees</h2></div></div>
-  <div class="body cols-2" style="grid-template-rows: 1fr auto">
-    <div class="stack">
-      <p>Average pole voltage of any of our legs, offset included:</p>
-      <div class="eq">⟨<span class="m">v</span><sub>xO</sub>⟩ = (<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>) <span class="m">V</span><sub>dc</sub>/2, &nbsp; x ∈ {a, b, c}</div>
-      <p data-step="1">Balanced three-wire load: the floating neutral removes the common part, so <span class="m">r</span><sub>0</sub> disappears:</p>
-      <div class="eq" data-step="1">⟨<span class="m">v</span><sub>xn</sub>⟩ = ⟨<span class="m">v</span><sub>xO</sub>⟩ − ⅓ Σ<sub>y</sub>⟨<span class="m">v</span><sub>yO</sub>⟩ = <span class="m">r</span><sub>x</sub> <span class="m">V</span><sub>dc</sub>/2</div>
-      <p data-step="2">Filter <span class="m">L</span>, <span class="m">R</span> to the grid voltage <b>e</b>:</p>
-      <div class="eq" data-step="2"><span class="m">L</span> d<b>i</b>/d<span class="m">t</span> = <b>v</b> − <b>e</b> − <span class="m">R</span> <b>i</b></div>
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="A PI controller sets the voltage">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 2 of 4</div><h2>Let a PI controller set the voltage</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① By hand: it does not hold</h3><p class="small" style="font-size:20px">We pick the voltage for 30 A. Then the grid drops 5 %, and the current is far off.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Measure and correct</h3><p class="small" style="font-size:20px">The PI compares the current with the wanted one and corrects the voltage. The drop is hardly seen.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ But always a little late</h3><p class="small" style="font-size:20px">A sine is a moving target. A small error stays (bottom plot). The dq transformation fixes this.</p></div>
     </div>
-    <div class="stack" data-step="3">
-      <p>In a frame rotating with the grid (amplitude-invariant Park, d aligned with <b>e</b>):</p>
-      <div class="eq"><span class="m">L</span> d<span class="m">i</span><sub>d</sub>/d<span class="m">t</span> = <span class="m">v</span><sub>d</sub> − <span class="m">e</span><sub>d</sub> − <span class="m">R i</span><sub>d</sub> + ω<span class="m">L i</span><sub>q</sub></div>
-      <div class="eq"><span class="m">L</span> d<span class="m">i</span><sub>q</sub>/d<span class="m">t</span> = <span class="m">v</span><sub>q</sub> − <span class="m">e</span><sub>q</sub> − <span class="m">R i</span><sub>q</sub> − ω<span class="m">L i</span><sub>d</sub></div>
-      <p class="small">Choose <span class="m">v</span><sub>d</sub> = <span class="m">u</span><sub>d</sub> + <span class="m">e</span><sub>d</sub> − ω<span class="m">L i</span><sub>q</sub> and <span class="m">v</span><sub>q</sub> = <span class="m">u</span><sub>q</sub> + <span class="m">e</span><sub>q</sub> + ω<span class="m">L i</span><sub>d</sub>: each axis becomes <span class="m">L</span> d<span class="m">i</span>/d<span class="m">t</span> + <span class="m">R i</span> = <span class="m">u</span>, controlled by a PI with <span class="m">K</span><sub>p</sub> = ω<sub>c</sub><span class="m">L</span>, <span class="m">K</span><sub>i</sub> = ω<sub>c</sub><span class="m">R</span>.</p>
-    </div>
-    <div class="callout" style="grid-column:1/-1" data-step="4"><b>To the controller, the multilevel leg is just a voltage source</b> with the limit |<b>v</b>| ≤ <span class="m">V</span><sub>dc</sub>/√3 (with min-max). The number of levels changes the ripple, not this model. <span class="qlabel">Question:</span> where does the ωL coupling come from? <span class="ans" data-step="5">From differentiating in a rotating frame: the derivative of the rotation produces the cross terms.</span></div>
+    <div data-sim="gridpi" data-config='{"w":640,"steps":{"0":{"mode":"hand"},"1":{"mode":"pi"}}}'></div>
   </div>
-  <aside class="notes"><p><b>2 min.</b> Same averaging operator as the instructor’s Control &amp; Modelling module. The next two slides use exactly these equations.</p></aside>
+  <aside class="notes"><p><b>2.5 min.</b> One phase shown. Wanted current: 30 A from 10 ms. Grid drop of 5 % at 50 ms.</p>
+    <ul>
+      <li><b>①</b> 5 % of 327 V is 16 V across 0.63 Ω: about 26 A of extra current, plus a slowly decaying offset.</li>
+      <li><b>②</b> Converter voltage = measured grid voltage + PI correction. Gains: K<sub>p</sub> = ω<sub>c</sub>L, K<sub>i</sub> = ω<sub>c</sub>R, bandwidth 400 Hz.</li>
+      <li><b>③</b> The error is about 12 % (50 Hz / 400 Hz): the PI needs an error to keep moving its output. Next slide removes it.</li>
+    </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="control" data-min="2" data-title="Control structure">
-  <div class="sh"><div><div class="kicker"><b>Control</b></div><h2>Where balancing lives in the control structure</h2></div></div>
-  <div class="body">
-    <svg class="bd" viewBox="0 0 1472 660">
-      <defs>
-        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker>
-      </defs>
-      <style>.bd .ar2{stroke:var(--ink2);stroke-width:2.2;fill:none;marker-end:url(#arr2)}</style>
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="The dq transformation">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 4</div><h2>The dq transformation: sines become constants</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:16px">
+      <div><h3 style="font-size:22px;margin:0">① Three sines, one turning arrow</h3><p class="small" style="font-size:20px">Like the voltage arrow of slide 9: the three currents are one arrow, turning at 50 Hz.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② The grid voltage is the reference</h3><p class="small" style="font-size:20px">The dq frame turns with the grid voltage, which lies on the d axis. In this frame the currents are two constants.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ <span class="m">i</span><sub>d</sub>: active, <span class="m">i</span><sub>q</sub>: reactive</h3><p class="small" style="font-size:20px"><span class="m">i</span><sub>d</sub> is in phase with the grid voltage: active power. <span class="m">i</span><sub>q</sub> is 90° away: reactive power.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ One PI for each</h3><p class="small" style="font-size:20px">Constant targets: the error goes to zero. The two PI outputs are transformed back to three phases for the PWM.</p></div>
+    </div>
+    <div data-sim="dqframe" data-config='{"w":700,"steps":{"0":{"dq":false,"id":30,"iq":0},"1":{"dq":true},"2":{"iq":-15}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2.5 min.</b> Press P to pause the arrows.</p>
+    <ul>
+      <li><b>①</b> The red sine in the bottom plot is phase a; the grey ones are b and c.</li>
+      <li><b>②</b> How it works: a PLL locks onto the measured grid voltage and gives its angle θ. With θ we transform the grid voltage and the currents (abc → dq, the Park transform). The grid voltage becomes e<sub>d</sub> = 327 V, e<sub>q</sub> = 0: that is what “reference” means.</li>
+      <li><b>③</b> P = 3/2 · e<sub>d</sub> · i<sub>d</sub> and Q = −3/2 · e<sub>d</sub> · i<sub>q</sub> (the sign of Q depends on the convention). Move the sliders: i<sub>d</sub> changes P only, i<sub>q</sub> changes Q only. In the top-left picture, i<sub>d</sub> makes the arrow longer along the grid voltage, i<sub>q</sub> turns it away from it.</li>
+      <li><b>④</b> The whole chain: measure → abc to dq → PI on i<sub>d</sub> and PI on i<sub>q</sub> → v<sub>d</sub>, v<sub>q</sub> → dq to abc → references for the carriers. The d and q axes are coupled through ωL; the controller cancels that term. The wanted i<sub>d</sub> comes from the DC-voltage PI (next slide); the wanted i<sub>q</sub> is the reactive power we want, often zero.</li>
+    </ul></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="control" data-min="2" data-title="DC voltage: who decides the wanted current">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 4 of 4</div><h2>Who decides the wanted current? The DC voltage</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① The DC capacitor is a bucket</h3><p class="small" style="font-size:20px">Power in fills it, power out empties it. In = out: the voltage stays.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② More comes in</h3><p class="small" style="font-size:20px">Same current to the grid: the voltage climbs until the converter trips.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A PI watches the voltage</h3><p class="small" style="font-size:20px">Too high? It asks for more <span class="m">i</span><sub>d</sub>: more active power to the grid. The voltage comes back to 800 V.</p></div>
+    </div>
+    <div data-sim="dcbucket" data-config='{"w":640,"steps":{"0":{"ev":false,"mode":"fixed"},"1":{"ev":true},"2":{"mode":"pi"}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2 min.</b> 2 mF at 800 V. Power in goes from 10 kW to 20 kW at 20 ms.</p>
+    <ul>
+      <li><b>②</b> 10 kW too much raises the voltage by about 6 V every millisecond: 900 V is reached 17 ms later.</li>
+      <li><b>③</b> The output of this PI is the wanted i<sub>d</sub> of the previous slide. It is much slower than the current loop (tens of Hz against several hundred Hz), so the two do not disturb each other.</li>
+      <li>This loop holds the sum of the two capacitor voltages; the midpoint PI of slide 19 holds their difference.</li>
+    </ul></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="control" data-min="1" data-title="All together: three PI controllers">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · the whole picture</div><h2>All together: three PI controllers</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr; gap:10px; align-content:center">
+    <div style="justify-self:center"><svg class="bd" viewBox="0 130 1000 330" style="width:1180px;height:390px" aria-label="Control structure">
+      <defs><marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker></defs>
+      <style>.bd .a3{stroke:var(--ink2);stroke-width:2.2;fill:none;marker-end:url(#arrS)}</style>
+      <g data-step="0">
+        <g class="box acc"><rect x="20" y="190" width="230" height="80"/><text x="135" y="220">DC-voltage PI</text><text x="135" y="248" class="nt" style="text-anchor:middle">keep 800 V</text></g>
+        <path class="a3" d="M250,230 H330"/><text x="290" y="206" class="nt" style="text-anchor:middle">wanted i<tspan baseline-shift="sub" font-size="12">d</tspan></text>
+        <text x="135" y="168" class="nt" style="text-anchor:middle">slow · slide 24</text>
+      </g>
       <g data-step="1">
-        <g class="box acc"><rect x="230" y="280" width="330" height="96"/><text x="395" y="312">current control in dq</text><text x="395" y="344" class="nt" style="text-anchor:middle">PI + ωL decoupling + e feed-forward</text></g>
-        <path class="ar2" d="M560,328 H620"/>
-        <g class="box"><rect x="620" y="294" width="130" height="68"/><text x="685" y="328">dq → abc</text></g>
-        <path class="ar2" d="M750,328 H822"/>
-        <circle cx="850" cy="328" r="28" fill="var(--panel)" stroke="var(--ink2)" stroke-width="2"/><text x="850" y="336" text-anchor="middle" style="font:700 26px var(--font);fill:var(--ink)">+</text>
-        <path class="ar2" d="M878,328 H930"/>
-        <g class="box"><rect x="930" y="284" width="200" height="88"/><text x="1030" y="316">modulator</text><text x="1030" y="344" class="nt" style="text-anchor:middle">carriers + offset</text></g>
-        <path class="ar2" d="M1130,328 H1180"/>
-        <g class="box lv"><rect x="1180" y="284" width="270" height="88"/><text x="1315" y="316">state selection</text><text x="1315" y="344" class="nt" style="text-anchor:middle">→ gates → NPC / ANPC / FC</text></g>
-        <g class="box"><rect x="20" y="490" width="170" height="68"/><text x="105" y="524">PLL → θ</text></g>
-        <path class="ar2" d="M190,524 H395 V376"/>
-        <text x="200" y="510" class="sig">θ, e_dq</text>
-        <text x="690" y="282" class="sig">r_a, r_b, r_c</text>
+        <g class="box acc"><rect x="330" y="190" width="220" height="80"/><text x="440" y="220">current PIs (dq)</text><text x="440" y="248" class="nt" style="text-anchor:middle">i<tspan baseline-shift="sub" font-size="12">d</tspan>: active · i<tspan baseline-shift="sub" font-size="12">q</tspan>: reactive</text></g>
+        <path class="a3" d="M440,330 V272"/><text x="440" y="350" class="nt" style="text-anchor:middle">wanted i<tspan baseline-shift="sub" font-size="12">q</tspan>: the reactive power we want</text>
+        <path class="a3" d="M550,230 H640"/><text x="595" y="212" class="nt" style="text-anchor:middle">voltage</text>
+        <g class="box"><rect x="640" y="190" width="200" height="80"/><text x="740" y="220">PWM</text><text x="740" y="248" class="nt" style="text-anchor:middle">carriers</text></g>
+        <path class="a3" d="M840,230 H900"/><text x="945" y="234" class="nt" style="text-anchor:middle">switches</text>
+        <text x="440" y="168" class="nt" style="text-anchor:middle">fast · slides 22 and 23</text>
       </g>
       <g data-step="2">
-        <g class="box"><rect x="20" y="70" width="330" height="96"/><text x="185" y="104">DC-voltage loop (sum)</text><text x="185" y="136" class="sig">V*_dc − (v_C1 + v_C2) → PI</text></g>
-        <path class="ar2" d="M300,166 V280"/><text x="312" y="226" class="sig">i_d*</text>
-        <g class="box"><rect x="390" y="90" width="170" height="68"/><text x="475" y="124">Q* → i_q*</text></g>
-        <path class="ar2" d="M475,158 V280"/>
+        <g class="box lv"><rect x="620" y="360" width="240" height="80"/><text x="740" y="390">midpoint PI</text><text x="740" y="418" class="nt" style="text-anchor:middle">keep C1 = C2</text></g>
+        <path class="a3" d="M740,360 V272"/><text x="760" y="318" class="nt" style="text-anchor:start">offset r<tspan baseline-shift="sub" font-size="12">0</tspan> · slide 19</text>
       </g>
-      <g data-step="3">
-        <g class="box acc"><rect x="600" y="490" width="420" height="96"/><text x="810" y="522">NP balancing loop (difference)</text><text x="810" y="554" class="sig">ΔV = v_C1 − v_C2 → sign(P)·PI → r_0,bal</text></g>
-        <path class="ar2" d="M850,490 V358"/>
-        <g class="box"><rect x="700" y="110" width="300" height="68"/><text x="850" y="144">min-max → r_0,mm</text></g>
-        <path class="ar2" d="M850,178 V298"/>
-        <text x="866" y="242" class="nt">shared headroom</text>
-      </g>
-      <g data-step="4">
-        <g class="box lv"><rect x="1180" y="490" width="270" height="96"/><text x="1315" y="522">V_fc measurements</text><text x="1315" y="554" class="nt" style="text-anchor:middle">redundant-state choice</text></g>
-        <path class="ar2" d="M1315,490 V374"/>
-        <rect x="1160" y="60" width="300" height="150" rx="4" fill="none" stroke="var(--line)" stroke-dasharray="6 6" stroke-width="2"/>
-        <text x="1180" y="96" class="gl">TIME SCALES</text>
-        <text x="1180" y="130" class="nt">current loop: ~1 kHz bandwidth</text>
-        <text x="1180" y="158" class="nt">DC voltage, NP loop: 10–50 Hz</text>
-        <text x="1180" y="186" class="nt">state selection: every period</text>
-      </g>
-    </svg>
+    </svg></div>
   </div>
-  <aside class="notes">
-    <p><b>2 min.</b> Build in four clicks: (1) inner current loop and modulator, (2) the <b>sum</b> loop sets i<sub>d</sub>*, (3) the <b>difference</b> loop adds an offset next to min-max — they share the same headroom, (4) flying-capacitor voltages act on state selection, inside the modulator.</p>
-  </aside>
+  <aside class="notes"><p><b>1 min.</b> A recap; one block per click.</p><ul><li>Speeds: current loop several hundred Hz; DC-voltage and midpoint loops 10–50 Hz.</li><li>The DC loop watches the sum v<sub>C1</sub> + v<sub>C2</sub>, the midpoint loop the difference. One cannot change what the other controls, so they do not fight.</li><li>Not drawn: the PLL that gives the grid angle.</li></ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="dq current control">
-  <div class="sh"><div><div class="kicker"><b>Control</b> · simulation · read: imperix, vector current control</div><h2>Current control in dq: what each term does</h2></div></div>
-  <div class="body" data-sim="dq"></div>
-  <aside class="notes">
-    <p><b>2.5 min.</b> Average model of an L filter; the multilevel converter appears as a voltage source with a limit.</p>
-    <ul>
-      <li>L di<sub>d</sub>/dt = v<sub>d</sub> − e<sub>d</sub> − R i<sub>d</sub> + ωL i<sub>q</sub>; L di<sub>q</sub>/dt = v<sub>q</sub> − e<sub>q</sub> − R i<sub>q</sub> − ωL i<sub>d</sub>.</li>
-      <li>Decoupling off → the i<sub>d</sub> step disturbs i<sub>q</sub>. Feed-forward off → the 20 % grid sag at 40 ms becomes a current transient.</li>
-      <li>Raise the bandwidth with the delay on → overshoot: digital delay limits the bandwidth.</li>
-      <li>Next slide: the L of this model is in practice an LCL, with a resonance this loop must not excite.</li>
-    </ul>
-  </aside>
-</section>
-
-<section class="slide" data-part="2" data-section="control" data-min="3" data-title="Grid filter: L or LCL">
-  <div class="sh"><div><div class="kicker"><b>Control</b> · the grid filter · read: Liserre, Blaabjerg &amp; Hansen, IEEE TIA 2005; Peña-Alzola et al., IEEE TPEL 2013</div><h2>Grid filter: L or LCL, and what the extra level buys</h2></div></div>
-  <div class="body" data-sim="lcl" data-config='{"topo":2,"filt":"l"}'></div>
-  <aside class="notes">
-    <p><b>3 min.</b> 400 V, 50 kVA, 800 V DC link, 10 kHz. Top: admittance from converter voltage to grid current. Bottom: grid-current harmonics = converter voltage harmonics × admittance, against 0.3 % of rated as a reference line.</p>
-    <ol style="padding-left:22px">
-      <li><b>2-level, L = 1.3 mH</b> (start): the cluster at f<sub>sw</sub> reaches about 1.1 % of rated, ripple ≈ 1.9 % rms. An L falls only 20 dB/decade.</li>
-      <li><b>3-level, same L:</b> the voltage step is halved, the cluster drops to about 0.5 % (ripple ≈ 0.9 %). That is the “smaller filter” of the extra level: same ripple with about half the inductance.</li>
-      <li><b>LCL</b> (same L<sub>1</sub> + L<sub>2</sub>, plus 10 µF, 1 % reactive power): 60 dB/decade above f<sub>res</sub> ≈ 3.3 kHz; the f<sub>sw</sub> cluster falls well below the line. But the undamped peak amplifies whatever sits near f<sub>res</sub>: on 3-level the largest harmonic is now at 3.3 kHz, not at f<sub>sw</sub>. Grid background harmonics and the current loop excite the same peak.</li>
-      <li><b>LCL + R<sub>d</sub></b> (1.5 Ω): the peak is gone, at the cost of about 6 W (3-level) or 20 W (2-level) in R<sub>d</sub>. The alternative is active damping in the current controller.</li>
-    </ol>
-    <p>Design rules (Liserre 2005): 10 f<sub>1</sub> &lt; f<sub>res</sub> &lt; f<sub>sw</sub>/2; C<sub>f</sub> reactive power ≤ 5 % of rating; total L small enough for the voltage drop (≈ 0.1 pu). Passive damping starts from R<sub>d</sub> ≈ 1/(3ω<sub>res</sub>C<sub>f</sub>).</p>
-    <p>IEEE 519 limits stop at h = 50; the 0.3 % line is only a visual reference for the kHz range.</p>
-  </aside>
-</section>
-
-<section class="slide" data-part="2" data-section="outlook" data-min="1.5" data-title="Where multilevel lives today">
-  <div class="sh"><div><div class="kicker">Industry and research</div><h2>Where multilevel converters live today</h2></div></div>
-  <div class="body cols-3" style="grid-template-rows: 1fr 1fr; gap:18px">
-    <div class="card" data-step="1"><h3>1500 V PV &amp; storage</h3><p class="small">3L NPC/ANPC with 1200 V devices; hybrid Si/SiC ANPC modules put SiC where it switches and IGBTs where they conduct.</p></div>
-    <div class="card" data-step="1"><h3>MV drives, wind, grid links</h3><p class="small">ABB ACS1000 (3L NPC, IGCT); ACS2000 (5L-ANPC). Back-to-back 3L converters in wind turbines and soft open points: both sides share one midpoint.</p></div>
-    <div class="card" data-step="1"><h3>HVDC &amp; STATCOM</h3><p class="small">MMC with hundreds of half-bridge SMs per arm. Trans Bay Cable (2010) was the first MMC-HVDC link; modern VSC-HVDC links are MMC-based.</p></div>
-    <div class="card" data-step="2"><h3>Research: wide band-gap</h3><p class="small">Flying-capacitor multilevel (FCML) converters with GaN for very high power density; SiC 3L ANPC for 800 V EV traction and chargers.</p></div>
-    <div class="card" data-step="2"><h3>Research: control</h3><p class="small">Model-predictive control with balancing in the cost function; optimised pulse patterns on 5L-ANPC MV drives; active thermal control through redundant states.</p></div>
-    <div class="card" data-step="2"><h3>Open problems</h3><p class="small">Balancing at low power factor and in overmodulation; capacitor and arm-energy sizing; fault tolerance using redundant states; EMI of fast multilevel edges.</p></div>
+<section class="slide" data-part="2" data-section="outlook" data-min="1" data-title="Where multilevel lives today">
+  <div class="sh"><div><div class="kicker">Industry and research</div><h2>Where multilevel converters are used</h2></div></div>
+  <div class="body cols-3" style="gap:22px; align-content:start">
+    <div class="card" data-step="1"><h3>Solar and batteries</h3><p class="small">1500 V PV and storage inverters use 3-level legs, so 1200 V devices can be used.</p></div>
+    <div class="card" data-step="1"><h3>Motor drives and wind</h3><p class="small">Medium-voltage drives and wind converters: higher voltage with standard switches, cleaner output.</p></div>
+    <div class="card" data-step="1"><h3>Research</h3><p class="small">Faster switches (SiC, GaN) in multilevel legs, and smarter control of the capacitor balance.</p></div>
   </div>
-  <aside class="notes"><p><b>1.5 min.</b> Kouro et al., IEEE TIE 2010 is the survey to cite. Check current product status before quoting ratings.</p></aside>
+  <aside class="notes"><p><b>1 min.</b> Kouro et al., IEEE TIE 2010 is the survey to cite.</p></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="outlook" data-min="1" data-title="Three things to remember">
   <div class="sh"><div><div class="kicker">Summary</div><h2>Three things to remember</h2></div></div>
   <div class="body" style="align-content:center; gap:22px">
-    <div class="card" data-step="1"><p class="lead"><b>1 · The modulator makes two decisions.</b> Which level (carriers, with min-max for 15 % more voltage: the space-vector modulator in carrier form), then which state for that level.</p></div>
-    <div class="card" data-step="2"><p class="lead"><b>2 · Balancing is a modulator job.</b> The offset (NPC), the state choice (flying capacitor), sorting (MMC). Its authority follows the active power or the current sign, so check both power directions.</p></div>
-    <div class="card" data-step="3"><p class="lead"><b>3 · To the controller, any leg is a voltage source behind a filter.</b> More levels mean smaller steps, so a smaller filter for the same ripple; an LCL needs its resonance damped.</p></div>
-    <div class="callout" data-step="4"><b>Next talk:</b> Elif applies phase-shifted and level-shifted carriers cell by cell in the <b>cascaded H-bridge</b>, where every cell has its own isolated source.</div>
+    <div class="card" data-step="1"><p class="lead"><b>1 · Pulses make an average.</b> Compare the reference with a carrier; the average follows the reference. Min-max adds 15 % and is the same as SVPWM.</p></div>
+    <div class="card" data-step="2"><p class="lead"><b>2 · More levels, more carriers.</b> One carrier per step, all in phase (PD): smaller jumps, smaller ripple.</p></div>
+    <div class="card" data-step="3"><p class="lead"><b>3 · The midpoint needs a controller.</b> Some outputs can be made two ways; a PI controller picks the one that keeps C1 and C2 equal.</p></div>
+    <div class="callout" data-step="4"><b>Next talk:</b> Elif’s cascaded H-bridge, where every cell has its own isolated source.</div>
   </div>
-  <aside class="notes"><p><b>1 min.</b> Then hand over to Elif. The printed quiz is handed out at the end of the module.</p></aside>
+  <aside class="notes"><p><b>1 min.</b> Then hand over to Elif.</p></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="outlook" data-min="0" data-title="References">
@@ -498,11 +658,9 @@
       <li>N. Celanovic, D. Boroyevich, “A comprehensive study of neutral-point voltage balancing problem in three-level NPC VSI PWM inverters,” <i>IEEE TPEL</i>, 15(2), 2000.</li>
       <li>T. A. Meynard, H. Foch, “Multi-level conversion: high voltage choppers and voltage-source inverters,” <i>IEEE PESC</i>, 1992.</li>
       <li>T. Brückner, S. Bernet, H. Güldner, “The active NPC converter and its loss-balancing control,” <i>IEEE TIE</i>, 52(3), 2005.</li>
-      <li>A. Lesnicar, R. Marquardt, “An innovative modular multilevel converter topology suitable for a wide power range,” <i>IEEE PowerTech</i>, Bologna, 2003.</li>
+      
     </ul>
     <ul class="small" style="gap:6px; font-size:17px">
-      <li>Q. Tu, Z. Xu, L. Xu, “Reduced switching-frequency modulation and circulating current suppression for modular multilevel converters,” <i>IEEE TPWRD</i>, 26(3), 2011.</li>
-      <li>S. Debnath et al., “Operation, control, and applications of the modular multilevel converter: a review,” <i>IEEE TPEL</i>, 30(1), 2015.</li>
       <li>M. Liserre, F. Blaabjerg, S. Hansen, “Design and control of an LCL-filter-based three-phase active rectifier,” <i>IEEE TIA</i>, 41(5), 2005.</li>
       <li>R. Peña-Alzola et al., “Analysis of the passive damping losses in LCL-filter-based grid converters,” <i>IEEE TPEL</i>, 28(6), 2013.</li>
       <li>J. Rodríguez, J.-S. Lai, F. Z. Peng, “Multilevel inverters: a survey of topologies, controls, and applications,” <i>IEEE TIE</i>, 49(4), 2002.</li>
@@ -529,6 +687,8 @@
 <script src="js/sim-mod.js"></script>
 <script src="js/sim-ctl.js"></script>
 <script src="js/sim-mmc.js"></script>
+<script src="js/sim-om.js"></script>
+<script src="js/sim-grid.js"></script>
 <script src="js/deck.js"></script>
 </body>
 </html>

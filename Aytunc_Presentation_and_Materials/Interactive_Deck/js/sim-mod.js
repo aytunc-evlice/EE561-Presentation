@@ -7,21 +7,23 @@
   // ---------- carrier lab ----------
   SIMS.carrier = function (host, cfg) {
     const S = 4096, VH = 400;
-    const P = { n: cfg.n || 3, arr: cfg.arr || 'PD', m: 0.9, mf: 15, mm: false, sig: 'ab' };
-    const cvA = K.canvas(920, 220), cvB = K.canvas(920, 190), cvC = K.canvas(920, 190);
+    const P = { n: cfg.n || 3, arr: cfg.arr || 'PD', m: 0.9, mf: 15, mm: false, sig: cfg.sig || 'ab', onlyA: !!cfg.onlyA };
+    const CW = cfg.w || 920;
+    const cvA = K.canvas(CW, 230), cvB = K.canvas(CW, cfg.w ? 165 : 190), cvC = K.canvas(CW, cfg.w ? 175 : 190);
     const roThd = K.readout('THD of selected signal', 'big'), roClu = K.readout('Strongest harmonic'), roF = K.readout('Fundamental (peak)');
     const ctl = [
       K.seg({ label: 'Levels', options: [[3, '3-level'], [5, '5-level']], value: P.n, onChange: (v) => { P.n = v; calc(); } }),
-      K.seg({ label: 'Carrier arrangement', options: [['PD', 'PD'], ['POD', 'POD'], ['APOD', 'APOD'], ['PS', 'Phase-shifted']], value: P.arr, onChange: (v) => { P.arr = v; calc(); } }),
+      K.seg({ label: 'Carrier arrangement', options: cfg.simple ? [['PD', 'PD (shifted)'], ['POD', 'POD (mirrored)']].concat(cfg.noPS ? [] : [['PS', 'Phase-shifted']]) : [['PD', 'PD'], ['POD', 'POD'], ['APOD', 'APOD'], ['PS', 'Phase-shifted']], value: P.arr, onChange: (v) => { P.arr = v; calc(); } }),
       K.slider({ label: 'm', min: 0.1, max: 1.2, step: 0.01, value: P.m, fmt: (v) => v.toFixed(2), onInput: (v) => { P.m = v; calc(); } }),
       K.slider({ label: 'f<sub>c</sub>/f<sub>1</sub>', min: 3, max: 41, step: 1, value: P.mf, fmt: (v) => String(v), onInput: (v) => { P.mf = v; calc(); } }),
       K.seg({ label: 'Zero-sequence', options: [[false, 'none (SPWM)'], [true, 'min-max injection']], value: P.mm, onChange: (v) => { P.mm = v; calc(); } }),
       K.seg({ label: 'Show spectrum of', options: [['a', 'pole v<sub>aO</sub>'], ['ab', 'line v<sub>ab</sub>']], value: P.sig, onChange: (v) => { P.sig = v; calc(); } }),
     ];
     host.classList.add('sim');
-    host.style.gridTemplateColumns = '920px 1fr';
+    host.style.gridTemplateColumns = CW + 'px 1fr';
+    const shown = cfg.simple ? [ctl[0], ctl[1], ctl[2], ctl[5]] : ctl;
     host.append(h('div', { class: 'sim-col', style: { gap: '8px' } }, cvA.el, cvB.el, cvC.el),
-      h('div', { class: 'sim-col' }, ctl.map((c) => c.el), h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr' } }, roThd.el, roF.el, roClu.el)));
+      h('div', { class: 'sim-col' }, shown.map((c) => c.el), h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr' } }, roThd.el, roF.el, roClu.el)));
     const va = new Float32Array(S), vb = new Float32Array(S), vc = new Float32Array(S);
     let amp = null;
     function carriers(t) { // values of the N-1 carriers at carrier phase t (in carrier periods)
@@ -71,20 +73,28 @@
       }
       const R = 400, ra = new Float32Array(R + 1), rb = new Float32Array(R + 1), rc = new Float32Array(R + 1);
       for (let q = 0; q <= R; q++) { const r = refs((K.TAU * q) / R); ra[q] = r[0]; rb[q] = r[1]; rc[q] = r[2]; }
-      series.push({ y: rb, x0: 0, dx: K.TAU / R, color: K.css('--s3'), width: 1.6, alpha: 0.7 }, { y: rc, x0: 0, dx: K.TAU / R, color: K.css('--s4'), width: 1.6, alpha: 0.7 }, { y: ra, x0: 0, dx: K.TAU / R, color: K.css('--s2'), width: 2.6 });
+      if (!P.onlyA) series.push({ y: rb, x0: 0, dx: K.TAU / R, color: K.css('--s3'), width: 1.6, alpha: 0.7 }, { y: rc, x0: 0, dx: K.TAU / R, color: K.css('--s4'), width: 1.6, alpha: 0.7 });
+      series.push({ y: ra, x0: 0, dx: K.TAU / R, color: K.css('--s2'), width: 2.6 });
       K.plot(ctx, { x: 50, y: 26, w: cvA.w - 64, h: cvA.h - 48 }, {
         xlim: [0, K.TAU], ylim: [-1.25, 1.25], yticks: [[-1, '−1'], [0, '0'], [1, '1']],
         bands: [{ y0: 1, y1: 1.25, color: 'rgba(192,57,43,.08)' }, { y0: -1.25, y1: -1, color: 'rgba(192,57,43,.08)' }],
-        series, title: 'Carriers and references r_a, r_b, r_c (normalized to V_dc/2)',
-        legend: [['r_a', K.css('--s2')], ['r_b', K.css('--s3')], ['r_c', K.css('--s4')]],
+        series, title: P.onlyA ? 'Carriers and the reference of leg a' : 'Carriers and references r_a, r_b, r_c',
+        legend: P.onlyA ? [['r_a', K.css('--s2')]] : [['r_a', K.css('--s2')], ['r_b', K.css('--s3')], ['r_c', K.css('--s4')]],
       });
+      if (P.n === 3 && P.arr !== 'PS') {
+        ctx.save(); ctx.font = '700 14px ' + K.font; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        const yU = 26 + (cvA.h - 48) * (1.25 - 1.125) / 2.5, yL = 26 + (cvA.h - 48) * (1.25 + 1.125) / 2.5;
+        ctx.fillStyle = K.css('--ink');
+        ctx.fillText('upper carrier (0 … +1): P ↔ O', cvA.w - 20, yU); ctx.fillText('lower carrier (−1 … 0): O ↔ N', cvA.w - 20, yL);
+        ctx.restore();
+      }
       ctx = cvB.ctx; cvB.clear();
       const isAb = P.sig === 'ab';
       K.plot(ctx, { x: 50, y: 26, w: cvB.w - 64, h: cvB.h - 52 }, {
         xlim: [0, S], ylim: isAb ? [-880, 880] : [-460, 460], yticks: isAb ? [[-800, '−800'], [0, '0'], [800, '800']] : [[-400, '−400'], [0, '0'], [400, '400']],
         xticks: [[0, '0'], [S / 2, '10 ms'], [S, '20 ms']],
         series: [{ y: sig, x0: 0, dx: 1, color: ink, width: 1.8, step: true }],
-        title: isAb ? 'Line-to-line voltage v_ab [V]' : 'Pole voltage v_aO [V]',
+        title: isAb ? 'Line-to-line voltage v_ab [V]' : 'Leg a output v_aO [V]: P = +400, O = 0, N = −400',
       });
       ctx = cvC.ctx; cvC.clear();
       const H = Math.min(300, Math.max(60, Math.round(P.mf * (P.arr === 'PS' ? P.n - 1 : 1) * 3.2)));
@@ -101,14 +111,25 @@
     }
     K.onTheme(() => draw());
     calc();
-    return {};
+    const ST = cfg.steps;
+    return {
+      step(k) {
+        if (!ST) return;
+        let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key];
+        if (!o) return;
+        let ch = false;
+        for (const key of ['arr', 'sig', 'onlyA', 'n']) if (o[key] != null && P[key] !== o[key]) { P[key] = o[key]; ch = true; }
+        if (ch) { ctl[0].set(P.n); ctl[1].set(P.arr); ctl[5].set(P.sig); calc(); }
+      },
+    };
   };
 
   // ---------- zero-sequence (min-max) explorer ----------
   SIMS.minmax = function (host, cfg) {
-    const P = { m: cfg.m || 1.1, on: false, th: 10, vdc: 650, play: false };
-    const cv = K.canvas(880, 420);
-    const tbl = h('table', { class: 'tb nocase', style: { fontSize: '19px' } });
+    const P = { m: cfg.m || 1.1, on: !!cfg.on, th: cfg.th != null ? cfg.th : 10, vdc: 650, play: false };
+    const CW = cfg.w || 880, CH = cfg.h || 420;
+    const cv = K.canvas(CW, CH);
+    const tbl = h('table', { class: 'tb nocase', style: { fontSize: CW < 800 ? '16px' : '19px' } });
     const roLin = K.readout('Peak |reference|', 'big'), roV = K.readout('Max V<sub>LL,rms</sub> without clipping');
     const ctl = [
       K.slider({ label: 'm', min: 0, max: 1.3, step: 0.005, value: P.m, fmt: (v) => v.toFixed(3), onInput: (v) => { P.m = v; draw(); } }),
@@ -119,7 +140,7 @@
     const thS = ctl[2];
     const playB = K.btn('▶ Sweep θ', () => toggle());
     host.classList.add('sim');
-    host.style.gridTemplateColumns = '880px 1fr';
+    host.style.gridTemplateColumns = CW + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el, tbl),
       h('div', { class: 'sim-col' }, ctl.map((c) => c.el), h('div', { class: 'row' }, playB), roLin.el, roV.el,
         h('div', { class: 'tiny', html: 'm = V<sub>1,phase,peak</sub> / (V<sub>dc</sub>/2). Linear limit: 1 for sine PWM, 2/√3 ≈ 1.155 with min-max injection (balanced three-wire load).' })));
@@ -148,7 +169,7 @@
         xticks: [0, 60, 120, 180, 240, 300, 360].map((v) => [v, v + '°']),
         bands: [{ y0: 1, y1: 1.35, color: 'rgba(192,57,43,.10)' }, { y0: -1.35, y1: -1, color: 'rgba(192,57,43,.10)' }],
         hlines: [{ v: 1, color: K.css('--bad'), dash: [4, 4], label: 'carrier limit' }, { v: -1, color: K.css('--bad'), dash: [4, 4] }],
-        series, cursor: P.th, title: P.on ? 'Modified references r′ = r + r₀ (bold), originals (faint), r₀ (dashed)' : 'Sine references r_a, r_b, r_c',
+        series, cursor: P.th, title: P.on ? 'r′ = r + r₀ (bold) · r (faint)' : 'Sine references r_a, r_b, r_c',
         legend: [['a', c1], ['b', c2], ['c', c3]].concat(P.on ? [['r₀', acc, [6, 5]]] : []),
       });
       const r = refs((P.th * Math.PI) / 180), f = (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
@@ -164,12 +185,16 @@
     function toggle() { P.play = !P.play; if (P.play) loop.start(); else loop.stop(); playB.innerHTML = P.play ? '❚❚ Pause' : '▶ Sweep θ'; }
     K.onTheme(draw);
     draw();
-    return { stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Sweep θ'; }, toggle };
+    const OS = cfg.onStep;
+    return {
+      stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Sweep θ'; }, toggle,
+      step(k) { if (OS == null) return; const on = k >= OS; if (on !== P.on) { P.on = on; ctl[1].set(on); draw(); } },
+    };
   };
 
   // ---------- space-vector hexagon ----------
   SIMS.svm = function (host, cfg) {
-    const P = { n: cfg.n || 3, m: 0.8, ang: 20, play: false, speed: 20 };
+    const P = { n: cfg.n || 3, m: cfg.m != null ? cfg.m : 0.8, ang: cfg.ang != null ? cfg.ang : 20, play: false, speed: 20 };
     const W = 640, cv = K.canvas(W, W);
     const info = h('div', { class: 'stack', style: { gap: '10px' } });
     const ctl = [
@@ -290,6 +315,10 @@
     function toggle() { P.play = !P.play; if (P.play) loop.start(); else loop.stop(); playB.innerHTML = P.play ? '❚❚ Pause' : '▶ Rotate v*'; }
     K.onTheme(draw);
     lat(); draw();
-    return { stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Rotate v*'; }, toggle };
+    const n0 = P.n, LS = cfg.levelStep;
+    return {
+      stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Rotate v*'; }, toggle,
+      step(k) { if (LS == null) return; const n = k >= LS ? 3 : n0; if (n !== P.n) { P.n = n; ctl[0].set(n); lat(); draw(); } },
+    };
   };
 })();

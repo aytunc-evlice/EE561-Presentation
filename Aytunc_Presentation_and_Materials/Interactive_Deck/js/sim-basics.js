@@ -233,29 +233,47 @@
   const car = (x) => 1 - 2 * K.tri(x); // +1 at the start of each carrier period → pulses centred in the period
 
   SIMS.spwm = function (host, cfg) {
+    /* One comparator, two uses.
+       DC mode (DC-DC, buck leg): carrier 0 … 1, constant reference D, output 0 or V_dc measured from the negative rail.
+       Sine mode (inverter leg): carrier −1 … +1, sine reference, pole voltage ±V_dc/2 measured from the midpoint. */
     const VH = 400, NP = 240; // V_dc/2, samples per carrier period
     const TH0 = 0.15 * K.TAU;
-    const P = { m: cfg.m != null ? cfg.m : 0.8, mf: cfg.mf || 9, th: TH0, play: false, k: 99 };
+    const P = { m: cfg.m != null ? cfg.m : 0.8, D: cfg.D != null ? cfg.D : 0.6, mf: cfg.mf || 9, th: TH0, play: false, k: 99, mode: cfg.mode || 'dc' };
     const cvA = K.canvas(880, 210), cvB = K.canvas(880, 170), cvZ = K.canvas(430, 250);
-    const roR = K.readout('r at the cursor'), roD = K.readout('duty d'), roV = K.readout('⟨v<sub>aO</sub>⟩ this period');
+    const roR = K.readout('reference at the cursor'), roD = K.readout('duty d'), roV = K.readout('average this period');
+    const modeS = K.seg({ label: 'Reference', options: [['dc', 'DC: DC-DC (buck)'], ['sine', 'sine: inverter leg']], value: P.mode, onChange: (v) => { setMode(v); } });
+    const dS = K.slider({ label: 'D', min: 0, max: 1, step: 0.01, value: P.D, fmt: (v) => v.toFixed(2), onInput: (v) => { P.D = v; calc(); } });
     const mS = K.slider({ label: 'm<sub>a</sub>', min: 0, max: 1.3, step: 0.01, value: P.m, fmt: (v) => v.toFixed(2), onInput: (v) => { P.m = v; calc(); } });
     const fS = K.slider({ label: 'm<sub>f</sub>', min: 3, max: 21, step: 1, value: P.mf, fmt: (v) => String(v), onInput: (v) => { P.mf = v; calc(); } });
     const playB = K.btn('▶ Run time', () => toggle());
+    const note = h('span', { class: 'tiny' });
     host.classList.add('sim');
     host.style.gridTemplateColumns = '1fr';
     host.style.gridTemplateRows = 'auto auto 1fr';
     host.style.gap = '10px';
     host.append(cvA.el, cvB.el, h('div', { style: { display: 'grid', gridTemplateColumns: '430px 1fr', gap: '18px', alignItems: 'start' } }, cvZ.el,
-      h('div', { class: 'sim-col', style: { gap: '12px' } }, mS.el, fS.el,
-        h('div', { class: 'row' }, playB, h('span', { class: 'tiny' }, 'or drag on the top plot · V_dc = 800 V')),
+      h('div', { class: 'sim-col', style: { gap: '10px' } }, modeS.el, dS.el, mS.el, fS.el,
+        h('div', { class: 'row' }, playB, note),
         h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr 1fr' } }, roR.el, roD.el, roV.el))));
+    const dc = () => P.mode === 'dc';
+    const carAt = (x) => (dc() ? (car(x) + 1) / 2 : car(x));
+    const refAt = (x) => (dc() ? P.D : P.m * Math.sin(K.TAU * x));
+    function setMode(v) {
+      P.mode = v; modeS.set(v);
+      dS.el.style.display = dc() ? '' : 'none';
+      mS.el.style.display = dc() ? 'none' : '';
+      note.textContent = dc() ? 'or drag on the top plot · V_dc = 800 V, output from the negative rail' : 'or drag on the top plot · V_dc = 800 V, pole voltage from the midpoint';
+      calc();
+    }
     let S = 0, c, r, rV, v, avg;
     function calc() {
       S = P.mf * NP;
       c = new Float32Array(S + 1); r = new Float32Array(S + 1); rV = new Float32Array(S + 1); v = new Float32Array(S + 1); avg = new Float32Array(S + 1);
       for (let i = 0; i <= S; i++) {
         const x = i / S;
-        c[i] = car(P.mf * x); r[i] = P.m * Math.sin(K.TAU * x); rV[i] = r[i] * VH; v[i] = r[i] > c[i] ? VH : -VH;
+        c[i] = carAt(P.mf * x); r[i] = refAt(x);
+        if (dc()) { rV[i] = r[i] * 2 * VH; v[i] = r[i] > c[i] ? 2 * VH : 0; }
+        else { rV[i] = r[i] * VH; v[i] = r[i] > c[i] ? VH : -VH; }
       }
       // centred moving average over one carrier period (periodic signal)
       const half = NP / 2, at = (j) => v[((j % S) + S) % S];
@@ -266,15 +284,19 @@
     }
     function draw() {
       const ink = K.css('--ink'), mut = K.css('--muted'), red = K.css('--s2'), blue = K.css('--s1');
-      const k = P.k, ic = Math.min(S, Math.round((P.th / K.TAU) * S)), dx = K.TAU / S;
+      const k = P.k, ic = Math.min(S, Math.round((P.th / K.TAU) * S)), dx = K.TAU / S, D = dc();
+      const xt = D
+        ? [[0, '0'], [K.TAU / 3, Math.round(P.mf / 3) === P.mf / 3 ? P.mf / 3 + ' T_s' : ''], [(2 * K.TAU) / 3, Math.round(P.mf / 3) === P.mf / 3 ? (2 * P.mf) / 3 + ' T_s' : ''], [K.TAU, P.mf + ' T_s']]
+        : [[0, '0'], [Math.PI / 2, '90°'], [Math.PI, '180°'], [1.5 * Math.PI, '270°'], [K.TAU, '360°']];
       cvA.clear();
       const sa = [{ y: c, x0: 0, dx, color: mut, width: 1.4 }];
       if (k >= 1) sa.push({ y: r, x0: 0, dx, color: red, width: 2.6 });
       K.plot(cvA.ctx, { x: 50, y: 28, w: cvA.w - 64, h: cvA.h - 56 }, {
-        xlim: [0, K.TAU], ylim: [-1.32, 1.32], yticks: [[-1, '−1'], [0, '0'], [1, '1']],
-        xticks: [[0, '0'], [Math.PI / 2, '90°'], [Math.PI, '180°'], [1.5 * Math.PI, '270°'], [K.TAU, '360°']],
-        bands: k >= 1 ? [{ y0: 1, y1: 1.32, color: 'rgba(192,57,43,.07)' }, { y0: -1.32, y1: -1, color: 'rgba(192,57,43,.07)' }] : null,
-        series: sa, cursor: P.th, title: k >= 1 ? 'Carrier c(t) and reference r(t) = m_a sin ω₁t' : 'Carrier c(t): a triangle at the switching frequency f_c',
+        xlim: [0, K.TAU], ylim: D ? [-0.16, 1.16] : [-1.32, 1.32], yticks: D ? [[0, '0'], [0.5, '0.5'], [1, '1']] : [[-1, '−1'], [0, '0'], [1, '1']],
+        xticks: xt,
+        bands: k >= 1 && !D ? [{ y0: 1, y1: 1.32, color: 'rgba(192,57,43,.07)' }, { y0: -1.32, y1: -1, color: 'rgba(192,57,43,.07)' }] : null,
+        series: sa, cursor: P.th,
+        title: k >= 1 ? (D ? 'Carrier and a constant (DC) reference' : 'Carrier and a sine reference') : 'Carrier: a triangle at the switching frequency f_c',
         legend: k >= 1 ? [['carrier', mut], ['reference', red]] : [['carrier', mut]],
       });
       cvB.clear();
@@ -282,25 +304,26 @@
       if (k >= 2) sb.push({ y: v, x0: 0, dx, color: ink, width: 1.2, step: true, alpha: 0.22 }, { y: v, x0: 0, dx, color: ink, width: 1.8, step: true, n: ic + 1 });
       if (k >= 3) sb.push({ y: rV, x0: 0, dx, color: red, width: 1.6, dash: [6, 5] }, { y: avg, x0: 0, dx, color: blue, width: 2.8 });
       K.plot(cvB.ctx, { x: 50, y: 28, w: cvB.w - 64, h: cvB.h - 40 }, {
-        xlim: [0, K.TAU], ylim: [-470, 470], yticks: [[-400, '−400'], [0, '0'], [400, '400']],
-        series: sb, cursor: k >= 2 ? P.th : null, title: k >= 2 ? 'Pole voltage v_aO [V]: S₁ = 1 while r > c' : 'Pole voltage v_aO [V]',
-        legend: k >= 3 ? [['v_aO', ink], ['average over T_s', blue], ['r · V_dc/2', red, [6, 5]]] : k >= 2 ? [['v_aO', ink]] : null,
+        xlim: [0, K.TAU], ylim: D ? [-70, 870] : [-470, 470], yticks: D ? [[0, '0'], [400, '400'], [800, '800']] : [[-400, '−400'], [0, '0'], [400, '400']],
+        series: sb, cursor: k >= 2 ? P.th : null,
+        title: D ? 'Output voltage [V]: switch on while reference > carrier' : 'Pole voltage [V]: switch on while reference > carrier',
+        legend: k >= 3 ? [[D ? 'output' : 'pole voltage', ink], ['average over T_s', blue], ['wanted (reference)', red, [6, 5]]] : k >= 2 ? [[D ? 'output' : 'pole voltage', ink]] : null,
       });
       // zoom on the carrier period under the cursor
       cvZ.clear();
-      const z = cvZ.ctx, ip = Math.min(P.mf - 1, Math.floor((P.th / K.TAU) * P.mf)), N = 300;
+      const z = cvZ.ctx, ip = Math.min(P.mf - 1, Math.floor((P.th / K.TAU) * P.mf)), N = 1200;
       const zc = new Float32Array(N + 1), zr = new Float32Array(N + 1), zs = new Float32Array(N + 1);
       let on = 0, xa = null, xb = null;
       for (let q = 0; q <= N; q++) {
         const x = (ip + q / N) / P.mf;
-        zc[q] = car(P.mf * x); zr[q] = P.m * Math.sin(K.TAU * x); zs[q] = zr[q] > zc[q] ? 1 : 0;
+        zc[q] = carAt(P.mf * x); zr[q] = refAt(x); zs[q] = zr[q] > zc[q] ? 1 : 0;
         if (q < N && zs[q]) { on++; if (xa == null) xa = q / N; xb = (q + 1) / N; }
       }
       const d = on / N;
       const zs1 = [{ y: zc, x0: 0, dx: 1 / N, color: mut, width: 1.8 }];
       if (k >= 1) zs1.push({ y: zr, x0: 0, dx: 1 / N, color: red, width: 2.6 });
       const A = K.plot(z, { x: 46, y: 26, w: cvZ.w - 60, h: 128 }, {
-        xlim: [0, 1], ylim: [-1.15, 1.15], yticks: [[-1, '−1'], [0, '0'], [1, '1']],
+        xlim: [0, 1], ylim: D ? [-0.08, 1.08] : [-1.15, 1.15], yticks: D ? [[0, '0'], [1, '1']] : [[-1, '−1'], [0, '0'], [1, '1']],
         series: zs1, title: 'Zoom: carrier period ' + (ip + 1) + ' of ' + P.mf,
       });
       if (k >= 2 && xa != null) {
@@ -320,10 +343,10 @@
           z.fillText('d·T_s', (B.X(xa) + B.X(xb)) / 2, B.Y(0.45));
         }
       }
-      const rc = P.m * Math.sin(P.th);
-      roR.set((rc >= 0 ? '+' : '−') + Math.abs(rc).toFixed(2));
+      const rc = D ? P.D : P.m * Math.sin(P.th);
+      roR.set((rc >= 0 ? (D ? '' : '+') : '−') + Math.abs(rc).toFixed(2));
       roD.set(k >= 2 ? d.toFixed(2) : '–');
-      roV.set(k >= 2 ? K.fmtV((2 * d - 1) * VH) : '–');
+      roV.set(k >= 2 ? (D ? Math.round(d * 2 * VH) + ' V' : K.fmtV((2 * d - 1) * VH)) : '–');
     }
     // drag on the top plot to move the time cursor
     let drag = false;
@@ -335,10 +358,19 @@
     const loop = K.loop((dt) => { P.th += (dt * K.TAU) / 10; if (P.th >= K.TAU) P.th -= K.TAU; draw(); });
     function toggle() { P.play = !P.play; if (P.play) loop.start(); else loop.stop(); playB.innerHTML = P.play ? '❚❚ Pause' : '▶ Run time'; }
     K.onTheme(draw);
-    calc();
+    // build steps: 0 carrier · 1 reference · 2 comparator · 3 average; from step SW on, the reference becomes a sine
+    const SW = cfg.sineStep != null ? cfg.sineStep : 99;
+    let lastK = -1;
+    setMode(P.mode);
     return {
       stop() { loop.stop(); P.play = false; playB.innerHTML = '▶ Run time'; },
-      toggle, step(k) { P.k = k; draw(); }, reset() { P.th = TH0; draw(); },
+      toggle,
+      step(k) {
+        if (lastK >= 0 && (k >= SW) !== (lastK >= SW)) setMode(k >= SW ? 'sine' : 'dc');
+        else if (lastK < 0 && SW < 99) setMode(k >= SW ? 'sine' : 'dc');
+        lastK = k; P.k = Math.min(k, 3); draw();
+      },
+      reset() { P.th = TH0; draw(); },
     };
   };
 

@@ -1,13 +1,7 @@
 # Quiz and exam questions
 
-## Modulation and balancing (separated from the joint quiz)
+To be written once the slides are final. The earlier quiz, answer key and potential final questions were removed in
+November 2026 (they are in the git history if needed).
 
-In November 2026 the joint Sefer İdacı / M. Aytunç Evlice quiz was split by presenter. Sefer’s questions (topologies)
-are in [`../../Sefer_Presentation_and_Materials/quiz/`](../../Sefer_Presentation_and_Materials/quiz/). The modulation and
-balancing questions are here, for M. Aytunç Evlice’s talk:
-
-- `Quiz - Modulation and Balancing.pdf`: one page, two questions (DC-bus utilization and min-max injection; neutral-point balancing), 50 points.
-- `Quiz Answer Key - Modulation and Balancing.pdf`: worked solutions and marking.
-- `Potential Final Questions - Modulation and Balancing.pdf`: carrier-based PWM of a three-level NPC and its offset (min-max vs. midpoint current); designing a neutral-point balancing loop, with solutions. Question 1 replaced the earlier space-vector question in November 2026.
-
-Sources are in `src/` (HTML + `handout.css`); edit them and run `src/build_pdfs.ps1` (Edge print-to-PDF) to rebuild.
+`src/` keeps the handout template: `handout.css`, `keep_together.js`, the logos and `build_pdfs.ps1` (prints
+`quiz.html`, `quiz_key.html` and `final_questions.html` to PDF with Edge once those files exist).

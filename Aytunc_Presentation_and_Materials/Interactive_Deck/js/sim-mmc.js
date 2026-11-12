@@ -166,8 +166,8 @@
       const dr = (L1 + L2) / C - w * w * L1 * L2, di = w * (L1 + L2) * Rd;
       return Math.hypot(Rd, 1 / (w * C)) / Math.hypot(dr, di);
     };
-    const cv = K.canvas(900, 590);
-    const roF = K.readout('LCL resonance f<sub>res</sub>'), roQ = K.readout('C<sub>f</sub> reactive power'), roW = K.readout('Largest i<sub>g</sub> harmonic', 'big'), roT = K.readout('Ripple i<sub>g</sub>, h ≥ 2 (rms)'), roP = K.readout('R<sub>d</sub> loss');
+    const cv = K.canvas(cfg.w || 900, 590);
+    const roF = K.readout('LCL resonance f<sub>res</sub>'), roQ = K.readout('C<sub>f</sub> reactive power'), roW = K.readout(cfg.simple ? 'Largest ripple component' : 'Largest i<sub>g</sub> harmonic', 'big'), roT = K.readout('Ripple i<sub>g</sub>, h ≥ 2 (rms)'), roP = K.readout('R<sub>d</sub> loss');
     const ctl = [
       K.seg({ label: 'Converter leg', options: [[2, '2-level'], [3, '3-level NPC (PD)']], value: P.topo, onChange: (v) => { P.topo = v; draw(); } }),
       K.seg({ label: 'Filter', options: [['l', 'L = L₁ + L₂'], ['lcl', 'LCL'], ['lcld', 'LCL + R<sub>d</sub>']], value: P.filt, onChange: (v) => { P.filt = v; draw(); } }),
@@ -177,11 +177,12 @@
       K.slider({ label: 'C<sub>f</sub>', min: 2, max: 40, step: 1, value: P.Cf, fmt: (v) => v + ' µF', onInput: (v) => { P.Cf = v; draw(); } }),
       K.slider({ label: 'R<sub>d</sub> (series with C<sub>f</sub>)', min: 0, max: 6, step: 0.1, value: P.Rd, fmt: (v) => v.toFixed(1) + ' Ω', onInput: (v) => { P.Rd = v; draw(); } }),
     ];
+    const SIMPLE = !!cfg.simple;
     host.classList.add('sim');
-    host.style.gridTemplateColumns = '900px 1fr';
+    host.style.gridTemplateColumns = (cfg.w || 900) + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el),
-      h('div', { class: 'sim-col', style: { gap: '9px' } }, ctl.map((c) => c.el),
-        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, roW.el, roT.el, roF.el, roQ.el, roP.el),
+      h('div', { class: 'sim-col', style: { gap: '9px' } }, (SIMPLE ? ctl.slice(0, 2) : ctl).map((c) => c.el),
+        h('div', { class: 'ro-grid', style: { gridTemplateColumns: SIMPLE ? '1fr' : '1fr 1fr' } }, ...(SIMPLE ? [roW.el, roT.el] : [roW.el, roT.el, roF.el, roQ.el, roP.el])),
         h('div', { class: 'tiny', html: '400 V, 50 kVA (I<sub>rated</sub> = 72 A rms), V<sub>dc</sub> = 800 V, sine PWM m = 0.82, natural sampling. Grid assumed stiff and clean: i<sub>g</sub> harmonics come from the converter only.' })));
     const LX = (f) => Math.log10(f);
     function draw() {
@@ -201,7 +202,7 @@
       const series = ['l', 'lcl', 'lcld'].map((k, i) => ({ x: fx, y: sel[k], color: [K.css('--muted'), K.css('--s1'), K.css('--s2')][i], width: k === P.filt ? 3 : 1.4, alpha: k === P.filt ? 1 : 0.55, dash: k === 'l' ? [6, 4] : null }));
       const top = K.plot(ctx, { x: 70, y: 30, w: cv.w - 86, h: 230 }, {
         xlim: xl, ylim: [-110, 30], xticks: xt, yticks: [[-100, '−100'], [-80, '−80'], [-60, '−60'], [-40, '−40'], [-20, '−20'], [0, '0'], [20, '20']],
-        series, title: '|i_g / v_c| [dB re 1 A/V]', legend: [['L', K.css('--muted'), [6, 4]], ['LCL', K.css('--s1')], ['LCL + R_d', K.css('--s2')]],
+        series, title: SIMPLE ? 'What gets through [dB]' : '|i_g / v_c| [dB re 1 A/V]', legend: [['L', K.css('--muted'), [6, 4]], ['LCL', K.css('--s1')], ['LCL + R_d', K.css('--s2')]],
       });
       const vmark = (pl, f, lab, col, y0, hh) => {
         const x = pl.X(LX(f)); if (x < 70 || x > cv.w - 16) return;
@@ -216,7 +217,7 @@
       const bot = K.plot(ctx, box, {
         xlim: xl, ylim: [-3, 1.3], xticks: xt, yticks: [[-3, '0.001 %'], [-2, '0.01 %'], [-1, '0.1 %'], [0, '1 %'], [1, '10 %']],
         hlines: [{ v: Math.log10(0.3), color: K.css('--warn'), dash: [5, 4], label: '0.3 % of I_rated' }],
-        title: 'Grid-current harmonics, % of rated peak current (' + nm[P.filt] + ', ' + P.topo + '-level)',
+        title: SIMPLE ? 'Ripple left in the grid current, % of rated (' + nm[P.filt] + ', ' + P.topo + '-level)' : 'Grid-current harmonics, % of rated peak current (' + nm[P.filt] + ', ' + P.topo + '-level)',
       });
       ctx.save(); ctx.beginPath(); ctx.rect(box.x, box.y, box.w, box.h); ctx.clip();
       ctx.strokeStyle = K.css('--s2'); ctx.lineWidth = 2;
@@ -242,6 +243,16 @@
     }
     K.onTheme(draw);
     draw();
-    return {};
+    const ST = cfg.steps;
+    return {
+      step(k) {
+        if (!ST) return;
+        let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key];
+        if (!o) return; let ch = false;
+        if (o.topo != null && o.topo !== P.topo) { P.topo = o.topo; ctl[0].set(o.topo); ch = true; }
+        if (o.filt != null && o.filt !== P.filt) { P.filt = o.filt; ctl[1].set(o.filt); ch = true; }
+        if (ch) draw();
+      },
+    };
   };
 })();
