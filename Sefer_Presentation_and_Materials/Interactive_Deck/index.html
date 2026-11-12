@@ -33,62 +33,156 @@
   <div class="body cols-2" style="align-content:start">
     <div class="stack">
       <h3>Textbooks</h3>
-      <ul class="small">
+      <ul>
         <li>Wu &amp; Narimani, <i>High-Power Converters and AC Drives</i>, Ch. 8–9</li>
-        <li>Baliga, <i>Fundamentals of Power Semiconductor Devices</i></li>
-      </ul>
-      <h3>Survey</h3>
-      <ul class="small">
-        <li>Rodríguez, Lai, Peng, <i>IEEE TIE</i>, 2002</li>
+        <li>Holmes &amp; Lipo, <i>Pulse Width Modulation for Power Converters</i>, §1.7–1.8</li>
       </ul>
     </div>
     <div class="stack">
-      <h3>Online</h3>
-      <ul class="small">
-        <li><a href="https://imperix.com/doc/TN132">imperix TN132</a>: NPC converter</li>
-      </ul>
-      <h3>Products</h3>
-      <ul class="small">
-        <li>ABB ACS1000 (3L NPC), ACS2000 (5L-ANPC)</li>
-        <li>Infineon hybrid Si/SiC ANPC, 1500 V PV</li>
+      <h3>Application notes and reference designs</h3>
+      <ul>
+        <li><a href="https://assets.danfoss.com/documents/latest/444045/AB501636827467en-000201.pdf">Semikron Danfoss AN 11-001</a>: 3L NPC, TNPC &amp; ANPC topology</li>
+        <li><a href="https://www.ti.com/tool/TIDA-01606">TI TIDA-01606</a>: 11 kW three-level T-type SiC inverter</li>
+        <li><a href="https://www.ti.com/tool/TIDA-010210">TI TIDA-010210</a>: 11 kW three-level ANPC GaN inverter</li>
       </ul>
     </div>
   </div>
-  <aside class="notes"><p><b>30 s.</b> Wu &amp; Narimani Ch. 8–9 is the reading for this talk. Full citations are on the last slide. The plots are teaching models: ideal switches, ideal capacitors, illustrative device data.</p></aside>
+  <aside class="notes"><p><b>30 s.</b> Wu &amp; Narimani Ch. 8–9 is the reading for this talk; Holmes &amp; Lipo §1.7 (three-level inverters) and §1.8 (multilevel topologies: diode-clamped, capacitor-clamped), pp. 38–55, cover the same circuits; its Ch. 11 (carrier PWM of multilevel inverters) belongs to the next talk. The Semikron Danfoss note is the practical companion for the NPC, T-type and ANPC slides; the two TI reference designs (design guides TIDUE53 and TIDUEZ0) are complete three-level inverters with schematics and test results. Full citations are on the last slide. The plots are teaching models: ideal switches, ideal capacitors, illustrative device data.</p></aside>
 </section>
 
-<section class="slide p1" data-part="1" data-section="intro" data-min="2" data-title="Basics: the leg and its voltages">
-  <div class="sh"><div><div class="kicker"><b>Basics</b></div><h2>Basics: the leg and its voltages</h2><div class="terms"><b>O</b>: DC-link midpoint · <b>n</b>: load star point · red lever: the rail each leg connects to</div></div></div>
-  <div class="body" style="grid-template-rows: 1fr auto; gap:12px">
-    <div data-sim="vlegs" data-config='{"m":0.8}'></div>
-    <div class="callout" data-step="2">The common mode v<sub>nO</sub> <b>cancels</b>: the load never sees it.</div>
+<section class="slide p1" data-part="1" data-section="intro" data-min="2" data-title="What is a multilevel converter?">
+  <div class="sh"><div><div class="kicker"><b>Multilevel converters</b></div><h2>What is a multilevel converter?</h2></div></div>
+  <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
+    <div data-sim="levels" data-config='{"show":"leg","cases":[{"n":2,"k":1},{"n":3,"k":1,"step":1},{"n":5,"k":3,"step":2}]}'></div>
+    <div class="callout" data-step="3"><b>N levels:</b> N − 1 capacitors split the DC link into steps of <b>V<sub>dc</sub>/(N − 1)</b></div>
   </div>
-  <aside class="notes"><p><b>2 min.</b> Fix the notation once; the next talks use it too.</p>
+  <aside class="notes">
+    <p><b>2 min.</b> The definition, on an 800 V link. The leg is drawn as an ideal selector: which real switches build it is the rest of the talk.</p>
     <ul>
-      <li>Click 0: three 3-level legs; each lever connects its output to P, O or N. v<sub>aO</sub> (from the midpoint O) has 3 levels, steps of V<sub>dc</sub>/2 = 400 V.</li>
-      <li>Click 1: line-to-line v<sub>ab</sub> = v<sub>aO</sub> − v<sub>bO</sub> has 5 levels: 0, ±400, ±800 V.</li>
-      <li>Click 2: v<sub>nO</sub> is the average of the three poles (common mode). It is the same in all three phases, so it cancels in v<sub>ab</sub> and in the phase voltage v<sub>an</sub>. The modulation talk uses this.</li>
+      <li>Click 0, 2 levels: the ordinary leg. One capacitor, two contacts: the output is +400 or −400 V, one step of 800 V.</li>
+      <li>Click 1, 3 levels: a second capacitor splits the link, and its midpoint O is a third contact. Steps of 400 V.</li>
+      <li>Click 2, 5 levels: four capacitors, five contacts, steps of 200 V.</li>
+      <li>Click 3: with N levels the step is V<sub>dc</sub>/(N − 1). The same number is the voltage each real switch has to block.</li>
     </ul>
-    <p>The waveforms use nearest-level (staircase) switching at m = 0.8, so the levels are easy to count.</p>
+    <p>P, O, N name the top rail, the midpoint and the bottom rail; the NPC slides use these names.</p>
   </aside>
 </section>
 
-<section class="slide p1" data-part="1" data-section="intro" data-min="2" data-title="More levels, smaller steps">
-  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>More levels: smaller steps, lower device voltage</h2><div class="terms"><b>Level</b>: a voltage the leg can connect its output to</div></div></div>
-  <div class="body" data-sim="ladder" data-config='{"n":2}'></div>
+<section class="slide p1" data-part="1" data-section="intro" data-min="2" data-title="More levels, closer to a sine">
+  <div class="sh"><div><div class="kicker"><b>Multilevel converters</b></div><h2>More levels: the output gets closer to a sine</h2></div></div>
+  <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
+    <div data-sim="levels" data-config='{"show":"wave","cases":[{"n":2},{"n":3,"step":1},{"n":5,"step":2}]}'></div>
+    <div class="callout" data-step="3">The output only jumps between <b>neighbouring levels</b>: less for the filter to remove</div>
+  </div>
   <aside class="notes">
-    <p><b>2 min.</b> Start at N = 2: a square wave, THD ≈ 48 %. Press <b>Sweep</b>.</p>
+    <p><b>2 min.</b> The same three legs with PWM: same 800 V link, same sine reference (m = 0.9), same switching frequency (15 pulses per period here, so the pulses are visible).</p>
     <ul>
-      <li>The step ΔV, and with it the device voltage, falls as V<sub>dc</sub>/(N − 1).</li>
-      <li>The staircase gets closer to the sine: THD falls roughly as 1/N, with one switching per level per half-cycle.</li>
-      <li>The price: 2(N − 1) switches, more gate drivers, and capacitors that must stay charged.</li>
+      <li>Click 0, 2 levels: every pulse swings the full 800 V. Voltage THD about 120 %: most of the output is switching harmonics.</li>
+      <li>Click 1, 3 levels: pulses of 400 V between neighbouring levels; the THD drops to about 64 %.</li>
+      <li>Click 2, 5 levels: pulses of 200 V; the THD is about 33 %, and the shape of the sine is visible in the voltage itself.</li>
+      <li>Click 3: the filter (or the motor inductance) only has to remove these smaller steps. The PLECS slide at the end shows the current.</li>
     </ul>
+    <p>The PWM is phase disposition: N − 1 in-phase carriers stacked between the levels. THD from the FFT of one period, all harmonics.</p>
+  </aside>
+</section>
+
+<section class="slide p1" data-part="1" data-section="intro" data-min="2.5" data-title="Advantages">
+  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>Advantages: everything scales with the step</h2></div></div>
+  <div class="body" data-sim="factors" data-config='{"kind":"gain","items":[
+    {"big":"1/(N−1)","text":"device voltage:<br>lower-voltage, faster parts","q":"vdev","unit":" V"},
+    {"big":"1/(N−1)","text":"voltage step:<br>less dv/dt and EMI","q":"vdev","unit":" V","step":1},
+    {"big":"≈ 1/(N−1)","text":"current ripple:<br>smaller filter","q":"ripple","pre":"× ","step":2},
+    {"big":"&lt; 1/(N−1)","text":"switching loss:<br>higher f<sub>sw</sub> possible","q":"esw","pre":"× ","step":3}]}'></div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> One card per advantage; the bars show the same quantity for 2, 3 and 5 levels on the 800 V link. In brackets, the 3-level case of the later slides (1500 V link, 10 kHz, m = 0.9, NPC model).</p>
+    <ul>
+      <li><b>1/(N−1) device voltage:</b> 800, 400, 200 V [3L on 1500 V: 750 V instead of 1500 V, so a 1.2 kV part instead of 3.3 kV by the ⅔ rule]: faster, cheaper, made in large volumes. The next two slides show why this matters most.</li>
+      <li><b>Click 1, 1/(N−1) voltage step:</b> the same numbers, seen from the load. For the same switching speed the dv/dt falls by the same factor: less EMI, smaller reflected-wave overvoltage on long motor cables, less insulation stress [3L: the common-mode step also halves, V<sub>dc</sub>/6 instead of V<sub>dc</sub>/3].</li>
+      <li><b>Click 2, ≈ 1/(N−1) ripple:</b> computed here from the PWM waveforms of the previous slide into 5 mH + 10 Ω: 0.55 and 0.31 of the two-level ripple. Keep the ripple and shrink the filter, or keep the filter and lower f<sub>sw</sub>.</li>
+      <li><b>Click 3, &lt; 1/(N−1) switching loss:</b> each commutation switches only V<sub>dc</sub>/(N − 1), and on a faster, lower-voltage device, so the real gain is larger than the bars, which show only the voltage [3L: 1/10, slide 10].</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide p1" data-part="1" data-section="intro" data-min="2.5" data-title="Disadvantages">
+  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>Disadvantages: more parts, more to control</h2></div></div>
+  <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
+    <div data-sim="factors" data-config='{"kind":"cost","items":[
+      {"big":"2(N−1)","text":"switches per leg,<br>each with a gate driver","q":"nsw"},
+      {"big":"N−1","text":"devices in series:<br>conduction loss","q":"nser","step":1},
+      {"big":"N−2","text":"capacitor voltages<br>to hold","q":"ncap","step":2},
+      {"big":"N³","text":"switching states:<br>harder control","q":"nst","step":3}]}'></div>
+    <div class="callout" data-step="4">Worth it when <b>V<sub>dc</sub></b> or <b>f<sub>sw</sub></b> is high</div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> The price, one card per item; the rest of the talk deals with these.</p>
+    <ul>
+      <li><b>2(N−1) switches</b> (Holmes &amp; Lipo §1.7: “twice as many switches … each must block only one-half of the DC link voltage”): 2, 4, 8 per leg, each with an isolated gate driver and its supply; diode clamping adds (N − 1)(N − 2) clamp diodes [3L NPC: 4 switches + 2 diodes].</li>
+      <li><b>Click 1, N−1 devices in series:</b> in diode-clamped and flying-capacitor legs the current crosses N − 1 devices instead of one; the T-type and the 5L-ANPC need fewer [3L: 1.5× conduction loss, 234 W vs 155 W]. At low f<sub>sw</sub> the 2-level leg can win. If the extra levels are used to raise the DC voltage instead, the power grows with the number of series switches and the efficiency stays about the same (Holmes &amp; Lipo, p. 49).</li>
+      <li><b>Click 2, N−2 capacitor voltages:</b> every inner level hangs on a capacitor that must stay charged: the next talk [3L: the midpoint O; the 5L-ANPC needs only two, the midpoint and C<sub>fc</sub>]. The losses also spread unevenly over the devices (slide 15).</li>
+      <li><b>Click 3, N³ states:</b> 8, 27, 125: more freedom, more modulation work. Protection is harder too: on a fault the outer switches must turn off before the inner ones.</li>
+    </ul>
+    <p>Click 4, the verdict [3L at 10 kHz: 430 W instead of 2.1 kW per leg]. For a low-voltage, cost-driven converter (e.g. a 400 V drive at a few kHz) the 2-level leg remains the cheaper choice.</p>
+  </aside>
+</section>
+
+<section class="slide p1" data-part="1" data-section="intro" data-min="2.5" data-title="In practice">
+  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>In practice: cooling, layout and power modules</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 500px 1fr; grid-template-rows: 1fr auto; gap:16px 36px">
+    <div class="ledger plain gain" style="align-self:start; margin-top:90px">
+      <div class="lh">Easier</div>
+      <div class="li"><span><b>Cooling:</b> the loss is spread over more, smaller chips</span></div>
+      <div class="li"><span><b>Size:</b> smaller filter, smaller heat sink</span></div>
+      <div class="li"><span><b>Parts:</b> low-voltage devices are cheap and fast</span></div>
+    </div>
+    <figure class="photo" style="align-self:center"><img src="img/photos/semikron_npc_long_commutation.png" alt="NPC leg: the long commutation path, from clamp diode D5 and T2 in the upper half to diodes D3 and D4 in the lower half" style="height:auto; object-fit:contain"><figcaption><b>NPC:</b> the long commutation loop</figcaption><div class="credit">Semikron Danfoss, AN 11-001, Fig. 11</div></figure>
+    <div class="ledger plain cost" data-step="1" style="align-self:start; margin-top:90px">
+      <div class="lh">Harder</div>
+      <div class="li"><span><b>Layout:</b> long traces between the switches add stray inductance and overshoot</span></div>
+      <div class="li"><span><b>Hot spots:</b> the loss is uneven; the hottest chip sets the rating</span></div>
+      <div class="li"><span><b>Drivers:</b> every switch needs an isolated gate supply</span></div>
+    </div>
+    <div class="callout" style="grid-column: 1 / -1" data-step="2"><b>Answer: the whole leg in one power module.</b> Short loops, one heat sink. MiniSKiiP 3-level (Semikron Danfoss), EasyPACK 3-level (Infineon), flowNPC (Vincotech)</div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> The same balance sheet as the last two slides, from the hardware side.</p>
+    <ul>
+      <li><b>Cooling:</b> for the same output the total loss is lower (slide 10) and it sits in four to eight chips instead of two, so the heat flux per chip is lower and the heat spreads better into the sink. With a higher switching frequency the filter inductor shrinks too.</li>
+      <li><b>Parts:</b> 650 V and 1200 V devices are made in very large volumes (drives, PV, cars); 3.3 kV and above are few, slow and expensive.</li>
+      <li><b>Click 1, layout:</b> in a two-level leg the commutation loop is one capacitor and two switches. The figure (Semikron Danfoss AN 11-001, Fig. 11) shows the long commutation of an NPC leg: the current moves between D5/T2 in the upper half and D3/D4 in the lower half, so the loop runs across the entire leg. Every centimetre of trace or busbar between them adds stray inductance: with L<sub>σ</sub>·di/dt the device sees an overshoot on top of V<sub>dc</sub>/2. Built from discrete parts or two-level half-bridge modules, the loop is long.</li>
+      <li><b>Hot spots:</b> the devices do not share the loss equally (slide 15: outer switches as inverter, inner switches as rectifier). The cooling must be sized for the hottest chip, not for the average.</li>
+      <li><b>Drivers:</b> 4 to 8 isolated gate drivers per leg, each with its own supply; on a fault the outer switches must turn off before the inner ones.</li>
+      <li><b>Click 2, power modules:</b> manufacturers put the complete three-level leg (the four switches and the two clamp diodes, or a T-type or ANPC leg) on one substrate. The loops are a few centimetres, the stray inductance is low and symmetric, and one heat sink carries all chips. The next slide shows examples: Semikron Danfoss MiniSKiiP 3-level (a full NPC phase leg, up to several hundred amperes), Infineon EasyPACK 3-level modules (NPC1 and NPC2 = T-type, 650 V and 1200 V, also with SiC), Vincotech flowNPC. The Semikron Danfoss application note AN 11-001 on the resources slide discusses these commutation loops.</li>
+    </ul>
+    <p>Check the datasheet of a given part for what it contains: some modules hold one leg, some two or three, some only half a leg (“split” modules).</p>
+  </aside>
+</section>
+
+<section class="slide p1" data-part="1" data-section="intro" data-min="1.5" data-title="Examples: modules and boards">
+  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>Examples: three-level modules and boards</h2></div></div>
+  <div class="body" style="align-content:center">
+    <div class="photos ex">
+      <figure class="photo"><img src="img/photos/semikron_3L_modules.jpg" alt="Semikron Danfoss three-level power modules: MiniSKiiP, SEMITOP, SEMiX and SEMITRANS housings, 10 A to 1400 A"><figcaption><b>Three-level modules</b><br>NPC, T-type, ANPC · 10–1400 A</figcaption><div class="credit">Semikron Danfoss, AN 11-001, Fig. 36</div></figure>
+      <figure class="photo" data-step="1"><img src="img/photos/vincotech_flownpc.jpg" alt="Vincotech flowNPC three-level NPC power module with press-fit pins"><figcaption><b>NPC module</b><br>1200 V, 560 A · press-fit pins</figcaption><div class="credit">Vincotech, flowNPC E3BP product page</div></figure>
+      <figure class="photo" data-step="2"><img src="img/photos/ti_tida01606_board.jpg" alt="TI TIDA-01606 reference design: 11 kW three-level T-type SiC inverter board with three switch sections, inductors and DC-link capacitors"><figcaption><b>T-type board, SiC</b><br>11 kW · discrete devices</figcaption><div class="credit">Texas Instruments, TIDA-01606 design guide (TIDUE53)</div></figure>
+      <figure class="photo" data-step="3"><img src="img/photos/ti_tida010210_board.jpg" alt="TI TIDA-010210 reference design: 11 kW three-level ANPC GaN inverter with three vertical power cards, inductors and DC-link capacitors"><figcaption><b>ANPC board, GaN</b><br>11 kW · one power card per phase</figcaption><div class="credit">Texas Instruments, TIDA-010210 design guide (TIDUEZ0)</div></figure>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>1.5 min.</b> What the last slide looks like in hardware.</p>
+    <ul>
+      <li><b>Click 0, Semikron Danfoss three-level modules:</b> the same NPC, T-type (TNPC) and ANPC legs in housings from 10 A (SEMITOP) through MiniSKiiP and SEMiX to 1400 A (SEMITRANS, where two modules together make one leg). Designed for low stray inductance.</li>
+      <li><b>Click 1, Vincotech flowNPC:</b> a three-level NPC module, 1200 V, 560 A. The pins on top are pressed into the PCB; the baseplate goes on the heat sink.</li>
+      <li><b>Click 2, TI TIDA-01606:</b> an 11 kW three-phase T-type inverter with discrete SiC MOSFETs. Three identical switch sections with their heat sinks at the top, the filter inductors below them, the DC-link capacitors at the left. Each phase is laid out compactly next to its capacitors to keep the loops short.</li>
+      <li><b>Click 3, TI TIDA-010210:</b> an 11 kW three-phase ANPC inverter with GaN switches at 100 kHz. Each phase is a small vertical power card that plugs into the main board: the card keeps the switching loop tiny, the main board carries only the DC link and the filter.</li>
+    </ul>
+    <p>Images from the manufacturers’ public documents, credited under each picture and on the References slide.</p>
   </aside>
 </section>
 
 <section class="slide p1" data-part="1" data-section="intro" data-min="1" data-title="Real switches">
-  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b> · photos: Wikimedia Commons</div><h2>Real switches: every device has one voltage rating</h2><div class="terms"><b>Rating</b>: the largest voltage the device may block</div></div></div>
-  <div class="body">
+  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>Real switches: every device has one voltage rating</h2></div></div>
+  <div class="body" style="align-content:center">
     <div class="photos">
       <figure class="photo"><img src="img/photos/igbt_discrete_1200V.jpg" alt="Infineon IHW20N120R3 1200 V discrete IGBT in a TO-247 package on a circuit board" style="object-position: 50% 45%"><figcaption><b>Discrete IGBT</b><br>1200 V, 20 A · cookers, PV</figcaption><div class="credit">Raimond Spekking · CC BY-SA 4.0</div></figure>
       <figure class="photo"><img src="img/photos/igbt_module_1200V.jpg" alt="Mitsubishi CM1400DU-24NF 1200 V, 1400 A half-bridge IGBT module" style="object-position: 50% 55%"><figcaption><b>Half-bridge module</b><br>1200 V, 1400 A · drives, wind</figcaption><div class="credit">Sthdhk · CC BY-SA 4.0</div></figure>
@@ -97,7 +191,7 @@
     </div>
   </div>
   <aside class="notes">
-    <p><b>1 min.</b> Real parts, small to large. A device is built for one voltage rating; the chip inside sets it. The 3.3 kV module switches at about 1 kHz, the 1.2 kV module at about 10 kHz: the next slide shows why.</p>
+    <p><b>1 min.</b> Where the first advantage comes from. Real parts, small to large. A device is built for one voltage rating; the chip inside sets it. The 3.3 kV module switches at about 1 kHz, the 1.2 kV module at about 10 kHz: the next slide shows why.</p>
     <ul>
       <li>Infineon IHW20N120R3: 1200 V, 20 A reverse-conducting IGBT in TO-247, from an induction cooker.</li>
       <li>Mitsubishi CM1400DU-24NF: 1200 V, 1400 A half-bridge module for drives.</li>
@@ -109,7 +203,7 @@
 </section>
 
 <section class="slide p1" data-part="1" data-section="intro" data-min="2.5" data-title="Lower-voltage devices">
-  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b> · illustrative device data</div><h2>Lower-voltage devices switch with 10× less energy</h2><div class="terms"><b>E<sub>sw</sub></b>: energy lost in one switching event</div></div></div>
+  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>Lower-voltage devices switch with 10× less energy</h2></div></div>
   <div class="body" style="grid-template-columns: 430px 1fr; gap:30px">
     <div class="stack" style="gap:26px; align-self:center">
       <p>Higher rating: thicker chip, <b>slower</b> switching</p>
@@ -120,9 +214,9 @@
     <div data-sim="vloss" data-config='{"w":1000,"h":580}'></div>
   </div>
   <aside class="notes">
-    <p><b>2.5 min.</b> 1500 V link, the same as the design example.</p>
+    <p><b>2.5 min.</b> 1500 V link.</p>
     <ul>
-      <li>A higher rating needs a thicker, lightly doped chip (Baliga). It stores more charge, so it switches slower: a 3.3 kV IGBT runs at about 1 kHz.</li>
+      <li>A higher rating needs a thicker, lightly doped chip. It stores more charge, so it switches slower: a 3.3 kV IGBT runs at about 1 kHz.</li>
       <li>A 3-level leg switches half the voltage (750 V) with a faster 1.2 kV device: about 10× less energy per event at 100 A.</li>
       <li>Black curve: the 2-level leg’s loss explodes with frequency. Click 1: for the same loss as 2-level at 1 kHz, the 3-level IGBT leg runs at ≈ 6 kHz, the SiC leg at ≈ 70 kHz.</li>
       <li>Honest trade-off: at low frequency the 3-level IGBT leg has more conduction loss (two devices in series).</li>
@@ -131,45 +225,10 @@
   </aside>
 </section>
 
-<section class="slide p1" data-part="1" data-section="intro" data-min="3" data-title="Gains and costs">
-  <div class="sh"><div><div class="kicker"><b>Why multilevel?</b> · 3-level NPC vs 2-level · 1500 V link, same f<sub>sw</sub></div><h2>What the extra level gains, and what it costs</h2><div class="terms"><b>Switching state</b>: one choice of level for each of the three legs</div></div></div>
-  <div class="body cols-2" style="grid-template-rows: 1fr auto; gap:20px 56px">
-    <div class="ledger gain">
-      <div class="lh">Gains</div>
-      <div class="li"><b>½</b><span>voltage on each device: <b>1.2 kV</b> parts</span></div>
-      <div class="li"><b>½</b><span>voltage step: less dv/dt and EMI</span></div>
-      <div class="li"><b>½</b><span>current ripple: smaller filter</span></div>
-      <div class="li"><b>1/10</b><span>switching loss</span></div>
-    </div>
-    <div class="ledger cost" data-step="1">
-      <div class="lh">Costs</div>
-      <div class="li"><b>2×</b><span>switches and gate drivers, + 2 diodes</span></div>
-      <div class="li"><b>1.5×</b><span>conduction loss: 2 devices in series</span></div>
-      <div class="li"><b>+1</b><span>capacitor voltage to hold</span></div>
-      <div class="li"><b>27</b><span>switching states, not 8: harder control</span></div>
-    </div>
-    <div class="callout" style="grid-column: 1 / -1" data-step="2">Net at 10 kHz: <b>430 W</b> instead of <b>2.1 kW</b> per leg. Worth it when <b>V<sub>dc</sub></b> or <b>f<sub>sw</sub></b> is high.</div>
-  </div>
-  <aside class="notes">
-    <p><b>3 min.</b> One balance sheet for the whole talk: the left column collects what the last three slides showed; the right column is what the rest of the talk deals with. Same 1500 V link, same 10 kHz carrier, m = 0.9.</p>
-    <ul>
-      <li><b>½ device voltage:</b> each device blocks 750 V instead of 1500 V, so a 1.2 kV part instead of 3.3 kV (⅔ rule): faster, cheaper, made in large volumes.</li>
-      <li><b>½ voltage step:</b> for the same switching speed the dv/dt halves: less EMI, smaller reflected-wave overvoltage on long motor cables, less insulation stress. The common-mode step also halves (V<sub>dc</sub>/6 instead of V<sub>dc</sub>/3) and its peak drops to ⅔, so less bearing current in motors.</li>
-      <li><b>½ ripple:</b> same carrier frequency, the harmonic line voltage and the ripple current are about half (PWM simulation: 0.46–0.49). Keep the ripple and halve the filter inductor, or keep the filter and halve f<sub>sw</sub>.</li>
-      <li><b>1/10 switching loss:</b> slide 6, half the voltage on a faster device.</li>
-      <li><b>2× parts:</b> 4 switches and 2 clamp diodes per leg instead of 2 switches; 4 isolated gate drivers with their supplies. Each part is cheaper, but there are more parts to buy, mount and lose.</li>
-      <li><b>1.5× conduction loss:</b> the current always crosses two devices (234 W vs 155 W in the model). At low f<sub>sw</sub> the 2-level leg can win.</li>
-      <li><b>+1 capacitor:</b> the midpoint O must stay at V<sub>dc</sub>/2: the next talk. The losses also spread unevenly over the devices (slide 13).</li>
-      <li><b>27 states:</b> 3³ instead of 2³ (slide 20): more freedom, more modulation work. Protection is harder too: on a fault the outer switches must turn off before the inner ones.</li>
-    </ul>
-    <p>Click 2, the verdict: at 10 kHz the 3-level leg loses about ⅕ of the 2-level leg. For a low-voltage, cost-driven converter (e.g. a 400 V drive at a few kHz) the 2-level leg remains the cheaper choice.</p>
-  </aside>
-</section>
-
 <section class="slide p1" data-part="1" data-section="intro" data-min="1" data-title="Three ways to make a level">
-  <div class="sh"><div><div class="kicker">Outline</div><h2>Three ways to make an extra level</h2><div class="terms"><b>Split DC link</b>: two capacitors in series; their midpoint <b>O</b> is a third voltage</div></div></div>
-  <div class="body cols-3" style="grid-template-rows: 1fr auto">
-    <div class="card idea" data-step="1">
+  <div class="sh"><div><div class="kicker"><b>Outline</b></div><h2>Three ways to make an extra level</h2></div></div>
+  <div class="body cols-3">
+    <div class="card idea">
       <div class="big">1 · CLAMP</div>
       <svg viewBox="0 0 360 230">
         <path class="w" d="M50,20 V210 M50,30 H130 M50,115 H130 M50,200 H130"/>
@@ -178,9 +237,9 @@
         <path class="hl" d="M130,115 H250 H330"/><circle cx="250" cy="115" r="7" fill="var(--accent)"/>
         <text x="300" y="100">out</text>
       </svg>
-      <p>Connect the output to the <b>midpoint O</b><br><span class="muted">NPC · T-type · ANPC</span></p>
+      <p>Output to the <b>midpoint O</b><br><span class="muted">NPC · T-type · ANPC</span></p>
     </div>
-    <div class="card idea" data-step="2">
+    <div class="card idea" data-step="1">
       <div class="big">2 · FLOAT</div>
       <svg viewBox="0 0 360 230">
         <path class="w" d="M50,20 V210 M50,30 H130 M50,200 H130"/>
@@ -192,7 +251,7 @@
       </svg>
       <p>A <b>charged capacitor</b> in series<br><span class="muted">Flying capacitor</span></p>
     </div>
-    <div class="card idea" data-step="3">
+    <div class="card idea" data-step="2">
       <div class="big">3 · COMBINE</div>
       <svg viewBox="0 0 360 230">
         <path class="w" d="M50,20 V210 M50,30 H110 M50,115 H110 M50,200 H110"/>
@@ -204,13 +263,12 @@
       </svg>
       <p>Midpoint <b>and</b> capacitor<br><span class="muted">5-level ANPC</span></p>
     </div>
-    <div class="callout" style="grid-column: 1 / -1" data-step="4">Every extra level hangs on a <b>capacitor</b> that must stay charged.</div>
   </div>
-  <aside class="notes"><p><b>1 min.</b> One idea per click: these are the three chapters of this talk. The common thread: every extra level hangs on a capacitor (the split DC link or a flying capacitor) that must stay at its voltage. Keeping it there is the next talk.</p></aside>
+  <aside class="notes"><p><b>1 min.</b> One idea per click: these are the three chapters of this talk. The common thread (say it, it is not on the slide): every extra level hangs on a capacitor (the split DC link or a flying capacitor) that must stay at its voltage. Keeping it there is the next talk.</p></aside>
 </section>
 
 <section class="slide p1" data-part="1" data-section="clamp" data-min="3.5" data-steps="3" data-title="NPC: three levels from a split link">
-  <div class="sh"><div><div class="kicker"><b>Clamp</b> · NPC (Nabae, 1981)</div><h2>NPC: clamp diodes add a 0 V level</h2><div class="terms"><b>State P / O / N</b>: output connected to P, O or N</div></div></div>
+  <div class="sh"><div><div class="kicker"><b>Clamp</b></div><h2>NPC: clamp diodes add a 0 V level</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
     <div data-sim="leg" data-config='{"topos":["2l","npc"],"topo":"2l","lockMode":true,"schW":660,"steps":{"0":{"topo":"2l","state":"P","sign":1},"1":{"topo":"npc","state":"P","sign":1},"2":{"topo":"npc","state":"O","sign":1},"3":{"topo":"npc","state":"O","sign":-1}}}'></div>
     <div class="strip" style="grid-template-columns: 1fr 1fr">
@@ -219,19 +277,19 @@
     </div>
   </div>
   <aside class="notes">
-    <p><b>3.5 min — the main circuit of this talk.</b> Arrow keys drive the schematic; you can also click the states.</p>
+    <p><b>3.5 min — the main circuit of this talk.</b> Arrow keys drive the schematic; the red dots at the bottom right show the clicks of this slide. On any leg slide, <b>P</b> flips the direction of the phase current; you can also click: the first line picks the output level, the second line lists the redundant states that give that level.</p>
     <ul>
       <li><b>Click 0, 2-level:</b> the recap. The off switch blocks the full 800 V (orange labels).</li>
       <li><b>Click 1, NPC in P:</b> split the link, add D5 and D6. S1 + S2 conduct; S3 and S4 each block 400 V because D6 holds node Y at O.</li>
-      <li><b>Click 2, state O, i<sub>a</sub> &gt; 0:</b> D5 + S2 connect the output to the midpoint. The phase current now flows in or out of O: this is where the balancing problem of the next talk comes from.</li>
+      <li><b>Click 2, state O, i<sub>a</sub> &gt; 0:</b> D5 + S2 connect the output to the midpoint. The phase current now flows in or out of O: this is where the balancing problem of the next talk comes from. Averaged over a switching period ⟨i<sub>O</sub>⟩ = (1 − |r|)·i<sub>a</sub> (time at O × phase current): zero over a full period, not over a half period, so the midpoint voltage ripples.</li>
       <li><b>Click 3, state O, i<sub>a</sub> &lt; 0:</b> same gates, different path: S3 + D6.</li>
     </ul>
-    <p>Gate pairs: (S1, S3) and (S2, S4) are complementary. Going from O to P switches only S3 off and S1 on. The leg never jumps P → N directly: that would be an 800 V step on series devices. Capacitors are ideal (voltages held constant).</p>
+    <p>Gate pairs: (S1, S3) and (S2, S4) are complementary. Going from O to P switches only S3 off and S1 on. The leg never jumps P → N directly: that would be an 800 V step on series devices. One state per level: the NPC leg has no redundant states of its own; the ANPC adds them (slide 14). Capacitors are ideal (voltages held constant).</p>
   </aside>
 </section>
 
 <section class="slide p1" data-part="1" data-section="clamp" data-min="3" data-title="NPC commutation, both current signs">
-  <div class="sh"><div><div class="kicker"><b>Clamp</b> · commutation P → O</div><h2>Which device pays the switching loss?</h2><div class="terms"><b>Hard switching</b>: voltage and current overlap, so energy is lost</div></div></div>
+  <div class="sh"><div><div class="kicker"><b>Clamp</b></div><h2>Which device pays the switching loss?</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:16px">
     <div data-sim="legfig" data-until="3" style="grid-row:1; grid-column:1" data-config='{"topo":"npc","legend":true,"figs":[{"state":"P","sign":1,"cap":"<b>(a)</b> P, i<sub>a</sub> &gt; 0: S1, S2 on"},{"state":"PdO","sign":1,"step":1,"cap":"<b>(b)</b> S1 off with current → D5. <b>Hard</b>"},{"state":"O","sign":1,"step":2,"cap":"<b>(c)</b> S3 on, no current. No loss"}]}'></div>
     <div data-sim="legfig" style="grid-row:1; grid-column:1" data-config='{"topo":"npc","legend":4,"figs":[{"state":"P","sign":-1,"step":4,"cap":"<b>(d)</b> P, i<sub>a</sub> &lt; 0: D1, D2 on"},{"state":"PdO","sign":-1,"step":5,"cap":"<b>(e)</b> S1 off, no current. No change"},{"state":"O","sign":-1,"step":6,"cap":"<b>(f)</b> S3 on against 400 V. <b>Hard</b>"}]}'></div>
@@ -243,55 +301,31 @@
   <aside class="notes">
     <p><b>3 min.</b> Top row (i<sub>a</sub> &gt; 0): S1 turns off while carrying current, the current jumps to D5: S1 takes the turn-off loss, D5 the recovery. S3 then turns on with no current: free.</p>
     <p>Bottom row (i<sub>a</sub> &lt; 0): the same gate sequence, opposite current. S1 now turns off for free; S3 turns on against 400 V and D1 recovers: the loss moves to the inner switch (the rectifier case).</p>
-    <p>The i<sub>a</sub> &lt; 0 loop runs through five devices (C1, D1, D2, S3, D6): more stray inductance, more overshoot. A known NPC layout issue; it motivates the ANPC. Quiz question 2 uses figure (f).</p>
-  </aside>
-</section>
-
-<section class="slide p1" data-part="1" data-section="clamp" data-min="2.5" data-title="NPC: the midpoint current">
-  <div class="sh"><div><div class="kicker"><b>Clamp</b> · analysis</div><h2>NPC: the phase current flows into the midpoint</h2><div class="terms"><b>⟨ ⟩</b>: average over one switching period · <b>r</b>: reference, −1 … 1</div></div></div>
-  <div class="body" style="grid-template-columns: 420px 1fr; gap:14px 26px">
-    <div class="stack" style="gap:24px; align-self:center">
-      <table class="tb nocase mini">
-        <tr><th>state</th><th class="c">v<sub>aO</sub></th><th class="c">i<sub>O</sub></th></tr>
-        <tr><td class="lvP"><b>P</b></td><td class="c">+V<sub>dc</sub>/2</td><td class="c">0</td></tr>
-        <tr><td><b>O</b></td><td class="c">0</td><td class="c"><b>i<sub>a</sub></b></td></tr>
-        <tr><td class="lvN"><b>N</b></td><td class="c">−V<sub>dc</sub>/2</td><td class="c">0</td></tr>
-      </table>
-      <div data-step="1"><span class="eq box">⟨<span class="m">i</span><sub>O</sub>⟩ = <span class="ub"><span>(1 − |<span class="m">r</span>|)</span><small>time at O</small></span> <span class="m">i</span><sub>a</sub></span></div>
-    </div>
-    <div data-sim="midpt" data-config='{"m":0.8,"w":1000,"h":540}'></div>
-  </div>
-  <aside class="notes"><p><b>2.5 min.</b> Only state O connects the phase current to the midpoint.</p>
-    <ul>
-      <li>Top plot, one bar per switching period: red = time at P (r), grey = time at O (1 − |r|), blue = time at N.</li>
-      <li>Click 1: averaging gives ⟨i<sub>O</sub>⟩ = (1 − |r|)·i<sub>a</sub>. Over a full period it averages to zero, but not over a half period: the midpoint voltage ripples.</li>
-      <li>Leave the boxed result on the board: the balancing talk starts from it.</li>
-    </ul>
-    <p>Background: ⟨v<sub>aO</sub>⟩ = r·V<sub>dc</sub>/2; with carrier PWM d<sub>P</sub> = max(r, 0), d<sub>N</sub> = max(−r, 0).</p>
+    <p>The i<sub>a</sub> &lt; 0 loop runs through five devices (C1, D1, D2, S3, D6): more stray inductance, more overshoot. A known NPC layout issue; it motivates the ANPC.</p>
   </aside>
 </section>
 
 <section class="slide p1" data-part="1" data-section="clamp" data-min="3" data-steps="3" data-title="T-type and ANPC">
-  <div class="sh"><div><div class="kicker"><b>Clamp</b> · Schweizer &amp; Kolar 2013 · Brückner et al. 2005</div><h2>T-type and ANPC: two fixes to the NPC</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Clamp</b></div><h2>T-type and ANPC: two fixes to the NPC</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
-    <div data-sim="leg" data-config='{"topos":["npc","ttype","anpc"],"topo":"ttype","lockMode":true,"table":false,"schW":660,"steps":{"0":{"topo":"ttype","state":"P","sign":1},"2":{"topo":"anpc","state":"Ou","sign":1},"3":{"topo":"anpc","state":"Ol","sign":1}}}'></div>
+    <div data-sim="leg" data-config='{"topos":["npc","ttype","anpc"],"topo":"ttype","lockMode":true,"table":false,"schW":660,"steps":{"0":{"topo":"ttype","state":"P","sign":1},"1":{"topo":"ttype","state":"O","sign":1},"2":{"topo":"anpc","state":"Ou","sign":1},"3":{"topo":"anpc","state":"Ol","sign":1}}}'></div>
     <div class="strip">
-      <div class="callout" data-step="1"><b>T-type:</b> 1 device in the path, but S1, S4 block <b>V<sub>dc</sub></b></div>
+      <div class="callout"><b>T-type:</b> 1 device in the path, but S1, S4 block <b>V<sub>dc</sub></b></div>
       <div class="callout" data-step="2"><b>ANPC:</b> the clamp diodes become switches S5, S6</div>
-      <div class="callout" data-step="3">Two paths to 0 V: <b>you choose</b> which device heats up</div>
+      <div class="callout" data-step="3">Two <b>redundant</b> 0 V states: you choose which device heats up</div>
     </div>
   </div>
   <aside class="notes">
-    <p><b>3 min.</b> T-type in state P: one device conducts (NPC: two), so less conduction loss. But the outer switches S1, S4 block the full 800 V and need a higher rating. Typical use: UPS, string PV, drives up to 690 V AC.</p>
-    <p>Click 2–3, ANPC: the zero level through the upper path (O<sub>U</sub>: D5 + S2, exactly the NPC path) or the lower path (O<sub>L</sub>: S6 + D3). Same output voltage, different devices: the controller can spread the loss.</p>
+    <p><b>3 min.</b> Every click changes the circuit. Click 0, T-type in state P: one device conducts (NPC: two), so less conduction loss. But the outer switches S1, S4 block the full 800 V and need a higher rating. Click 1, T-type in state O: a bidirectional switch (S2, S3) connects the output straight to the midpoint. Typical use: UPS, string PV, drives up to 690 V AC.</p>
+    <p>Click 2–3, ANPC: the zero level through the upper path (O<sub>U</sub>: D5 + S2, exactly the NPC path) or the lower path (O<sub>L</sub>: S6 + D3). Same output voltage, different devices: these are <b>redundant states</b>, and the controller uses the choice to spread the loss. The ANPC has 6 states for 3 levels; 4 of them give 0 V (O<sub>U</sub>, O<sub>L</sub>, and each with one outer switch also on).</p>
     <p>Hybrid Si/SiC ANPC modules (Infineon, 1500 V PV with 1200 V chips) put fast SiC where the switching happens and IGBTs where current only conducts.</p>
   </aside>
 </section>
 
 <section class="slide p1" data-part="1" data-section="clamp" data-min="2" data-title="Who works hardest?">
-  <div class="sh"><div><div class="kicker"><b>Clamp</b> · loss model, illustrative device data, 10 kHz</div><h2>Who works hardest? It depends on the power flow</h2><div class="terms"><b>Inverter</b>: power to the AC side · <b>rectifier</b>: power to the DC side</div></div></div>
+  <div class="sh"><div><div class="kicker"><b>Clamp</b></div><h2>Who works hardest? It depends on the power flow</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
-    <div data-sim="lossbars" data-config='{"m":0.9,"w":470,"h":560,"cases":[{"topo":"npc","phi":0,"title":"NPC, inverter"},{"topo":"npc","phi":180,"title":"NPC, rectifier","step":1},{"topo":"anpc","phi":180,"pol":"half","title":"ANPC, rectifier","step":2}]}'></div>
+    <div data-sim="lossbars" data-config='{"m":0.9,"w":452,"h":560,"cases":[{"topo":"npc","phi":0,"title":"NPC, inverter"},{"topo":"npc","phi":180,"title":"NPC, rectifier","step":1},{"topo":"anpc","phi":180,"pol":"half","title":"ANPC, rectifier","step":2}]}'></div>
     <div class="strip">
       <div class="callout">Inverter: <b>outer</b> S1, S4 hottest</div>
       <div class="callout" data-step="1">Rectifier: <b>inner</b> S2, S3 hottest</div>
@@ -310,11 +344,11 @@
 </section>
 
 <section class="slide p1" data-part="1" data-section="float" data-min="3" data-title="Flying capacitor">
-  <div class="sh"><div><div class="kicker"><b>Float</b> · flying capacitor (Meynard &amp; Foch, 1992)</div><h2>Flying capacitor: a charged capacitor makes 0 V</h2><div class="terms"><b>State 10</b>: S1 on, S2 off · <b>C<sub>fc</sub></b> held at V<sub>dc</sub>/2 = 400 V</div></div></div>
+  <div class="sh"><div><div class="kicker"><b>Float</b></div><h2>Flying capacitor: a charged capacitor makes 0 V</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
     <div data-sim="leg" data-config='{"topo":"fc","state":"11","lockMode":true,"table":false,"schW":660,"steps":{"0":{"state":"11","sign":1},"1":{"state":"10","sign":1},"2":{"state":"01","sign":1}}}'></div>
     <div class="strip" style="grid-template-columns: 1fr 1fr">
-      <div class="callout" data-step="1"><b>10</b> and <b>01</b> both give 0 V …</div>
+      <div class="callout" data-step="1"><b>10</b> and <b>01</b>: <b>redundant</b>, both give 0 V …</div>
       <div class="callout" data-step="2">… but move charge in <b>opposite</b> directions</div>
     </div>
   </div>
@@ -325,176 +359,97 @@
       <li>Click 1, state 10: −400 V + 800 V − 400 V = 0 V; with i<sub>a</sub> &gt; 0 the current charges C<sub>fc</sub>.</li>
       <li>Click 2, state 01: also 0 V, but the current discharges C<sub>fc</sub>.</li>
     </ul>
-    <p>Two ways to make 0 V with opposite effects on the capacitor: choosing between them keeps V<sub>fc</sub> in place. Costs: one capacitor per leg, pre-charge at start-up, V<sub>fc</sub> must be measured and controlled. Capacitors are ideal here (V<sub>fc</sub> held at 400 V).</p>
+    <p>Holmes &amp; Lipo §1.8.2 calls this leg capacitor-clamped and names the same two points: the redundancy of its states, and the initialization (pre-charge) of the capacitor as its main drawback.</p>
+    <p>Two ways to make 0 V with opposite effects on the capacitor: 4 states for 3 levels, and 10 / 01 are redundant. Choosing between them keeps V<sub>fc</sub> in place. Costs: one capacitor per leg, pre-charge at start-up, V<sub>fc</sub> must be measured and controlled. Capacitors are ideal here (V<sub>fc</sub> held at 400 V).</p>
+    <p>With PWM: i<sub>fc</sub> = (S1 − S2)·i<sub>a</sub>, so ⟨i<sub>fc</sub>⟩ = (d<sub>1</sub> − d<sub>2</sub>)·i<sub>a</sub>. Phase-shifted carriers (two carriers half a period apart, one duty) give 10 and 01 equal time: no net charge, and the output ripple is at 2f<sub>sw</sub>. A small duty difference moves charge on purpose: the balancing loop of the next talk. Sizing: a charging state lasts at most T<sub>s</sub>/2 with the full current, so C<sub>fc</sub> ≥ I<sub>pk</sub>/(2f<sub>sw</sub>ΔV); 100 A, 10 kHz, ΔV = 19 V gives ≈ 270 µF (final question 2 uses this).</p>
   </aside>
 </section>
 
-<section class="slide p1" data-part="1" data-section="float" data-min="2" data-title="Flying capacitor: charge balance">
-  <div class="sh"><div><div class="kicker"><b>Float</b> · analysis</div><h2>Flying capacitor: equal duties, no net charge</h2><div class="terms"><b>d<sub>1</sub>, d<sub>2</sub></b>: duties of S1 and S2 · <b>phase-shifted carriers</b>: two carriers half a period apart</div></div></div>
-  <div class="body" style="grid-template-columns: 480px 1fr; gap:14px 26px">
-    <div class="stack" style="gap:24px; align-self:center">
-      <div class="eq"><span class="m">i</span><sub>fc</sub> = (<span class="m">S</span><sub>1</sub> − <span class="m">S</span><sub>2</sub>) <span class="m">i</span><sub>a</sub></div>
-      <div data-step="1"><span class="eq box">⟨<span class="m">i</span><sub>fc</sub>⟩ = <span class="ub"><span>(<span class="m">d</span><sub>1</sub> − <span class="m">d</span><sub>2</sub>)</span><small>duty difference</small></span> <span class="m">i</span><sub>a</sub></span></div>
-      <p data-step="1">Equal duties: ⟨<span class="m">i</span><sub>fc</sub>⟩ = 0</p>
-    </div>
-    <div data-sim="fcpwm" data-config='{"d":0.6,"w":960,"h":520}'></div>
-  </div>
-  <aside class="notes"><p><b>2 min.</b> Same averaging as the NPC slide.</p>
-    <ul>
-      <li>Top: the same duty d compared with two carriers half a period apart gives the gate signals S1, S2.</li>
-      <li>Middle: state 10 charges C<sub>fc</sub>, state 01 discharges it; both last equally long.</li>
-      <li>Bottom: i<sub>fc</sub> = +I in 10, −I in 01, zero in 11 and 00. Click 1: equal duties give zero average current.</li>
-    </ul>
-    <p>Each switch runs at f<sub>sw</sub>; the output ripple is at 2f<sub>sw</sub>. A small duty difference moves charge on purpose: that is how a balancing loop corrects V<sub>fc</sub> (next talk).</p>
-  </aside>
-</section>
-
-<section class="slide p1" data-part="1" data-section="combine" data-min="3" data-steps="3" data-title="5-level ANPC">
-  <div class="sh"><div><div class="kicker"><b>Combine</b> · 5-level ANPC (Barbosa et al., 2005)</div><h2>5-level ANPC: a selector plus a flying-capacitor cell</h2><div class="terms"><b>Selector</b> S5–S8: upper or lower half of the link · <b>cell</b> S1, S2, C<sub>fc</sub>: a 3-level flying-capacitor leg</div></div></div>
+<section class="slide p1" data-part="1" data-section="combine" data-min="3" data-steps="2" data-title="5-level ANPC">
+  <div class="sh"><div><div class="kicker"><b>Combine</b></div><h2>5-level ANPC: a selector plus a flying-capacitor cell</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:12px">
-    <div data-sim="leg" data-config='{"topo":"anpc5","state":"u10","lockMode":true,"table":false,"schW":660}'></div>
+    <div data-sim="leg" data-config='{"topo":"anpc5","state":"u11","lockMode":true,"table":false,"schW":660,"steps":{"0":{"state":"u11","sign":1},"1":{"state":"u10","sign":1},"2":{"state":"u01","sign":1}}}'></div>
     <div class="strip">
-      <div class="callout" data-step="1"><b>Selector:</b> switches slowly, at f<sub>1</sub></div>
-      <div class="callout" data-step="2"><b>Cell:</b> adds ±V<sub>dc</sub>/4 at the PWM rate</div>
-      <div class="callout" data-step="3"><b>Industry:</b> ABB ACS2000, 4–6.9 kV drives</div>
+      <div class="callout"><b>Selector:</b> switches slowly, at f<sub>1</sub></div>
+      <div class="callout" data-step="1"><b>Cell:</b> adds ±V<sub>dc</sub>/4 at the PWM rate</div>
+      <div class="callout" data-step="2"><b>Redundant:</b> +200 a charges C<sub>fc</sub>, +200 b discharges it</div>
     </div>
   </div>
   <aside class="notes">
-    <p><b>3 min.</b> Click the states: +200 a (upper half, cell 10) charges C<sub>fc</sub> for i &gt; 0; +200 b (cell 01) discharges it. The cell is the flying-capacitor leg of the previous slides.</p>
+    <p><b>3 min.</b> Every click changes the circuit; the cell is the flying-capacitor leg of slide 16. Click 0, +400 V: the selector connects the cell to the upper half, the cell bypasses C<sub>fc</sub>. Click 1, +200 a (cell 10): the current now passes through C<sub>fc</sub> and charges it (i &gt; 0). Click 2, +200 b (cell 01): the same +200 V, but the current discharges C<sub>fc</sub>.</p>
     <ul>
       <li>S5–S8 pick the half (P–O or O–N), block V<sub>dc</sub>/2 and switch only at the fundamental frequency.</li>
       <li>S1, S2 and C<sub>fc</sub> (charged to V<sub>dc</sub>/4) add the ±200 V levels at the PWM frequency; those devices block only V<sub>dc</sub>/4.</li>
       <li>Same DC link as a 3-level NPC, one extra capacitor per phase. ABB ACS2000: back-to-back 5L-ANPC, transformerless 4–6.9 kV drive.</li>
     </ul>
-    <p>Why not 7 or 9 levels with diode clamping: clamp diodes grow as N² and the link capacitors drift. Capacitors are ideal here (C<sub>fc</sub> held at 200 V).</p>
+    <p>8 states for 5 levels: +200, 0 and −200 V each have two redundant states (a, b). The a/b choice balances C<sub>fc</sub>; 0 a / 0 b also choose which selector carries the current. Why not 7 or 9 levels with diode clamping: the clamp diodes grow as N², some must block (N − 2) steps, and the link capacitors drift; Holmes &amp; Lipo (§1.8.1) call more than five levels not practical. Capacitors are ideal here (C<sub>fc</sub> held at 200 V).</p>
   </aside>
 </section>
 
-<section class="slide p1" data-part="1" data-section="combine" data-min="2" data-title="Design example: a 1500 V leg">
-  <div class="sh"><div><div class="kicker"><b>Design example</b></div><h2>Design: one leg for a 1500 V DC link</h2><div class="terms"><b>⅔ rule</b>: a device blocks at most ⅔ of its rating</div></div></div>
-  <div class="body xl" style="align-content:center">
-    <ol class="steps">
-      <li data-step="1"><span><b>Levels:</b> 2L needs 3.3 kV parts, 3L only <b>1.2 kV</b></span></li>
-      <li data-step="2"><span><b>Clamp:</b> T-type outer switch sees 1500 V ✗ → <b>3L ANPC</b></span></li>
-      <li data-step="3"><span><b>Or 5L-ANPC:</b> 1.2 kV + <b>650 V</b> devices, V<sub>fc</sub> = 375 V</span></li>
-      <li data-step="4"><span><b>Flying capacitor:</b> <span class="m">C</span><sub>fc</sub> ≥ <span class="m">I</span><sub>pk</sub>/(2<span class="m">f</span><sub>sw</sub>Δ<span class="m">V</span>) ≈ <b>270 µF</b>, pre-charged</span></li>
-    </ol>
-  </div>
-  <aside class="notes">
-    <p><b>2 min.</b> Same step-by-step format as the design procedures in the course.</p>
-    <ul>
-      <li>Step 1: 2-level, each device blocks 1500 V → needs 2250 V → 3.3 kV class (slow). 3-level: 750 V → 1125 V → 1.2 kV class. Quiz question 1 uses this rule.</li>
-      <li>Step 2: the T-type outer switches block the full 1500 V, so it loses its advantage; NPC works, ANPC if the converter must also run as a rectifier (loss sharing).</li>
-      <li>Step 3: selectors block 750 V (1.2 kV class), cell devices 375 V (650 V class).</li>
-      <li>Step 4: with phase-shifted carriers a charging state lasts at most T<sub>s</sub>/2 with the full current. ΔV = 5 % of 375 V ≈ 19 V, I<sub>pk</sub> = 100 A, f<sub>sw</sub> = 10 kHz → 100/(2·10<sup>4</sup>·19) ≈ 270 µF. Doubling f<sub>sw</sub> halves it. Pre-charge: an empty C<sub>fc</sub> puts 750 V on a 650 V device.</li>
-    </ul>
-  </aside>
-</section>
-
-<section class="slide p1" data-part="1" data-section="combine" data-min="2" data-title="Choosing a topology">
-  <div class="sh"><div><div class="kicker"><b>Clamp · Float · Combine</b> · comparison</div><h2>Choosing a topology: gains and costs</h2><div class="terms"><b>MV</b>: medium voltage, 2.3–6.9 kV · <b>PV</b>: photovoltaic inverter</div></div></div>
+<section class="slide p1" data-part="1" data-section="combine" data-min="2.5" data-title="Choosing a topology">
+  <div class="sh"><div><div class="kicker"><b>Clamp · Float · Combine</b></div><h2>Choosing a topology</h2></div></div>
   <div class="body" style="grid-template-rows: 1fr auto; gap:18px; align-content:center">
-    <table class="tb gc">
-      <tr><th>Leg</th><th class="g">+ Gain</th><th class="b">− Cost</th><th>Typical use</th></tr>
-      <tr><td><b>2-level</b></td><td>simplest: 2 switches</td><td>blocks V<sub>dc</sub>, big steps</td><td>≤ 1 kV drives</td></tr>
-      <tr data-step="1"><td><b>NPC</b></td><td>every device blocks V<sub>dc</sub>/2</td><td>uneven losses</td><td>MV drives, PV</td></tr>
-      <tr data-step="1"><td><b>T-type</b></td><td>1 device in the path</td><td>outer switches block V<sub>dc</sub></td><td>≤ 1 kV: UPS, PV</td></tr>
-      <tr data-step="1"><td><b>ANPC</b></td><td>losses shared</td><td>6 switches</td><td>1500 V PV, SiC</td></tr>
-      <tr data-step="2"><td><b>Flying cap.</b></td><td>no diodes, ripple at 2 f<sub>sw</sub></td><td>large C<sub>fc</sub>, pre-charge</td><td>DC–DC, GaN</td></tr>
-      <tr data-step="3"><td><b>5L-ANPC</b></td><td>5 levels, ≤ 1.2 kV parts</td><td>8 switches, 2 capacitors</td><td>MV drives</td></tr>
+    <table class="tb gc topo">
+      <tr><th></th><th>Leg</th><th>Devices</th><th>Each blocks</th><th class="c">States / levels</th><th class="g">+ Advantage</th><th class="b">− Disadvantage</th><th>Typical use</th></tr>
+      <tr><td class="th" data-sim="legthumb" data-config='{"topo":"2l"}'></td><td><b>2-level</b></td><td>2 switches</td><td>V<sub>dc</sub></td><td class="c">2 / 2</td><td>simplest</td><td>big steps, slow parts</td><td>≤ 1 kV drives</td></tr>
+      <tr data-step="1"><td class="th" data-sim="legthumb" data-config='{"topo":"npc"}'></td><td><b>NPC</b></td><td>4 switches, 2 diodes</td><td>V<sub>dc</sub>/2</td><td class="c">3 / 3</td><td>half the device voltage</td><td>uneven losses</td><td>MV drives, PV</td></tr>
+      <tr data-step="1"><td class="th" data-sim="legthumb" data-config='{"topo":"ttype"}'></td><td><b>T-type</b></td><td>4 switches</td><td>V<sub>dc</sub> outer</td><td class="c">3 / 3</td><td>1 device in the path</td><td>outer switches block V<sub>dc</sub></td><td>≤ 1 kV: UPS, PV</td></tr>
+      <tr data-step="1"><td class="th" data-sim="legthumb" data-config='{"topo":"anpc"}'></td><td><b>ANPC</b></td><td>6 switches</td><td>V<sub>dc</sub>/2</td><td class="c"><b>6</b> / 3</td><td>losses shared</td><td>more switches</td><td>1500 V PV, SiC</td></tr>
+      <tr data-step="2"><td class="th" data-sim="legthumb" data-config='{"topo":"fc"}'></td><td><b>Flying cap.</b></td><td>4 switches, C<sub>fc</sub></td><td>V<sub>dc</sub>/2</td><td class="c"><b>4</b> / 3</td><td>no diodes, ripple at 2 f<sub>sw</sub></td><td>large C<sub>fc</sub>, pre-charge</td><td>DC–DC, GaN</td></tr>
+      <tr data-step="3"><td class="th" data-sim="legthumb" data-config='{"topo":"anpc5"}'></td><td><b>5L-ANPC</b></td><td>8 switches, C<sub>fc</sub></td><td>V<sub>dc</sub>/2, V<sub>dc</sub>/4</td><td class="c"><b>8</b> / 5</td><td>5 levels</td><td>most parts, 2 voltages to hold</td><td>MV drives</td></tr>
     </table>
-    <div class="callout" data-step="4">Every multilevel leg pays with a <b>capacitor voltage to hold</b></div>
+    <div class="callout" data-step="4">More states than levels: <b>redundant states</b>, the freedom the next talk uses</div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> One row per topology: read only the gain and the cost, not the whole table.</p>
+    <p><b>2.5 min.</b> One row per topology, the same order as the talk. Read across: what it is built from, what each device blocks, how many switching states it has for its levels, then one advantage and one disadvantage.</p>
+    <p>States / levels: where the first number is larger (bold), the leg has redundant states: ANPC 6 states for 3 levels, flying capacitor 4 for 3, 5L-ANPC 8 for 5. Every multilevel leg also pays with at least one capacitor voltage to hold.</p>
     <ul>
       <li><b>2-level:</b> the reference. Cheapest and simplest; the device blocks the full link and every step is V<sub>dc</sub>.</li>
-      <li><b>NPC:</b> V<sub>dc</sub>/2 on all six devices (4 switches, 2 clamp diodes), but the outer and inner devices heat up differently (slide 13). ABB ACS1000: IGCT 3-level NPC.</li>
+      <li><b>NPC:</b> V<sub>dc</sub>/2 on all six devices (4 switches, 2 clamp diodes), but the outer and inner devices heat up differently (slide 15). ABB ACS1000: IGCT 3-level NPC.</li>
       <li><b>T-type:</b> one device in the path in P and N, so the lowest conduction loss; the outer switches block V<sub>dc</sub>, so it only pays below about 1 kV.</li>
       <li><b>ANPC:</b> the free choice of zero path shares the loss; the price is two more switches and gate drivers.</li>
       <li><b>Flying capacitor:</b> no clamp diodes; with phase-shifted carriers the output ripple is at 2 f<sub>sw</sub>. The price: a capacitor sized for the full load current, which must be pre-charged before start-up.</li>
-      <li><b>5L-ANPC:</b> five levels with 1.2 kV selectors and a 650 V cell (design example); the control holds the midpoint and V<sub>fc</sub>. ABB ACS2000.</li>
+      <li><b>5L-ANPC:</b> five levels with 1.2 kV selectors and a 650 V cell on a 1500 V link; the control holds the midpoint and V<sub>fc</sub>. ABB ACS2000.</li>
     </ul>
-    <p>Next: how many switching states these legs have, and why several of them give the same output.</p>
-  </aside>
-</section>
-
-<section class="slide p1" data-part="1" data-section="states" data-min="2" data-title="States of one leg">
-  <div class="sh"><div><div class="kicker"><b>States</b> · state simplification, one leg</div><h2>One leg: 16 gate combinations, only 3 states</h2><div class="terms"><b>Gate combination</b>: one on/off pattern of all switches · <b>state</b>: a combination that safely connects the output to one level</div></div></div>
-  <div class="body" style="grid-template-columns: 740px 1fr; gap:44px; align-items:center">
-    <div data-sim="gates" data-config='{"w":740,"h":630}'></div>
-    <div class="stack" data-step="3" style="gap:26px">
-      <table class="tb gc st">
-        <tr><th>Leg</th><th class="c">Gate comb.</th><th class="c">States</th><th class="c">Levels</th></tr>
-        <tr><td><b>2-level</b></td><td class="c">4</td><td class="c">2</td><td class="c">2</td></tr>
-        <tr><td><b>NPC, T-type</b></td><td class="c">16</td><td class="c">3</td><td class="c">3</td></tr>
-        <tr><td><b>Flying cap.</b></td><td class="c">16</td><td class="c hl">4</td><td class="c">3</td></tr>
-        <tr><td><b>ANPC</b></td><td class="c">64</td><td class="c hl">6</td><td class="c">3</td></tr>
-        <tr><td><b>5L-ANPC</b></td><td class="c">256</td><td class="c hl">8</td><td class="c">5</td></tr>
-      </table>
-      <div class="callout">More states than levels: <b>redundant</b> states</div>
-    </div>
-  </div>
-  <aside class="notes">
-    <p><b>2 min.</b> State simplification: start from every on/off pattern of the switches and strike out what the hardware must never see.</p>
-    <ul>
-      <li>Click 0: 4 switches → 2⁴ = 16 gate combinations. Each cell lists S1 S2 S3 S4.</li>
-      <li>Click 1, rule 1: (S1, S3) and (S2, S4) are complementary pairs. Both on: S1 + S2 + S3 shorts the upper capacitor through D6, all four short the link, the rest leave one switch blocking the full V<sub>dc</sub>. Both off: the diodes decide, so the output follows the current sign (allowed only as dead time or for shutdown). 16 → 4.</li>
-      <li>Click 2, rule 2: S1 + S4 leaves S2 and S3 off; again the current sign sets the output, and S2 or S3 would block 800 V. 4 → 3: P, O, N, one state per level.</li>
-      <li>Click 3: the same simplification for every leg of this talk. T-type: the same 3 (there S1 + S4 is a direct short). Flying capacitor: all 4 combinations of its two pairs are useful; 10 and 01 both give 0 V. ANPC: three pairs (S1, S5), (S2, S3), (S4, S6), 8 combinations, 6 states, 4 of them at 0 V: the zero-path choice. 5L-ANPC: four pairs, the two selector pairs must agree, so 8 states for 5 levels.</li>
-    </ul>
-  </aside>
-</section>
-
-<section class="slide p1" data-part="1" data-section="states" data-min="2.5" data-steps="2" data-title="N³ states, fewer voltages">
-  <div class="sh"><div><div class="kicker"><b>States</b> · three legs · space-vector diagram</div><h2>Three legs: N³ states, but fewer line voltages</h2><div class="terms"><b>Dot</b>: one set of line voltages v<sub>ab</sub>, v<sub>bc</sub>, v<sub>ca</sub> · <b>label</b>: the states that produce it</div></div></div>
-  <div class="body" data-sim="svd" data-config='{"w":1460,"h":640}'></div>
-  <aside class="notes">
-    <p><b>2.5 min.</b> A state of the converter is one level for each leg, e.g. POO. The load only sees the line voltages, drawn as one dot: the space vector.</p>
-    <ul>
-      <li>Click 0, 2-level: 2³ = 8 states, 7 dots. Only the centre is shared: PPP and NNN both give zero.</li>
-      <li>Click 1, 3-level: 3³ = 27 states, 19 dots. Centre: 3 states (PPP, OOO, NNN); six inner dots: 2 each (e.g. POO and ONN); twelve outer dots: 1 each. 3 + 12 + 12 = 27.</li>
-      <li>Why: lifting all three legs by one level changes only the common mode v<sub>nO</sub>, not the line voltages. A dot whose legs span s levels has N − s states.</li>
-      <li>Click 2, 5-level: 125 states, 61 dots, 64 redundant: the redundancy grows faster than the number of voltages.</li>
-    </ul>
-    <p>The simplification for the modulator: it only picks among 19 (or 61) voltages; the redundant states are free choices to balance the capacitors, lower the common mode or switch fewer devices. The modulation talk builds on this diagram.</p>
-  </aside>
-</section>
-
-<section class="slide p1" data-part="1" data-section="states" data-min="2" data-steps="2" data-title="Redundant states">
-  <div class="sh"><div><div class="kicker"><b>States</b> · redundancy</div><h2>Redundant states: same output, opposite midpoint current</h2><div class="terms"><b>Redundant states</b>: different states with the same line voltages</div></div></div>
-  <div class="body" style="grid-template-rows: 1fr auto; gap:14px">
-    <div data-sim="redund" data-config='{"cases":[{"st":"POO","cap":"a → P · b, c → O"},{"st":"ONN","cap":"a → O · b, c → N","step":1}]}'></div>
-    <div class="callout" data-step="2">Same v<sub>ab</sub>, v<sub>bc</sub>, v<sub>ca</sub>, opposite midpoint current: the choice <b>steers the midpoint</b> → next talk</div>
-  </div>
-  <aside class="notes">
-    <p><b>2 min.</b> One inner dot of the previous slide: two states.</p>
-    <ul>
-      <li>Click 0, POO: leg a at P, legs b and c at O. With i<sub>a</sub> &gt; 0 the return current i<sub>b</sub> + i<sub>c</sub> = −i<sub>a</sub> flows into the midpoint O.</li>
-      <li>Click 1, ONN: leg a at O, legs b and c at N. Now i<sub>a</sub> itself is drawn out of O.</li>
-      <li>Click 2: in both, v<sub>ab</sub> = v<sub>ac</sub> = V<sub>dc</sub>/2 and v<sub>bc</sub> = 0. Only the common mode differs: v<sub>nO</sub> = +V<sub>dc</sub>/6 in POO, −V<sub>dc</sub>/3 in ONN, and the load does not see it.</li>
-      <li>One state pushes the midpoint voltage up, the other pulls it down. Choosing between them in every switching period keeps the NPC midpoint at V<sub>dc</sub>/2.</li>
-      <li>The same idea inside one leg: 10 / 01 of the flying capacitor, the two zero paths of the ANPC, the a / b states of the 5L-ANPC.</li>
-    </ul>
-    <p class="say">Handover: “We now know which levels the hardware can make, how many states make them, and that several states give the same output. The next talk shows how to schedule those states and keep the capacitors where they belong.”</p>
+    <p>Next slide: the same comparison in PLECS.</p>
+    <p class="say">Handover (after the simulation slide): “We now know which levels the hardware can make, and that several switching states give the same output. The next talk shows how to schedule those states and keep the capacitors where they belong.”</p>
     <p>The printed quiz is handed out at the end of the module.</p>
+  </aside>
+</section>
+
+<section class="slide p1" data-part="1" data-section="simulation" data-min="2.5" data-title="PLECS simulation">
+  <div class="sh"><div><div class="kicker"><b>Simulation</b></div><h2>PLECS: more levels, smaller steps, less ripple</h2></div></div>
+  <div class="body" style="grid-template-rows: 1fr auto; gap:10px">
+    <img class="simfig" src="img/plecs_multilevel_legs.png" alt="PLECS result: output voltage of a two-level leg (steps of 800 V), a three-level NPC leg (steps of 400 V) and a five-level ANPC leg (steps of 200 V), and the three load currents">
+    <div class="callout">Same fundamental (<b>360 V</b>, 35.6 A). Current ripple: NPC <b>0.55×</b>, 5L-ANPC <b>0.15×</b> the two-level ripple</div>
+  </div>
+  <aside class="notes">
+    <p><b>2.5 min.</b> A check of slides 3 to 5 in a circuit simulator. The model is <code>simulations/multilevel_legs.plecs</code>: open it in PLECS and press Ctrl+T to run it live; the scope shows the same plots and the flying-capacitor voltage.</p>
+    <ul>
+      <li>Three legs on the same 800 V link (two ideal 400 V halves, midpoint O), the same 5 mH output filter inductor and 10 Ω load to O, the same sine reference (m = 0.9, 50 Hz), and 2 kHz carriers.</li>
+      <li>Two-level leg: one carrier from −1 to 1. NPC leg: two carriers, 0 to 1 for S1/S3 and −1 to 0 for S2/S4.</li>
+      <li>5L-ANPC leg: the sign of the reference sets the selector S5–S8 (it switches at 50 Hz); two carriers half a period apart drive the cell S1, S2. The flying capacitor (1 mF) starts at 200 V and stays between 197 and 203 V with no balancing loop: the two redundant states get equal time.</li>
+      <li>Voltages: steps of 800, 400 and 200 V; each leg only moves between neighbouring levels.</li>
+      <li>Currents: the same fundamental, 35.6 A (360 V over 10 Ω + j1.57 Ω). RMS ripple: 3.8 A two-level, 2.1 A NPC (0.55×), 0.56 A 5L-ANPC (0.15×). The 5L-ANPC gains twice: a quarter of the step, and the two shifted carriers double the ripple frequency to 4 kHz.</li>
+      <li>To try live: each leg has its own switching frequency at the top of the initialization commands (Simulation → Simulation parameters → Initialization): <code>f_sw_two_level</code>, <code>f_sw_three_level</code>, <code>f_sw_five_level</code>. The filter and load (<code>L_filter</code>, <code>R_load</code>) are shared.</li>
+      <li>A good demo with the same filter: set 7400, 3700 and 1000 Hz. All three legs then have the same current ripple (about 1.1 A RMS): the 5L-ANPC matches the two-level leg while switching 7 times slower.</li>
+    </ul>
+    <p>Devices are ideal (the 5L-ANPC switches have 1 mΩ), so there is no dead time and almost no loss in this model.</p>
   </aside>
 </section>
 
 <section class="slide p1" data-part="1" data-section="combine" data-min="0" data-title="References">
   <div class="sh"><div><h2>References</h2></div></div>
   <div class="body cols-2" style="gap:36px; align-content:start">
-    <ul class="small" style="gap:14px">
+    <ul style="gap:18px">
       <li>B. Wu, M. Narimani, <i>High-Power Converters and AC Drives</i>, 2nd ed., Wiley-IEEE Press, 2017.</li>
-      <li>J. Rodríguez, J.-S. Lai, F. Z. Peng, “Multilevel inverters: a survey of topologies, controls, and applications,” <i>IEEE TIE</i>, 49(4), 2002.</li>
-      <li>B. J. Baliga, <i>Fundamentals of Power Semiconductor Devices</i>, Springer, 2008.</li>
-      <li>A. Nabae, I. Takahashi, H. Akagi, “A new neutral-point-clamped PWM inverter,” <i>IEEE TIA</i>, 17(5), 1981.</li>
+      <li>D. G. Holmes, T. A. Lipo, <i>Pulse Width Modulation for Power Converters: Principles and Practice</i>, Wiley-IEEE Press, 2003.</li>
     </ul>
-    <ul class="small" style="gap:14px">
-      <li>M. Schweizer, J. W. Kolar, “Design and implementation of a highly efficient three-level T-type converter for low-voltage applications,” <i>IEEE TPEL</i>, 28(2), 2013.</li>
-      <li>T. Brückner, S. Bernet, H. Güldner, “The active NPC converter and its loss-balancing control,” <i>IEEE TIE</i>, 52(3), 2005.</li>
-      <li>T. A. Meynard, H. Foch, “Multi-level conversion: high voltage choppers and voltage-source inverters,” <i>IEEE PESC</i>, 1992.</li>
-      <li>P. Barbosa et al., “Active neutral-point-clamped multilevel converters,” <i>IEEE PESC</i>, 2005.</li>
+    <ul style="gap:18px">
+      <li>Semikron Danfoss, “3L NPC, TNPC &amp; ANPC Topology,” Application Note AN 11-001.</li>
+      <li>Texas Instruments, “11-kW, bidirectional three-phase three-level (T-type) inverter and PFC reference design,” TIDA-01606 (design guide TIDUE53).</li>
+      <li>Texas Instruments, “11-kW, bidirectional, three-phase ANPC based on GaN reference design,” TIDA-010210 (design guide TIDUEZ0).</li>
+      <li>Vincotech, flowNPC E3BP three-level NPC module 30-EP12NIC560H7-PU10F57T, product page.</li>
     </ul>
   </div>
   <aside class="notes"><p>The plots are simplified teaching models (ideal switches, ideal capacitors, average models, illustrative device data); say so if asked.</p></aside>
@@ -511,9 +466,7 @@
 <script src="js/kit.js"></script>
 <script src="js/sim-intro.js"></script>
 <script src="js/sim-basics.js"></script>
-<script src="js/sim-vis.js"></script>
 <script src="js/sim-leg.js"></script>
-<script src="js/sim-states.js"></script>
 <script src="js/deck.js"></script>
 </body>
 </html>

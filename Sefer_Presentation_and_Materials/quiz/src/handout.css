@@ -95,4 +95,10 @@ h2.sec { font-size: 14pt; font-weight: 400; margin: 2mm 0 3mm; border-bottom: 1.
 .sch .dot { fill: var(--ink2); }
 .sch .term { fill: #fff; stroke: var(--ink2); stroke-width: 2.4; }
 .sch .flow, .sch .flow-glow, .sch .blk, .sch .vout, .sch .iarrow { display: none; }
+/* quiz figures: a row of small legs; a schematic that shows its current path */
+.figrow { display: grid; gap: 2mm; }
+.legs3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 1mm 0 3mm; }
+.fig .cap.name { text-align: left; font-size: 10pt; color: var(--ink); padding: 1mm 2mm 5mm; border-top: 1px solid var(--line); }
+.sch.path .flow { display: inline; stroke: #e08a00; stroke-width: 8; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: .1 18; }
+.sch.path .iarrow { display: inline; fill: #e08a00; }
 .hexfig text { font: 600 11px var(--font); fill: var(--ink2); }
