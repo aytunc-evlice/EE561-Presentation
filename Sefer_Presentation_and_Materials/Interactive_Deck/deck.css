@@ -183,7 +183,7 @@ table.tb { border-collapse: collapse; width: 100%; font-size: 20px; color: var(-
 .p1 .ledger.gain .lh, .p1 .ledger.gain .li > b:first-child { color: var(--good); }
 .p1 .ledger.cost .lh, .p1 .ledger.cost .li > b:first-child { color: var(--bad); }
 .p1 .ledger.cost .li { grid-template-columns: 150px 1fr; }
-.p1 .ledger.plain { gap: 22px; }
+.p1 .ledger.plain { gap: 14px; align-self: stretch; }
 .p1 .ledger.plain .li { grid-template-columns: 1fr; font-size: 28px; line-height: 1.3; }
 .p1 .ledger.plain .li b { font: inherit; font-weight: 700; color: inherit; }
 /* advantage / disadvantage cards */

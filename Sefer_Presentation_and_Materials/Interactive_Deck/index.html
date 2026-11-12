@@ -128,21 +128,23 @@
 
 <section class="slide p1" data-part="1" data-section="intro" data-min="2.5" data-title="In practice">
   <div class="sh"><div><div class="kicker"><b>Why multilevel?</b></div><h2>In practice: cooling, layout and power modules</h2></div></div>
-  <div class="body" style="grid-template-columns: 1fr 500px 1fr; grid-template-rows: 1fr auto; gap:16px 36px">
-    <div class="ledger plain gain" style="align-self:start; margin-top:90px">
-      <div class="lh">Easier</div>
-      <div class="li"><span><b>Cooling:</b> the loss is spread over more, smaller chips</span></div>
-      <div class="li"><span><b>Size:</b> smaller filter, smaller heat sink</span></div>
-      <div class="li"><span><b>Parts:</b> low-voltage devices are cheap and fast</span></div>
+  <div class="body" style="grid-template-columns: 800px 1fr; grid-template-rows: 1fr auto; gap:16px 48px">
+    <figure class="photo" style="align-self:center"><img src="img/photos/semikron_npc_long_commutation.png" alt="NPC leg: the long commutation path, from clamp diode D5 and T2 in the upper half to diodes D3 and D4 in the lower half" style="height:auto; object-fit:contain; border:0"><figcaption><b>NPC leg:</b> the commutation loop (red) runs across the whole leg</figcaption><div class="credit">Semikron Danfoss, AN 11-001, Fig. 11</div></figure>
+    <div class="stack" style="gap:34px; align-self:center">
+      <div class="ledger plain gain">
+        <div class="lh">Easier</div>
+        <div class="li"><span><b>Cooling:</b> loss spread over more chips</span></div>
+        <div class="li"><span><b>Size:</b> smaller filter and heat sink</span></div>
+        <div class="li"><span><b>Parts:</b> cheap, fast low-voltage devices</span></div>
+      </div>
+      <div class="ledger plain cost" data-step="1">
+        <div class="lh">Harder</div>
+        <div class="li"><span><b>Layout:</b> long loops add stray inductance</span></div>
+        <div class="li"><span><b>Hot spots:</b> the hottest chip sets the rating</span></div>
+        <div class="li"><span><b>Drivers:</b> an isolated supply per switch</span></div>
+      </div>
     </div>
-    <figure class="photo" style="align-self:center"><img src="img/photos/semikron_npc_long_commutation.png" alt="NPC leg: the long commutation path, from clamp diode D5 and T2 in the upper half to diodes D3 and D4 in the lower half" style="height:auto; object-fit:contain"><figcaption><b>NPC:</b> the long commutation loop</figcaption><div class="credit">Semikron Danfoss, AN 11-001, Fig. 11</div></figure>
-    <div class="ledger plain cost" data-step="1" style="align-self:start; margin-top:90px">
-      <div class="lh">Harder</div>
-      <div class="li"><span><b>Layout:</b> long traces between the switches add stray inductance and overshoot</span></div>
-      <div class="li"><span><b>Hot spots:</b> the loss is uneven; the hottest chip sets the rating</span></div>
-      <div class="li"><span><b>Drivers:</b> every switch needs an isolated gate supply</span></div>
-    </div>
-    <div class="callout" style="grid-column: 1 / -1" data-step="2"><b>Answer: the whole leg in one power module.</b> Short loops, one heat sink. MiniSKiiP 3-level (Semikron Danfoss), EasyPACK 3-level (Infineon), flowNPC (Vincotech)</div>
+    <div class="callout" style="grid-column: 1 / -1" data-step="2"><b>Answer: the whole leg in one power module.</b> Short loops, one heat sink (next slide)</div>
   </div>
   <aside class="notes">
     <p><b>2.5 min.</b> The same balance sheet as the last two slides, from the hardware side.</p>
