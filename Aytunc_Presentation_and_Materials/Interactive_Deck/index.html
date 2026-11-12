@@ -232,7 +232,7 @@
   <div class="sh"><div><div class="kicker"><b>Modulate</b> · the space-vector view in one slide · read: Zhou &amp; Wang, IEEE TIE 2002; McGrath, Holmes &amp; Lipo, IEEE TPEL 2003</div><h2>Space-vector PWM = sine PWM + the min-max offset</h2></div></div>
   <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
     <div class="stack" style="gap:10px">
-      <p class="small" style="font-size:19px">The offset of the last slide is what a space-vector modulator does. Same two-level converter on Sefer’s map: 8 switch states → 7 vectors (6 active, 1 zero).</p>
+      <p class="small" style="font-size:19px">The offset of the last slide is what a space-vector modulator does. Same two-level converter as a map of its output voltages: 8 switch states → 7 vectors (6 active, 1 zero).</p>
       <p class="small" style="font-size:19px"><b><b>v</b>* is the reference as one arrow.</b> Combine the three references (a = e<sup>j120°</sup>):</p>
       <div class="eq" style="font-size:22px"><b>v</b>* = ⅔ (<span class="m">r</span><sub>a</sub> + a <span class="m">r</span><sub>b</sub> + a² <span class="m">r</span><sub>c</sub>) = <span class="m">m</span> e<sup>jθ</sup></div>
       <p class="small" style="font-size:19px">Its length is <span class="m">m</span>. As θ = ω<span class="m">t</span> grows it <b>rotates</b>, one turn per output cycle: a phasor that turns in real time. In each switching period SVPWM builds it from the nearest vectors (shaded) and their time shares.</p>
@@ -289,7 +289,7 @@
         <div class="callout" style="font-size:20px"><b>Example:</b> 3L NPC, reference r = 0.6. Within one carrier period the leg sits in <span class="lvP">P</span> for 60 % and in O for 40 % of the time → average 0.6 · V<sub>dc</sub>/2 = 240 V on an 800 V link.</div>
         <p class="small muted">Carrier comparison and space vectors are two views of the same averaging.</p></div>
       <div class="card stack" data-step="2"><h3>② Which state for that level?</h3><p>When several states give the same level, the choice is free for the output — so we spend it on something else: <b>midpoint balance, V<sub>fc</sub>, or losses</b>.</p>
-        <div class="callout" style="font-size:20px"><b>From Sefer’s talk:</b> ANPC zero → O<sub>U</sub> or O<sub>L</sub>. FC zero → 10 (charges C<sub>fc</sub> if i<sub>a</sub> &gt; 0) or 01 (discharges). 5L-ANPC +200 V → “a” or “b”.</div>
+        <div class="callout" style="font-size:20px"><b>Examples of redundant states:</b> ANPC zero → O<sub>U</sub> or O<sub>L</sub>. FC zero → 10 (charges C<sub>fc</sub> if i<sub>a</sub> &gt; 0) or 01 (discharges). 5L-ANPC +200 V → “a” or “b”.</div>
         <p class="small muted">Rule: decide the level from the reference, then the state from the capacitor error and the current sign.</p></div>
     </div>
     <div class="callout" data-step="3" style="font-size:20px"><b>In the carrier world:</b> POO and ONN differ only by moving all three legs one level. Adding the same offset <span class="m">r</span><sub>0</sub> to all three references moves time between them without changing the line voltages, so <span class="m">r</span><sub>0</sub> is the balancing knob of the next slides.</div>
@@ -298,7 +298,7 @@
 </section>
 
 <section class="slide" data-part="2" data-section="balance" data-min="1" data-title="Why capacitors drift">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · recap of Sefer’s ⟨i<sub>O</sub>⟩ = (1 − |r|) i<sub>a</sub></div><h2>Why capacitors drift</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · recap: ⟨i<sub>O</sub>⟩ = (1 − |r|) i<sub>a</sub></div><h2>Why capacitors drift</h2></div></div>
   <div class="body cols-2" style="grid-template-rows: 1fr auto">
     <div class="card stack" data-step="1"><h3>Split DC link (NPC, T-type, ANPC, 5L)</h3>
       <div class="eq"><span class="m">V</span><sub>dc</sub> = <span class="m">v</span><sub>C1</sub> + <span class="m">v</span><sub>C2</sub> &nbsp;&nbsp; Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub></div>
