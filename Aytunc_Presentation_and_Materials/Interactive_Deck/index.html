@@ -397,22 +397,31 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="1" data-title="Why capacitors drift">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · recap: ⟨i<sub>O</sub>⟩ = (1 − |r|) i<sub>a</sub></div><h2>Why capacitors drift</h2></div></div>
-  <div class="body cols-2" style="grid-template-rows: 1fr auto">
-    <div class="card stack" data-step="1"><h3>Split DC link (NPC, T-type, ANPC, 5L)</h3>
-      <div class="eq"><span class="m">V</span><sub>dc</sub> = <span class="m">v</span><sub>C1</sub> + <span class="m">v</span><sub>C2</sub> &nbsp;&nbsp; Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub></div>
-      <div class="eq"><span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = <span class="m">i</span><sub>O</sub> &nbsp;&nbsp; <span class="m">i</span><sub>O</sub> = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub>|) <span class="m">i</span><sub>x</sub></div>
-      <p class="small">Ideal, balanced operation gives zero <i>average</i> i<sub>O</sub> but a ripple at 3f<sub>1</sub>. Device mismatch, leakage, transients and unbalanced loads integrate into drift.</p>
+<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Why capacitors drift">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · why the midpoint voltage drifts</div><h2>Why the two capacitors drift apart</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
+    <div class="stack" style="gap:8px">
+      <div><h3 style="font-size:20px;margin:0">① How long each leg sits at O</h3><p class="small" style="font-size:18px">Slide 11: for <span class="m">r</span> &gt; 0 a leg is at P for a fraction <span class="m">r</span> of each period and at O for the rest; for <span class="m">r</span> &lt; 0 the same with N. So leg x sits at O for (1 − |<span class="m">r</span><sub>x</sub>|) of the period.</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② The average midpoint current</h3><p class="small" style="font-size:18px">While a leg is at O, its current comes from O (slide 14). Over one switching period:</p>
+        <div class="eq" style="font-size:22px">⟨<span class="m">i</span><sub>O</sub>⟩ = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub>|) · <span class="m">i</span><sub>x</sub></div></div>
+      <div data-step="2"><h3 style="font-size:20px;margin:0">③ It moves the difference</h3><div class="eq" style="font-size:22px"><span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = ⟨<span class="m">i</span><sub>O</sub>⟩, &nbsp; Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub></div><p class="small" style="font-size:18px">Current out of O raises C1 and lowers C2 (slide 14).</p></div>
+      <div data-step="3"><h3 style="font-size:20px;margin:0">④ Balanced load: zero on average</h3><p class="small" style="font-size:18px">Over a full cycle the three terms cancel (red curve), but not at every instant: Δ<i>V</i> ripples at 3 × 50 Hz and comes back.</p></div>
+      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ Nothing pulls it back</h3><p class="small" style="font-size:18px">Add a small leakage (1 A, a real capacitor or a sensor) or kick Δ<i>V</i>: it drifts or stays off. The DC source only fixes the sum v<sub>C1</sub> + v<sub>C2</sub>, not the difference.</p></div>
+      <div data-step="5"><h3 style="font-size:20px;margin:0">⑥ Only the state choice can</h3><p class="small" style="font-size:18px">Δ<i>V</i> moves only through <span class="m">i</span><sub>O</sub>, and slide 14 showed the modulator steers <span class="m">i</span><sub>O</sub> with <span class="m">r</span><sub>0</sub>. Next slide: how strong that knob is.</p></div>
     </div>
-    <div class="card stack" data-step="2"><h3>Flying capacitor (FC, 5L-ANPC)</h3>
-      <div class="eq"><span class="m">C</span><sub>fc</sub> d<span class="m">V</span><sub>fc</sub>/d<span class="m">t</span> = (<span class="m">S</span><sub>1</sub> − <span class="m">S</span><sub>2</sub>) <span class="m">i</span><sub>a</sub></div>
-      <p class="small">Every redundant state moves charge. Alternating them keeps the average at zero but does not remove an existing error.</p>
-      <p class="small">An off-target V<sub>fc</sub> distorts the levels (P − V<sub>fc</sub> ≠ 0) and overstresses the devices that block it.</p>
-    </div>
-    <div class="callout" data-step="3" style="grid-column:1/-1"><b>Sum ≠ difference.</b> The DC-voltage controller (or source) fixes v<sub>C1</sub> + v<sub>C2</sub>. Only current through O — chosen by the modulator — moves ΔV. Same for V<sub>fc</sub>: only the redundant-state choice moves it.</div>
+    <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":620,"steps":{"0":{"bleed":0},"4":{"bleed":1}}}'></div>
   </div>
-  <aside class="notes"><p><b>1 min.</b> Do not re-derive: Sefer left ⟨i<sub>O</sub>⟩ = (1 − |r|)·i<sub>a</sub> and i<sub>fc</sub> = (S<sub>1</sub> − S<sub>2</sub>)·i<sub>a</sub> on the board; summing over the three phases gives the left box. The message is the bottom line: balancing is a <i>modulator</i> job, not a DC-controller job.</p></aside>
+  <aside class="notes">
+    <p><b>3 min.</b> No balancing in this simulation: we only watch. 2 × 4.7 mF, 50 A peak, m = 0.8, unity power factor, speed ×0.1 so the 150 Hz ripple is visible.</p>
+    <ul>
+      <li><b>① “Why 1 − |r|?”</b> Point back at slide 11: the upper carrier runs 0 … 1, so the leg is at P for exactly r of the period (the buck rule) and at O for the rest.</li>
+      <li><b>②</b> Each leg contributes its own current, weighted by its time at O. The grey curve is this per period.</li>
+      <li><b>③</b> Sign convention as on slide 14: current drawn out of O pushes v<sub>C1</sub> up and v<sub>C2</sub> down.</li>
+      <li><b>④</b> The red curve (20 ms average) sits at zero; ΔV wiggles a few volts at 150 Hz but has no trend.</li>
+      <li><b>⑤</b> Click: 1 A leakage on the upper half. ΔV ramps and trips at ±100 V. Also try “Kick ΔV +40 V” with leakage 0: it just stays at +40 V. There is no restoring force, like a ball on a flat table.</li>
+      <li><b>⑥</b> The DC-voltage controller (or source) sees only v<sub>C1</sub> + v<sub>C2</sub>. The difference needs its own knob, and the only one is the midpoint current, chosen by the modulator.</li>
+    </ul>
+  </aside>
 </section>
 
 <section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Derivation: balancing authority">

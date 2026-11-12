@@ -19,7 +19,8 @@
       st.bDv.fill(st.dv);
     };
     reset(cfg.dv0);
-    const cv = K.canvas(900, 590);
+    const CW = cfg.w || 900, SIMPLE = !!cfg.simple;
+    const cv = K.canvas(CW, 590);
     const roDv = K.readout('ΔV = v<sub>C1</sub> − v<sub>C2</sub>', 'big'), roV = K.readout('v<sub>C1</sub> / v<sub>C2</sub>'), roG = K.readout('Balancing authority ⟨Σ sign(r<sub>x</sub>) i<sub>x</sub>⟩'), roSt = K.readout('Status');
     const ctl = {
       on: K.seg({ label: 'Balancing loop', options: [[false, 'off'], [true, 'on']], value: P.on, onChange: (v) => { P.on = v; st.integ = 0; } }),
@@ -31,11 +32,11 @@
     };
     const playB = K.btn('❚❚ Pause', () => toggle());
     host.classList.add('sim');
-    host.style.gridTemplateColumns = '900px 1fr';
+    host.style.gridTemplateColumns = CW + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el),
-      h('div', { class: 'sim-col', style: { gap: '10px' } }, ctl.on.el, ctl.law.el, ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el,
-        h('div', { class: 'row' }, playB, K.btn('Kick ΔV +40 V', () => { st.dv += 40; }), K.btn('Reset', () => { reset(40); })),
-        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, roDv.el, roV.el, roG.el, roSt.el)));
+      h('div', { class: 'sim-col', style: { gap: '10px' } }, ...(SIMPLE ? [ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el] : [ctl.on.el, ctl.law.el, ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el]),
+        h('div', { class: 'row' }, playB, K.btn('Kick ΔV +40 V', () => { st.dv += 40; }), K.btn('Reset', () => { reset(cfg.dv0 != null ? cfg.dv0 : 40); })),
+        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, ...(SIMPLE ? [roDv.el, roV.el, roSt.el] : [roDv.el, roV.el, roG.el, roSt.el]))));
 
     function stepSim() {
       const w = K.TAU * F1;
@@ -77,20 +78,20 @@
     function draw() {
       const ctx = cv.ctx; cv.clear();
       const xt = [[0, '−200 ms'], [NW / 2, '−100 ms'], [NW, 'now']];
-      const box = (k) => ({ x: 62, y: 30 + k * 188, w: cv.w - 78, h: 138 });
+      const box = SIMPLE ? (k) => (k === 0 ? { x: 62, y: 30, w: cv.w - 78, h: 230 } : { x: 62, y: 330, w: cv.w - 78, h: 220 }) : (k) => ({ x: 62, y: 30 + k * 188, w: cv.w - 78, h: 138 });
       K.plot(ctx, box(0), {
         xlim: [0, NW], ylim: [-120, 120], yticks: [[-100, '−100'], [-50, '−50'], [0, '0'], [50, '50'], [100, '100']], xticks: xt,
         hlines: [{ v: 100, color: K.css('--bad'), dash: [5, 4], label: 'trip' }, { v: -100, color: K.css('--bad'), dash: [5, 4] }],
         series: [{ y: chrono(st.bDv), x0: 0, dx: 1, color: K.css('--s1'), width: 2.4 }], title: 'Capacitor voltage difference ΔV [V]',
       });
-      K.plot(ctx, box(1), {
+      if (!SIMPLE) K.plot(ctx, box(1), {
         xlim: [0, NW], ylim: [-0.25, 0.25], yticks: [[-0.2, '−0.2'], [0, '0'], [0.2, '0.2']], xticks: xt,
         series: [{ y: chrono(st.bR0), x0: 0, dx: 1, color: K.css('--accent'), width: 2.4 }], title: 'Common offset r₀ added to all three references',
       });
-      K.plot(ctx, box(2), {
+      K.plot(ctx, box(SIMPLE ? 1 : 2), {
         xlim: [0, NW], ylim: [-60, 60], yticks: [[-50, '−50'], [0, '0'], [50, '50']], xticks: xt,
         series: [{ y: chrono(st.bIo), x0: 0, dx: 1, color: K.css('--muted'), width: 1.2, alpha: 0.7 }, { y: chrono(st.bIoA), x0: 0, dx: 1, color: K.css('--s2'), width: 2.6 }],
-        title: 'Midpoint current i_O [A]: per switching period (grey) and 20 ms average (red)',
+        title: SIMPLE ? 'Midpoint current i_O [A]: per period (grey), average (red)' : 'Midpoint current i_O [A]: per switching period (grey) and 20 ms average (red)',
       });
       roDv.set((st.dv >= 0 ? '+' : '−') + Math.abs(st.dv).toFixed(1) + ' V');
       roV.set(Math.round(400 + st.dv / 2) + ' / ' + Math.round(400 - st.dv / 2) + ' V');
@@ -102,7 +103,17 @@
     function toggle() { P.play = !P.play; playB.innerHTML = P.play ? '❚❚ Pause' : '▶ Play'; }
     K.onTheme(draw);
     draw();
-    return { start: loop.start, stop: loop.stop, toggle, reset() { reset(40); } };
+    const ST = cfg.steps;
+    return {
+      start: loop.start, stop: loop.stop, toggle, reset() { reset(cfg.dv0 != null ? cfg.dv0 : 40); },
+      step(k) {
+        if (!ST) return;
+        let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key];
+        if (!o) return;
+        if (o.bleed != null && o.bleed !== P.bleed) { P.bleed = o.bleed; ctl.bleed.set(o.bleed); }
+        if (o.on != null && o.on !== P.on) { P.on = o.on; ctl.on.set(o.on); }
+      },
+    };
   };
 
   /* dq current control of an L filter, averaged converter, PI with optional feed-forward and decoupling. */
