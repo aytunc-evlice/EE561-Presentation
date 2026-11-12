@@ -40,18 +40,18 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 11 | ★ Three levels: one carrier for each half (upper P/O, lower O/N), same rule inside each half; PD = shifted copy, POD = mirror image (simulation, one leg) | 2.5 |
 | 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
 | 13 | More levels: five levels, four carriers, same rule; PD vs POD (simulation) | 1.5 |
-| 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
-| 15 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
-| 16 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
-| 17 | ★ How the offset pushes charge into or out of the midpoint: one instant, time at P/O/N per leg, r₀ = 0, +0.1, −0.1 (simulation) | 2.5 |
-| 18 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
-| 19 | Flying capacitor: two ways to make 0 V (10 / 01), one charges the capacitor and one discharges it, taking turns leaves an error, choosing by the error removes it (schematic + period-by-period plot) | 2 |
-| 20 | Grid step 1, what makes the current flow: equal voltages give no current; the leading side sends active power to the lagging side; the higher-voltage side sends reactive power (simulation with size and timing sliders) | 2.5 |
-| 21 | Grid step 2, let a PI controller set the voltage: set by hand it fails when the grid drops 5 %, the PI corrects it, but a small error stays on a sine (simulation) | 2.5 |
-| 22 | Grid step 3, the dq transformation: the frame turns with the grid voltage (the reference, on the d axis), the sine currents become two constants, i_d for active and i_q for reactive power, one PI each (animation with sliders, P and Q readouts) | 2.5 |
-| 23 | Grid step 4, who decides the wanted current: the DC capacitor as a bucket, more power in makes it overflow, a PI on the DC voltage asks for more grid current (simulation) | 2 |
-| 24 | All together: three PI controllers (DC voltage, current, midpoint) in one block diagram | 1 |
-| 25 | Grid step 5, the filter: the ripple on the current, 3-level halves it, LCL removes most of it, an LCL rings after a kick and a resistor calms it (simulation) | 2.5 |
+| 14 | The filter, from pulses to a sine: the leg output is pulses, an inductor keeps only the average, 3-level halves the ripple, LCL removes most of it, an LCL rings after a kick and a resistor calms it (simulation) | 2.5 |
+| 15 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
+| 16 | ★ Why the capacitor voltages wiggle at 150 Hz: the midpoint current repeats three times per cycle, the capacitors follow it (simulation) | 1.5 |
+| 17 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
+| 18 | ★ How the offset pushes charge into or out of the midpoint: one instant, time at P/O/N per leg, r₀ = 0, +0.1, −0.1 (simulation) | 2.5 |
+| 19 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
+| 20 | Flying capacitor: two ways to make 0 V (10 / 01), one charges the capacitor and one discharges it, taking turns leaves an error, choosing by the error removes it (schematic + period-by-period plot) | 2 |
+| 21 | Grid step 1 of 4, what makes the current flow: equal voltages give no current; the leading side sends active power to the lagging side; the higher-voltage side sends reactive power (simulation with size and timing sliders) | 2.5 |
+| 22 | Grid step 2 of 4, let a PI controller set the voltage: set by hand it fails when the grid drops 5 %, the PI corrects it, but a small error stays on a sine (simulation) | 2.5 |
+| 23 | Grid step 3 of 4, the dq transformation: the frame turns with the grid voltage (the reference, on the d axis), the sine currents become two constants, i_d for active and i_q for reactive power, one PI each (animation with sliders, P and Q readouts) | 2.5 |
+| 24 | Grid step 4 of 4, who decides the wanted current: the DC capacitor as a bucket, more power in makes it overflow, a PI on the DC voltage asks for more grid current (simulation) | 2 |
+| 25 | All together: three PI controllers (DC voltage, current, midpoint) in one block diagram | 1 |
 | 26 | Where multilevel converters are used (three cards) | 1 |
 | 27 | Three things to remember, handover to Elif | 1 |
 | 28 | References | |
@@ -59,13 +59,13 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 ## Simulation models: what to say if asked
 
 - **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
-- **Neutral-point balancing (slide 18):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
-- **Flying-capacitor balancing (slide 19):** a simple leg schematic that highlights the current path in state 10 or 01, and the capacitor voltage period by period after a −60 V disturbance, with the states alternated or chosen by the error.
-- **Grid basics (slide 20):** steady-state phasors, per phase: grid 327 V peak, L = 2 mH, no resistance; i = (v − e)/(jωL).
-- **PI current control (slide 21):** one phase, L = 2 mH, R = 0.1 Ω. By hand: the voltage that gives 30 A at the nominal grid. PI: measured grid voltage + PI correction, 400 Hz bandwidth. The grid drops 5 % at 50 ms.
-- **dq transformation (slide 22):** pure geometry: the current arrow is (i<sub>d</sub> + j·i<sub>q</sub>) turned by the grid angle; the phase currents are its projections. P = 3/2·e<sub>d</sub>·i<sub>d</sub>, Q = −3/2·e<sub>d</sub>·i<sub>q</sub> with e<sub>d</sub> = 327 V.
-- **DC voltage (slide 23):** energy balance of a 2 mF capacitor at 800 V, C·v·dv/dt = P<sub>in</sub> − P<sub>out</sub>; the current loop is taken as instant. PI: 0.5 A/V and 40 A/(V·s).
-- **Grid filter (slide 25):** the phase voltage of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) is passed through the complex filter admittance by FFT and inverse FFT; the result is the ripple added to a clean 102 A sine. The kick view is a time-domain simulation of a 200 V, 20 µs pulse on the converter side, with and without the 1.5 Ω resistor in series with the capacitor.
+- **Neutral-point balancing (slide 19):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
+- **Flying-capacitor balancing (slide 20):** a simple leg schematic that highlights the current path in state 10 or 01, and the capacitor voltage period by period after a −60 V disturbance, with the states alternated or chosen by the error.
+- **Grid basics (slide 21):** steady-state phasors, per phase: grid 327 V peak, L = 2 mH, no resistance; i = (v − e)/(jωL).
+- **PI current control (slide 22):** one phase, L = 2 mH, R = 0.1 Ω. By hand: the voltage that gives 30 A at the nominal grid. PI: measured grid voltage + PI correction, 400 Hz bandwidth. The grid drops 5 % at 50 ms.
+- **dq transformation (slide 23):** pure geometry: the current arrow is (i<sub>d</sub> + j·i<sub>q</sub>) turned by the grid angle; the phase currents are its projections. P = 3/2·e<sub>d</sub>·i<sub>d</sub>, Q = −3/2·e<sub>d</sub>·i<sub>q</sub> with e<sub>d</sub> = 327 V.
+- **DC voltage (slide 24):** energy balance of a 2 mF capacitor at 800 V, C·v·dv/dt = P<sub>in</sub> − P<sub>out</sub>; the current loop is taken as instant. PI: 0.5 A/V and 40 A/(V·s).
+- **Grid filter (slide 14):** the phase voltage of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) is passed through the complex filter admittance by FFT and inverse FFT; the result is the ripple added to a clean 102 A sine. The kick view is a time-domain simulation of a 200 V, 20 µs pulse on the converter side, with and without the 1.5 Ω resistor in series with the capacitor.
 
 ## Printed handouts
 

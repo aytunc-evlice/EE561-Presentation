@@ -13,7 +13,7 @@
 
   SIMS.gridbasic = function (host, cfg) {
     const X = W * L, P = { amp: 100, ang: 0 };
-    const cv = K.canvas(cfg.w || 640, 590);
+    const cv = K.canvas(cfg.w || 640, 640);
     const sch = svgEl(380, 150);
     sch.innerHTML = `<circle cx="50" cy="75" r="34" style="fill:var(--panel);stroke:var(--s2);stroke-width:3"/><text x="50" y="72" style="${TX}">v</text><text x="50" y="90" style="${MU}">converter</text>
       <circle cx="330" cy="75" r="34" style="fill:var(--panel);stroke:var(--s1);stroke-width:3"/><text x="330" y="72" style="${TX}">e</text><text x="330" y="90" style="${MU}">grid</text>
@@ -31,11 +31,30 @@
       const N = 400, e = [], v = [], dv = [], i = [], es = [];
       for (let n = 0; n <= N; n++) { const th = (W * 0.04 * n) / N; e.push(E * Math.sin(th)); v.push(V * Math.sin(th + d)); dv.push(v[n] - e[n]); i.push(ire * Math.sin(th) + iim * Math.cos(th)); es.push(45 * Math.sin(th)); }
       const xt = [0, 10, 20, 30, 40].map((x) => [x, x + ' ms']), c1 = K.css('--s1'), c2 = K.css('--s2'), c3 = K.css('--s3'), mut = K.css('--muted'), bx = { x: 56, w: cv.w - 70 };
-      K.plot(ctx, { ...bx, y: 30, h: 130 }, { xlim: [0, 40], ylim: [-400, 400], yticks: [[-300, '−300'], [0, '0'], [300, '300']], xticks: xt,
+      const top = K.plot(ctx, { ...bx, y: 30, h: 90 }, { xlim: [0, 40], ylim: [-400, 400], yticks: [[-300, '−300'], [0, '0'], [300, '300']], xticks: xt,
         series: [{ y: e, x0: 0, dx: 40 / N, color: c1, width: 4 }, { y: v, x0: 0, dx: 40 / N, color: c2, width: 2 }], title: 'Voltages [V]', legend: [['grid e', c1], ['converter v', c2]] });
-      K.plot(ctx, { ...bx, y: 222, h: 100 }, { xlim: [0, 40], ylim: [-40, 40], yticks: [[-30, '−30'], [0, '0'], [30, '30']], xticks: xt,
-        series: [{ y: dv, x0: 0, dx: 40 / N, color: K.css('--ink'), width: 2.6 }], title: 'The difference v − e: the voltage across the inductor [V]' });
-      K.plot(ctx, { ...bx, y: 384, h: 160 }, { xlim: [0, 40], ylim: [-60, 60], yticks: [[-40, '−40'], [0, '0'], [40, '40']], xticks: xt,
+      // two close-ups: at the peak (size) and at the zero crossing (timing)
+      const Z = [{ t0: 3.4, t1: 6.6, y0: 290, y1: 360, yt: [[300, '300'], [325, '325'], [350, '350']], name: 'At the peak: which is bigger?' },
+        { t0: 9.4, t1: 10.6, y0: -65, y1: 65, yt: [[-50, '−50'], [0, '0'], [50, '50']], name: 'At the zero: which is ahead?' }];
+      const zw = (bx.w - 70) / 2, zf = (t) => { const th = W * t * 1e-3; return [E * Math.sin(th), V * Math.sin(th + d)]; };
+      Z.forEach((z, k) => {
+        const zx = bx.x + k * (zw + 70), ze = [], zv = [], M = 160;
+        for (let n = 0; n <= M; n++) { const [a, b] = zf(z.t0 + ((z.t1 - z.t0) * n) / M); ze.push(a); zv.push(b); }
+        // mark the window on the full plot
+        ctx.save(); ctx.fillStyle = K.css('--accent-soft') || 'rgba(0,0,0,.06)'; ctx.strokeStyle = mut; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+        const X0 = top.X(z.t0), X1 = top.X(z.t1), Y0 = top.Y(z.y1), Y1 = top.Y(z.y0);
+        ctx.fillRect(X0, Y0, X1 - X0, Y1 - Y0); ctx.strokeRect(X0, Y0, X1 - X0, Y1 - Y0); ctx.restore();
+        const zp = K.plot(ctx, { x: zx, y: 182, w: zw, h: 120 }, { xlim: [z.t0, z.t1], ylim: [z.y0, z.y1], yticks: z.yt, xticks: [[(z.t0 + z.t1) / 2, ((z.t0 + z.t1) / 2) + ' ms']],
+          series: [{ y: ze, x0: z.t0, dx: (z.t1 - z.t0) / M, color: c1, width: 4 }, { y: zv, x0: z.t0, dx: (z.t1 - z.t0) / M, color: c2, width: 2.6 }], title: z.name });
+        if (k === 1 && Math.abs(d) > 1e-4) { // timing arrow between the two zero crossings
+          const tc = 10 - (d / W) * 1e3, y0 = zp.Y(0) + 26, xa = zp.X(tc), xb = zp.X(10);
+          ctx.save(); ctx.strokeStyle = K.css('--ink'); ctx.fillStyle = K.css('--ink'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(xa, y0); ctx.lineTo(xb, y0); ctx.stroke();
+          ctx.font = '700 13px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(Math.abs(P.ang) + '°', (xa + xb) / 2, y0 + 4); ctx.restore();
+        }
+      });
+      K.plot(ctx, { ...bx, y: 362, h: 70 }, { xlim: [0, 40], ylim: [-40, 40], yticks: [[-30, '−30'], [0, '0'], [30, '30']], xticks: xt,
+        series: [{ y: dv, x0: 0, dx: 40 / N, color: K.css('--ink'), width: 2.6 }], title: 'The difference v − e: across the inductor [V]' });
+      K.plot(ctx, { ...bx, y: 492, h: 110 }, { xlim: [0, 40], ylim: [-60, 60], yticks: [[-40, '−40'], [0, '0'], [40, '40']], xticks: xt,
         series: [{ y: es, x0: 0, dx: 40 / N, color: c1, width: 1.6, dash: [6, 4], alpha: 0.8 }, { y: i, x0: 0, dx: 40 / N, color: c3, width: 3.2 }], title: 'Current [A]', legend: [['current i', c3], ['grid voltage (shape only)', c1, [6, 4]]] });
       const I = Math.hypot(ire, iim), p = (1.5 * E * ire) / 1000, q = (-1.5 * E * iim) / 1000;
       roI.set(I.toFixed(0) + ' A <small class="muted">peak</small>');

@@ -372,6 +372,26 @@
   </aside>
 </section>
 
+<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="From pulses to a sine: the filter">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · from pulses to a sine</div><h2>The filter: from pulses to a sine</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:16px">
+      <div><h3 style="font-size:22px;margin:0">① The output is pulses</h3><p class="small" style="font-size:20px">The leg only jumps between levels (top plot). Only its average is a sine.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② An inductor smooths the current</h3><p class="small" style="font-size:20px">It cannot follow the fast jumps, only the slow average. The current is a sine with a small zig-zag.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Three levels: half the ripple</h3><p class="small" style="font-size:20px">Half the voltage jump, half the zig-zag. Same inductor.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ LCL: almost none</h3><p class="small" style="font-size:20px">Add a capacitor in the middle: it takes the ripple.</p></div>
+      <div data-step="4"><h3 style="font-size:22px;margin:0">⑤ But an LCL can ring</h3><p class="small" style="font-size:20px">After a kick it rings like a bell. A small resistor calms it.</p></div>
+    </div>
+    <div data-sim="gridfilter" data-config='{"w":640,"steps":{"0":{"topo":2,"filt":"l","view":"ripple","cur":false},"1":{"cur":true},"2":{"topo":3},"3":{"filt":"lcl"},"4":{"filt":"lcld","view":"kick"}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2.5 min.</b> 400 V, 50 kVA (102 A peak), 800 V DC, 10 kHz. L = 1.3 mH; LCL: 1 mH + 0.3 mH with 10 µF; R = 1.5 Ω.</p><ul>
+    <li><b>①</b> The top plot is the phase voltage of the converter (line to neutral): fast pulses; the dashed line is its average, the sine we asked the modulator for.</li>
+    <li><b>②</b> This is why the following slides can draw sine currents: from here on, “the converter voltage” means the average, and the filter takes care of the rest.</li>
+    <li>Numbers: ripple about 7 A peak to peak (2-level, L) → 3.4 A (3-level, L) → below 1 A (LCL).</li>
+    <li><b>⑤</b> The ringing frequency is the LCL resonance, about 3.3 kHz here. Undamped, it can be excited by the switching or by the controller. The resistor costs only a few watts; it can also be damped in the controller (active damping).</li>
+    <li>Design rules if asked (Liserre, Blaabjerg &amp; Hansen, IEEE TIA 2005): resonance between 10× grid frequency and half the switching frequency; capacitor reactive power below 5 % of the rating.</li></ul></aside>
+</section>
+
 <section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Same output, two ways">
   <div class="sh"><div><div class="kicker"><b>Modulate</b> → <b>Balance</b> · the free choice that balances the capacitors</div><h2>Same output, two ways: the free choice</h2></div></div>
   <div class="body" style="grid-template-columns: 430px 1fr; gap:22px">
@@ -400,7 +420,7 @@
   <div class="sh"><div><div class="kicker"><b>Balance</b> · the normal ripple</div><h2>Why the capacitor voltages wiggle at 150 Hz</h2></div></div>
   <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
     <div class="stack" style="gap:20px">
-      <div><h3 style="font-size:22px;margin:0">① The midpoint current goes up and down</h3><p class="small" style="font-size:20px">Legs at O send their current through the midpoint (slide 14). Over one cycle this current rises and falls (plot).</p></div>
+      <div><h3 style="font-size:22px;margin:0">① The midpoint current goes up and down</h3><p class="small" style="font-size:20px">Legs at O send their current through the midpoint (slide 15). Over one cycle this current rises and falls (plot).</p></div>
       <div data-step="1"><h3 style="font-size:22px;margin:0">② It repeats three times per cycle</h3><p class="small" style="font-size:20px">The three phases are identical, just shifted by a third of a cycle. So what they make together repeats every third of a cycle: 3 × 50 Hz = <b>150 Hz</b>.</p></div>
       <div data-step="2"><h3 style="font-size:22px;margin:0">③ The capacitors follow it</h3><p class="small" style="font-size:20px">C1 and C2 wiggle at 150 Hz, a few volts, in opposite directions. It averages to zero, so it never grows. Bigger capacitors, smaller wiggle.</p></div>
     </div>
@@ -423,7 +443,7 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:21px;margin:0">① Ideal case: only the wiggle</h3><p class="small" style="font-size:19px">Last slide: with a balanced load the midpoint current has no average. The two voltages wiggle at 150 Hz around 400 V and stay there.</p></div>
       <div data-step="1"><h3 style="font-size:21px;margin:0">② But nothing pulls them back</h3><p class="small" style="font-size:19px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
-      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next: how it moves the charge.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 15 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next: how it moves the charge.</p></div>
     </div>
     <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"1":{"bleed":1}}}'></div>
   </div>
@@ -466,12 +486,12 @@
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① Measure the difference</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>. The goal is zero.</p></div>
       <div data-step="1"><h3 style="font-size:22px;margin:0">② A PI controller makes the offset</h3><p class="small" style="font-size:20px">Δ<span class="m">V</span> goes into a PI controller; its output is the offset <span class="m">r</span><sub>0</sub> added to all three references (last slide). The P part reacts at once, the I part keeps pushing until Δ<span class="m">V</span> is exactly zero.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Loop on: the voltages come back</h3><p class="small" style="font-size:20px">C1 and C2 return to 400 V within a few cycles. The 150 Hz wiggle stays: it is normal (slide 15).</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Loop on: the voltages come back</h3><p class="small" style="font-size:20px">C1 and C2 return to 400 V within a few cycles. The 150 Hz wiggle stays: it is normal (slide 16).</p></div>
       <div data-step="3"><h3 style="font-size:22px;margin:0">④ A leak? The I part handles it</h3><p class="small" style="font-size:20px">With a 1 A leak the I part settles at the small offset that cancels it, and Δ<span class="m">V</span> stays at zero.</p></div>
     </div>
     <div data-sim="npbal" data-config='{"dv0":40,"on":false,"simple":true,"loopCtl":true,"showR0":true,"w":640,"steps":{"0":{"on":false,"bleed":0},"2":{"on":true},"3":{"bleed":1}}}'></div>
   </div>
-  <aside class="notes"><p><b>3 min.</b> Starts at 420 / 380 V with the loop off: the voltages just stay apart (slide 16). Click 2 switches the PI loop on, click 3 adds 1 A of leakage. Speed ×0.1.</p>
+  <aside class="notes"><p><b>3 min.</b> Starts at 420 / 380 V with the loop off: the voltages just stay apart (slide 17). Click 2 switches the PI loop on, click 3 adds 1 A of leakage. Speed ×0.1.</p>
     <ul>
       <li><b>②</b> Gains: K<sub>p</sub> = 0.0015 per volt, K<sub>i</sub> = 0.03 per volt-second; the offset is limited to ±0.2 so it never pushes a reference out of the carrier band.</li>
       <li><b>③</b> Point at the lower plot: r<sub>0</sub> jumps, then decays as ΔV closes. Time constant about 33 ms here.</li>
@@ -501,10 +521,10 @@
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="Grid basics: what makes the current flow">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 1 of 5</div><h2>Grid connection: what makes the current flow?</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 1 of 4</div><h2>Grid connection: what makes the current flow?</h2></div></div>
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① Equal voltages: no current</h3><p class="small" style="font-size:20px">The converter copies the grid voltage. Nothing across the inductor, nothing flows.</p></div>
+      <div><h3 style="font-size:22px;margin:0">① Equal voltages: no current</h3><p class="small" style="font-size:20px">The converter (its average, slide 14) copies the grid voltage. Nothing across the inductor, nothing flows.</p></div>
       <div data-step="1"><h3 style="font-size:22px;margin:0">② Leading: active power</h3><p class="small" style="font-size:20px">3° ahead: the current is in step with the grid voltage. The leading side sends active power to the lagging side.</p></div>
       <div data-step="2"><h3 style="font-size:22px;margin:0">③ Higher voltage: reactive power</h3><p class="small" style="font-size:20px">5 % bigger: the current comes a quarter period late. The higher-voltage side sends reactive power.</p></div>
       <div class="callout" data-step="3" style="font-size:19px"><b>AC power flow:</b> the angle sets the active power, the size sets the reactive power.</div>
@@ -522,7 +542,7 @@
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="A PI controller sets the voltage">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 2 of 5</div><h2>Let a PI controller set the voltage</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 2 of 4</div><h2>Let a PI controller set the voltage</h2></div></div>
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① By hand: it does not hold</h3><p class="small" style="font-size:20px">We pick the voltage for 30 A. Then the grid drops 5 %, and the current is far off.</p></div>
@@ -540,7 +560,7 @@
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="The dq transformation">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 5</div><h2>The dq transformation: sines become constants</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 4</div><h2>The dq transformation: sines become constants</h2></div></div>
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:16px">
       <div><h3 style="font-size:22px;margin:0">① Three sines, one turning arrow</h3><p class="small" style="font-size:20px">Like the voltage arrow of slide 9: the three currents are one arrow, turning at 50 Hz.</p></div>
@@ -560,7 +580,7 @@
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="2" data-title="DC voltage: who decides the wanted current">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 4 of 5</div><h2>Who decides the wanted current? The DC voltage</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 4 of 4</div><h2>Who decides the wanted current? The DC voltage</h2></div></div>
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① The DC capacitor is a bucket</h3><p class="small" style="font-size:20px">Power in fills it, power out empties it. In = out: the voltage stays.</p></div>
@@ -573,7 +593,7 @@
     <ul>
       <li><b>②</b> 10 kW too much raises the voltage by about 6 V every millisecond: 900 V is reached 17 ms later.</li>
       <li><b>③</b> The output of this PI is the wanted i<sub>d</sub> of the previous slide. It is much slower than the current loop (tens of Hz against several hundred Hz), so the two do not disturb each other.</li>
-      <li>This loop holds the sum of the two capacitor voltages; the midpoint PI of slide 18 holds their difference.</li>
+      <li>This loop holds the sum of the two capacitor voltages; the midpoint PI of slide 19 holds their difference.</li>
     </ul></aside>
 </section>
 
@@ -586,7 +606,7 @@
       <g data-step="0">
         <g class="box acc"><rect x="20" y="190" width="230" height="80"/><text x="135" y="220">DC-voltage PI</text><text x="135" y="248" class="nt" style="text-anchor:middle">keep 800 V</text></g>
         <path class="a3" d="M250,230 H330"/><text x="290" y="206" class="nt" style="text-anchor:middle">wanted i<tspan baseline-shift="sub" font-size="12">d</tspan></text>
-        <text x="135" y="168" class="nt" style="text-anchor:middle">slow · slide 23</text>
+        <text x="135" y="168" class="nt" style="text-anchor:middle">slow · slide 24</text>
       </g>
       <g data-step="1">
         <g class="box acc"><rect x="330" y="190" width="220" height="80"/><text x="440" y="220">current PIs (dq)</text><text x="440" y="248" class="nt" style="text-anchor:middle">i<tspan baseline-shift="sub" font-size="12">d</tspan>: active · i<tspan baseline-shift="sub" font-size="12">q</tspan>: reactive</text></g>
@@ -594,29 +614,15 @@
         <path class="a3" d="M550,230 H640"/><text x="595" y="212" class="nt" style="text-anchor:middle">voltage</text>
         <g class="box"><rect x="640" y="190" width="200" height="80"/><text x="740" y="220">PWM</text><text x="740" y="248" class="nt" style="text-anchor:middle">carriers</text></g>
         <path class="a3" d="M840,230 H900"/><text x="945" y="234" class="nt" style="text-anchor:middle">switches</text>
-        <text x="440" y="168" class="nt" style="text-anchor:middle">fast · slides 21 and 22</text>
+        <text x="440" y="168" class="nt" style="text-anchor:middle">fast · slides 22 and 23</text>
       </g>
       <g data-step="2">
         <g class="box lv"><rect x="620" y="360" width="240" height="80"/><text x="740" y="390">midpoint PI</text><text x="740" y="418" class="nt" style="text-anchor:middle">keep C1 = C2</text></g>
-        <path class="a3" d="M740,360 V272"/><text x="760" y="318" class="nt" style="text-anchor:start">offset r<tspan baseline-shift="sub" font-size="12">0</tspan> · slide 18</text>
+        <path class="a3" d="M740,360 V272"/><text x="760" y="318" class="nt" style="text-anchor:start">offset r<tspan baseline-shift="sub" font-size="12">0</tspan> · slide 19</text>
       </g>
     </svg></div>
   </div>
   <aside class="notes"><p><b>1 min.</b> A recap; one block per click.</p><ul><li>Speeds: current loop several hundred Hz; DC-voltage and midpoint loops 10–50 Hz.</li><li>The DC loop watches the sum v<sub>C1</sub> + v<sub>C2</sub>, the midpoint loop the difference. One cannot change what the other controls, so they do not fight.</li><li>Not drawn: the PLL that gives the grid angle.</li></ul></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="Grid filter: L or LCL">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 5 of 5</div><h2>Grid filter: cleaning up the current</h2></div></div>
-  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
-    <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① The pulses leave a ripple</h3><p class="small" style="font-size:20px">The real converter voltage is pulses. A small zig-zag stays on the current.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② Three levels: half the ripple</h3><p class="small" style="font-size:20px">Half the voltage jump, half the zig-zag. Same inductor.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ LCL: almost none</h3><p class="small" style="font-size:20px">A capacitor in the middle takes the ripple.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ But an LCL can ring</h3><p class="small" style="font-size:20px">After a kick it rings like a bell. A small resistor calms it.</p></div>
-    </div>
-    <div data-sim="gridfilter" data-config='{"w":640,"steps":{"0":{"topo":2,"filt":"l","view":"ripple"},"1":{"topo":3},"2":{"filt":"lcl"},"3":{"filt":"lcld","view":"kick"}}}'></div>
-  </div>
-  <aside class="notes"><p><b>2.5 min.</b> 400 V, 50 kVA (102 A peak), 800 V DC, 10 kHz. L = 1.3 mH; LCL: 1 mH + 0.3 mH with 10 µF; R = 1.5 Ω.</p><ul><li>Numbers: ripple about 7 A peak to peak (2-level, L) → 3.4 A (3-level, L) → below 1 A (LCL).</li><li>The ringing frequency is the LCL resonance, about 3.3 kHz here. Undamped, it can be excited by the switching or by the controller. The resistor costs only a few watts. It can also be damped in the controller (active damping).</li><li>Design rules if asked (Liserre, Blaabjerg &amp; Hansen, IEEE TIA 2005): resonance between 10× grid frequency and half the switching frequency; capacitor reactive power below 5 % of the rating.</li></ul></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="outlook" data-min="1" data-title="Where multilevel lives today">

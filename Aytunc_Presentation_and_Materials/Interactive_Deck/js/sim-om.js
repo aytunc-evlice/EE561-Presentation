@@ -712,7 +712,7 @@
   SIMS.gridfilter = function (host, cfg) {
     const TAU = K.TAU, VDC = 800, VPH = (400 / Math.sqrt(3)) * Math.SQRT2, MOD = VPH / (VDC / 2), MF = 200, M = 1 << 15;
     const L1 = 1e-3, L2 = 0.3e-3, C = 10e-6, RD = 1.5, I1 = 102;
-    const P = { topo: 2, filt: 'l', view: 'ripple' };
+    const P = { topo: 2, filt: 'l', view: 'ripple', cur: true };
     for (const k of Object.keys(P)) if (cfg[k] != null) P[k] = cfg[k];
     const Hs = (e0, e1) => (e0 >= 0 && e1 >= 0 ? 1 : e0 < 0 && e1 < 0 ? 0 : e0 >= 0 ? e0 / (e0 - e1) : e1 / (e1 - e0));
     const vanCache = {}, ripCache = {};
@@ -759,7 +759,7 @@
       return out;
     }
     const KICK = { lcl: kick(false), lcld: kick(true) };
-    const cv = K.canvas(cfg.w || 640, 560);
+    const cv = K.canvas(cfg.w || 640, 600);
     const sch = K.s('svg', { viewBox: '0 0 380 150', style: 'width:380px;height:150px' });
     const ro = K.readout('Ripple left (peak to peak)', 'big');
     const ctl = [
@@ -795,21 +795,37 @@
       for (let q = 0; q < n; q++) ys[q] = I1 * Math.sin((TAU * q) / n) + rp.y[q];
       const xt = [0, 5, 10, 15, 20].map((v) => [v, v + ' ms']);
       const name = { l: 'L', lcl: 'LCL', lcld: 'LCL + R' }[P.filt];
-      K.plot(ctx, { x: 58, y: 30, w: cv.w - 72, h: 200 }, {
+      const vv = van(P.topo), D = 8, nv = vv.length / D, vs = new Float64Array(nv), va = new Float64Array(nv);
+      for (let q = 0; q < nv; q++) { vs[q] = vv[q * D]; va[q] = VPH * Math.sin((TAU * q) / nv); }
+      K.plot(ctx, { x: 58, y: 30, w: cv.w - 72, h: 140 }, {
+        xlim: [0, 20], ylim: [-600, 600], yticks: [[-400, '−400'], [0, '0'], [400, '400']], xticks: xt,
+        series: [{ y: vs, x0: 0, dx: 20 / nv, color: K.css('--muted'), width: 0.8, alpha: 0.8 }, { y: va, x0: 0, dx: 20 / nv, color: K.css('--s2'), width: 2.6, dash: [7, 5] }],
+        title: `Converter voltage [V] (${P.topo}-level)`, legend: [['pulses', K.css('--muted')], ['average', K.css('--s2'), [7, 5]]],
+      });
+      const box2 = { x: 58, y: 232, w: cv.w - 72, h: 150 }, box3 = { x: 58, y: 444, w: cv.w - 72, h: 120 };
+      if (!P.cur) {
+        for (const [bx, msg] of [[box2, 'Current through the inductor: ?'], [box3, '']]) {
+          ctx.save(); ctx.strokeStyle = K.css('--line'); ctx.setLineDash([6, 6]); ctx.strokeRect(bx.x, bx.y, bx.w, bx.h); ctx.restore();
+          if (msg) { ctx.fillStyle = K.css('--muted'); ctx.font = '600 17px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(msg, bx.x + bx.w / 2, bx.y + bx.h / 2); }
+        }
+        ro.set('—');
+        return;
+      }
+      K.plot(ctx, box2, {
         xlim: [0, 20], ylim: [-130, 130], yticks: [[-100, '−100'], [0, '0'], [100, '100']], xticks: xt,
         series: [{ y: ys, x0: 0, dx: 20 / n, color: K.css('--s1'), width: 1.4 }],
-        title: `Grid current [A], one 50 Hz cycle (${P.topo}-level, ${name})`,
+        title: `Current [A] (${P.topo}-level, ${name} filter)`,
       });
       if (P.view === 'ripple') {
-        K.plot(ctx, { x: 58, y: 300, w: cv.w - 72, h: 220 }, {
-          xlim: [0, 20], ylim: [-5, 5], yticks: [[-4, '−4'], [-2, '−2'], [0, '0'], [2, '2'], [4, '4']], xticks: xt,
+        K.plot(ctx, box3, {
+          xlim: [0, 20], ylim: [-5, 5], yticks: [[-4, '−4'], [0, '0'], [4, '4']], xticks: xt,
           series: [{ y: rp.y, x0: 0, dx: 20 / n, color: K.css('--s2'), width: 1.2 }],
           title: 'Ripple only: the current minus the clean sine [A]',
         });
       } else {
         const dx = 2e-3 * 1000;
-        K.plot(ctx, { x: 58, y: 300, w: cv.w - 72, h: 220 }, {
-          xlim: [0, 3], ylim: [-1, 8], yticks: [[0, '0'], [2, '2'], [4, '4'], [6, '6'], [8, '8']], xticks: [0, 1, 2, 3].map((v) => [v, v + ' ms']),
+        K.plot(ctx, box3, {
+          xlim: [0, 3], ylim: [-1, 8], yticks: [[0, '0'], [4, '4'], [8, '8']], xticks: [0, 1, 2, 3].map((v) => [v, v + ' ms']),
           series: [{ y: KICK.lcl, x0: 0, dx: dx / 1000, color: K.css('--s2'), width: 2.2 }, { y: KICK.lcld, x0: 0, dx: dx / 1000, color: K.css('--s1'), width: 3 }],
           title: 'After a short kick at 0.5 ms [A]', legend: [['LCL: rings', K.css('--s2')], ['LCL + R: calm', K.css('--s1')]],
         });
@@ -823,6 +839,7 @@
       if (o.topo != null && o.topo !== P.topo) { P.topo = o.topo; ctl[0].set(o.topo); ch = true; }
       if (o.filt != null && o.filt !== P.filt) { P.filt = o.filt; ctl[1].set(o.filt); ch = true; }
       if (o.view != null && o.view !== P.view) { P.view = o.view; ctl[2].set(o.view); ch = true; }
+      if (o.cur != null && o.cur !== P.cur) { P.cur = o.cur; ch = true; }
       if (ch) draw(); } };
   };
 })();
