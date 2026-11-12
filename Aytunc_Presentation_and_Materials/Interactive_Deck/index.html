@@ -500,84 +500,117 @@
     </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="control" data-min="2" data-title="Averaged model for control">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · what the controller sees</div><h2>Connecting to the grid: the converter is a voltage source</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="Grid basics: what makes the current flow">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 1 of 5</div><h2>Grid connection: what makes the current flow?</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① Forget the pulses</h3><p class="small" style="font-size:20px">Averaged over each switching period, a leg is just a voltage we can set (slide 4). More levels change the ripple, not this picture.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② An inductor sits in between</h3><p class="small" style="font-size:20px">Converter on one side, grid on the other, an inductor between them.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ The difference drives the current</h3><p class="small" style="font-size:20px">Converter voltage a bit higher than the grid: current flows into the grid. A bit lower: it flows back. So the controller only has to set the converter voltage.</p></div>
+      <div><h3 style="font-size:22px;margin:0">① Equal voltages: no current</h3><p class="small" style="font-size:20px">The converter copies the grid voltage. Nothing across the inductor, nothing flows.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② A little ahead: power flows</h3><p class="small" style="font-size:20px">3° ahead: the current is in step with the grid voltage. Power goes into the grid.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A little bigger: reactive power</h3><p class="small" style="font-size:20px">5 % bigger: the current comes a quarter period late. No net power.</p></div>
+      <div class="callout" data-step="3" style="font-size:20px">A few volts move tens of amps. Too sensitive to set by hand.</div>
     </div>
-    <div style="align-self:center"><svg viewBox="0 0 600 300" style="width:640px;height:320px" aria-label="Converter as a voltage source, inductor, grid">
-      <style>.cg line,.cg path{stroke:var(--ink2);stroke-width:2.4;fill:none} .cg text{font:700 18px var(--font);fill:var(--ink);dominant-baseline:middle;text-anchor:middle} .cg .mu{fill:var(--muted);font-size:15px;font-weight:600} .cg circle{fill:var(--panel);stroke:var(--ink2);stroke-width:2.4}</style>
-      <g class="cg">
-        <circle cx="110" cy="150" r="56"/><text x="110" y="142">v</text><text x="110" y="166" class="mu">converter</text>
-        <line x1="110" y1="94" x2="110" y2="60"/><line x1="110" y1="60" x2="230" y2="60"/>
-        <path d="M230,60 c0,-18 22,-18 22,0 c0,-18 22,-18 22,0 c0,-18 22,-18 22,0 c0,-18 22,-18 22,0"/>
-        <text x="274" y="26">L</text>
-        <line x1="318" y1="60" x2="490" y2="60"/><line x1="490" y1="60" x2="490" y2="94"/>
-        <circle cx="490" cy="150" r="56"/><text x="490" y="142">e</text><text x="490" y="166" class="mu">grid</text>
-        <line x1="110" y1="206" x2="110" y2="240"/><line x1="490" y1="206" x2="490" y2="240"/><line x1="110" y1="240" x2="490" y2="240"/>
-        <path d="M380,60 l-16,-9 v18 z" style="fill:var(--s2);stroke:var(--s2)"/><text x="400" y="34" style="fill:var(--s2)">i</text>
-        <text x="300" y="272" class="mu">v higher than e → i grows</text>
-      </g>
-    </svg></div>
+    <div data-sim="gridbasic" data-config='{"w":640,"steps":{"0":{"amp":100,"ang":0},"1":{"ang":3},"2":{"ang":0,"amp":105}}}'></div>
   </div>
-  <aside class="notes"><p><b>2 min.</b></p><ul><li>Equation if asked: L di/dt = v − e − R i, with v = r·V<sub>dc</sub>/2 per phase. The largest v is V<sub>dc</sub>/√3 with min-max (slide 7).</li><li>“Higher” means in amplitude or in phase: a small lead of v over e sends active power, a larger amplitude sends reactive power.</li></ul></aside>
+  <aside class="notes"><p><b>2.5 min.</b> Per phase: grid 327 V peak (400 V line-to-line), L = 2 mH (0.63 Ω at 50 Hz). The converter voltage here is the average over a switching period (slide 4): the pulses are forgotten.</p>
+    <ul>
+      <li><b>①</b> Point at the middle plot: the difference is zero.</li>
+      <li><b>②</b> 3° is a difference of about 17 V; it gives 27 A and 13 kW. Move the timing slider the other way: power comes back from the grid.</li>
+      <li><b>③</b> The inductor delays the current a quarter period behind the voltage across it. Formulas if asked: P = 3·E·V·sin δ / (2X), Q ≈ 3·E·(V − E) / (2X), with peak values.</li>
+      <li>Play with both sliders: timing moves active power, size moves reactive power.</li>
+    </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="control" data-min="2" data-title="Control structure">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · the whole picture</div><h2>Three PI controllers, three jobs</h2></div></div>
-  <div class="body" style="grid-template-columns: 400px 1fr; gap:24px">
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="A PI controller sets the voltage">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 2 of 5</div><h2>Let a PI controller set the voltage</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① Current PI</h3><p class="small" style="font-size:20px">Makes the grid current follow the wanted current (next slide). The fastest loop.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② DC-voltage PI</h3><p class="small" style="font-size:20px">Keeps the DC voltage at 800 V. Too low? It asks for more current from the grid.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Midpoint PI</h3><p class="small" style="font-size:20px">Keeps the two capacitors equal by adding the offset <span class="m">r</span><sub>0</sub> (slide 18).</p></div>
+      <div><h3 style="font-size:22px;margin:0">① By hand: it does not hold</h3><p class="small" style="font-size:20px">We pick the voltage for 30 A. Then the grid drops 5 %, and the current is far off.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Measure and correct</h3><p class="small" style="font-size:20px">The PI compares the current with the wanted one and corrects the voltage. The drop is hardly seen.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ But always a little late</h3><p class="small" style="font-size:20px">A sine is a moving target. A small error stays (bottom plot).</p></div>
     </div>
-    <div style="align-self:center"><svg class="bd" viewBox="0 150 1000 310" style="width:1000px;height:310px" aria-label="Control structure">
+    <div data-sim="gridpi" data-config='{"w":640,"steps":{"0":{"mode":"hand"},"1":{"mode":"pi"}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2.5 min.</b> One phase shown. Wanted current: 30 A from 10 ms. Grid drop of 5 % at 50 ms.</p>
+    <ul>
+      <li><b>①</b> 5 % of 327 V is 16 V across 0.63 Ω: about 26 A of extra current, plus a slowly decaying offset.</li>
+      <li><b>②</b> Converter voltage = measured grid voltage + PI correction. Gains: K<sub>p</sub> = ω<sub>c</sub>L, K<sub>i</sub> = ω<sub>c</sub>R, bandwidth 400 Hz.</li>
+      <li><b>③</b> The error is about 12 % (50 Hz / 400 Hz): the PI needs an error to keep moving its output. Next slide removes it.</li>
+    </ul></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="dq: make the target stand still">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 5</div><h2>Make the target stand still</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① The current is a turning arrow</h3><p class="small" style="font-size:20px">Like the voltage arrow of slide 9. The three sines are this one arrow, turning with the grid.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Turn along with it</h3><p class="small" style="font-size:20px">Seen from the grid arrow, nothing moves. The sines become two flat lines.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Two parts</h3><p class="small" style="font-size:20px"><span class="m">i</span><sub>d</sub>, along the grid arrow: active power. <span class="m">i</span><sub>q</sub>, across it: reactive power.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ One PI for each</h3><p class="small" style="font-size:20px">A flat target is easy: the error goes to zero.</p></div>
+    </div>
+    <div data-sim="dqframe" data-config='{"w":700,"steps":{"0":{"dq":false,"id":30,"iq":0},"1":{"dq":true},"2":{"iq":-15}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2.5 min.</b> Press P to pause the arrows.</p>
+    <ul>
+      <li><b>①</b> The red sine in the bottom plot is phase a; the grey ones are b and c.</li>
+      <li><b>②</b> This change of viewpoint is the Park (dq) transform. The grid angle comes from a PLL, which locks onto the grid voltage.</li>
+      <li><b>③</b> Move the sliders: i<sub>d</sub> changes the size of the sines, i<sub>q</sub> shifts them in time.</li>
+      <li><b>④</b> Same PI as before, but now on i<sub>d</sub> and i<sub>q</sub>: the integrator removes the constant error completely. In dq the two axes are coupled through ωL; the controller cancels that term.</li>
+    </ul></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="control" data-min="2" data-title="DC voltage: who decides the wanted current">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 4 of 5</div><h2>Who decides the wanted current? The DC voltage</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① The DC capacitor is a bucket</h3><p class="small" style="font-size:20px">Power in fills it, power out empties it. In = out: the voltage stays.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② More comes in</h3><p class="small" style="font-size:20px">Same current to the grid: the voltage climbs until the converter trips.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A PI watches the voltage</h3><p class="small" style="font-size:20px">Too high? It asks for more grid current. The voltage comes back to 800 V.</p></div>
+    </div>
+    <div data-sim="dcbucket" data-config='{"w":640,"steps":{"0":{"ev":false,"mode":"fixed"},"1":{"ev":true},"2":{"mode":"pi"}}}'></div>
+  </div>
+  <aside class="notes"><p><b>2 min.</b> 2 mF at 800 V. Power in goes from 10 kW to 20 kW at 20 ms.</p>
+    <ul>
+      <li><b>②</b> 10 kW too much raises the voltage by about 6 V every millisecond: 900 V is reached 17 ms later.</li>
+      <li><b>③</b> The output of this PI is the wanted i<sub>d</sub> of the previous slide. It is much slower than the current loop (tens of Hz against several hundred Hz), so the two do not disturb each other.</li>
+      <li>This loop holds the sum of the two capacitor voltages; the midpoint PI of slide 18 holds their difference.</li>
+    </ul></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="control" data-min="1" data-title="All together: three PI controllers">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · the whole picture</div><h2>All together: three PI controllers</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr; gap:10px; align-content:center">
+    <div style="justify-self:center"><svg class="bd" viewBox="0 130 1000 330" style="width:1180px;height:390px" aria-label="Control structure">
       <defs><marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker></defs>
       <style>.bd .a3{stroke:var(--ink2);stroke-width:2.2;fill:none;marker-end:url(#arrS)}</style>
       <g data-step="0">
-        <g class="box acc"><rect x="330" y="190" width="220" height="80"/><text x="440" y="220">current PI</text><text x="440" y="248" class="nt" style="text-anchor:middle">follow the wanted current</text></g>
-        <path class="a3" d="M550,230 H640"/>
-        <g class="box"><rect x="640" y="190" width="200" height="80"/><text x="740" y="220">PWM</text><text x="740" y="248" class="nt" style="text-anchor:middle">carriers</text></g>
-        <path class="a3" d="M840,230 H900"/><text x="945" y="234" class="nt" style="text-anchor:middle">switches</text>
-      </g>
-      <g data-step="1">
         <g class="box acc"><rect x="20" y="190" width="230" height="80"/><text x="135" y="220">DC-voltage PI</text><text x="135" y="248" class="nt" style="text-anchor:middle">keep 800 V</text></g>
         <path class="a3" d="M250,230 H330"/><text x="290" y="212" class="nt" style="text-anchor:middle">wanted i</text>
+        <text x="135" y="168" class="nt" style="text-anchor:middle">slow · slide 23</text>
+      </g>
+      <g data-step="1">
+        <g class="box acc"><rect x="330" y="190" width="220" height="80"/><text x="440" y="220">current PI</text><text x="440" y="248" class="nt" style="text-anchor:middle">follow the wanted current</text></g>
+        <path class="a3" d="M550,230 H640"/><text x="595" y="212" class="nt" style="text-anchor:middle">voltage</text>
+        <g class="box"><rect x="640" y="190" width="200" height="80"/><text x="740" y="220">PWM</text><text x="740" y="248" class="nt" style="text-anchor:middle">carriers</text></g>
+        <path class="a3" d="M840,230 H900"/><text x="945" y="234" class="nt" style="text-anchor:middle">switches</text>
+        <text x="440" y="168" class="nt" style="text-anchor:middle">fast · slides 21 and 22</text>
       </g>
       <g data-step="2">
         <g class="box lv"><rect x="620" y="360" width="240" height="80"/><text x="740" y="390">midpoint PI</text><text x="740" y="418" class="nt" style="text-anchor:middle">keep C1 = C2</text></g>
-        <path class="a3" d="M740,360 V272"/><text x="760" y="318" class="nt" style="text-anchor:start">offset r<tspan baseline-shift="sub" font-size="12">0</tspan></text>
+        <path class="a3" d="M740,360 V272"/><text x="760" y="318" class="nt" style="text-anchor:start">offset r<tspan baseline-shift="sub" font-size="12">0</tspan> · slide 18</text>
       </g>
     </svg></div>
   </div>
-  <aside class="notes"><p><b>2 min.</b> One block per click.</p><ul><li>Speeds: current loop about 1 kHz bandwidth; DC-voltage and midpoint loops 10–50 Hz.</li><li>The DC loop watches the sum v<sub>C1</sub> + v<sub>C2</sub>, the midpoint loop the difference v<sub>C1</sub> − v<sub>C2</sub>. They do not fight: one cannot change what the other controls.</li><li>A grid-synchronization block (PLL) gives the grid angle for the current controller; not drawn.</li></ul></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="dq current control">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · current control</div><h2>Current control: turn the sines into flat lines</h2></div></div>
-  <div class="body" style="grid-template-columns: 420px 1fr; gap:24px">
-    <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① The target keeps moving</h3><p class="small" style="font-size:20px">The grid current is three sines. A PI controller is good at holding a constant, not at chasing a sine.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② Turn along with the grid</h3><p class="small" style="font-size:20px">Look at the currents from a frame that spins with the grid voltage. From there the sines stand still: two flat lines, <span class="m">i</span><sub>d</sub> and <span class="m">i</span><sub>q</sub>.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ What the two lines mean</h3><p class="small" style="font-size:20px"><span class="m">i</span><sub>d</sub>: in step with the grid voltage, active power. <span class="m">i</span><sub>q</sub>: a quarter period behind, reactive power.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ One PI for each line</h3><p class="small" style="font-size:20px">Flat targets are easy. We ask for active current at 5 ms and reactive at 20 ms: both follow at once, and the sines change with them.</p></div>
-    </div>
-    <div data-sim="dqsimple" data-config='{"w":980,"steps":{"0":{"dq":false},"1":{"dq":true}}}'></div>
-  </div>
-  <aside class="notes"><p><b>2.5 min.</b> L = 2 mH, 400 V grid, 800 V DC, 10 kHz sampling, 400 Hz current-loop bandwidth.</p><ul><li>The turning frame is the Park transform; its angle comes from the PLL.</li><li>Point at the top plot after click 3: at 5 ms the sines grow, at 20 ms they shift in phase.</li><li>Details if asked: the PI gains are K<sub>p</sub> = ω<sub>c</sub>L, K<sub>i</sub> = ω<sub>c</sub>R; the ωL cross-coupling between d and q is cancelled in the controller.</li></ul></aside>
+  <aside class="notes"><p><b>1 min.</b> A recap; one block per click.</p><ul><li>Speeds: current loop several hundred Hz; DC-voltage and midpoint loops 10–50 Hz.</li><li>The DC loop watches the sum v<sub>C1</sub> + v<sub>C2</sub>, the midpoint loop the difference. One cannot change what the other controls, so they do not fight.</li><li>Not drawn: the PLL that gives the grid angle.</li></ul></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="Grid filter: L or LCL">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · the filter</div><h2>Grid filter: cleaning up the current</h2></div></div>
-  <div class="body" style="grid-template-columns: 380px 1fr; gap:24px">
-    <div class="stack" style="gap:16px">
-      <div><h3 style="font-size:22px;margin:0">① The pulses leave a ripple</h3><p class="small" style="font-size:20px">The inductor smooths the current, but a small zig-zag at the switching frequency stays on the sine.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② Three levels: half the ripple</h3><p class="small" style="font-size:20px">The voltage jumps are half as big, so the zig-zag is about half. Same inductor.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ LCL: almost no ripple</h3><p class="small" style="font-size:20px">Split the inductor in two and put a capacitor in the middle. The capacitor takes the ripple, the grid gets a clean sine.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ But an LCL can ring</h3><p class="small" style="font-size:20px">Give it a short kick and it rings like a bell. A small resistor next to the capacitor calms it.</p></div>
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 5 of 5</div><h2>Grid filter: cleaning up the current</h2></div></div>
+  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① The pulses leave a ripple</h3><p class="small" style="font-size:20px">The real converter voltage is pulses. A small zig-zag stays on the current.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② Three levels: half the ripple</h3><p class="small" style="font-size:20px">Half the voltage jump, half the zig-zag. Same inductor.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ LCL: almost none</h3><p class="small" style="font-size:20px">A capacitor in the middle takes the ripple.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ But an LCL can ring</h3><p class="small" style="font-size:20px">After a kick it rings like a bell. A small resistor calms it.</p></div>
     </div>
     <div data-sim="gridfilter" data-config='{"w":640,"steps":{"0":{"topo":2,"filt":"l","view":"ripple"},"1":{"topo":3},"2":{"filt":"lcl"},"3":{"filt":"lcld","view":"kick"}}}'></div>
   </div>
@@ -647,6 +680,7 @@
 <script src="js/sim-ctl.js"></script>
 <script src="js/sim-mmc.js"></script>
 <script src="js/sim-om.js"></script>
+<script src="js/sim-grid.js"></script>
 <script src="js/deck.js"></script>
 </body>
 </html>
