@@ -32,7 +32,7 @@
     <ol style="gap:12px">
       <li>Define carrier, reference, m<sub>a</sub> and m<sub>f</sub>, and predict the fundamental and the harmonic clusters of sine-triangle PWM.</li>
       <li>Compute the min-max offset and the linear limit, and explain why it is the space-vector modulator in carrier form.</li>
-      <li>Generate the level sequence of a multilevel leg with carriers (PD, POD, APOD, phase-shifted).</li>
+      <li>Generate the level sequence of a multilevel leg with stacked carriers, and explain why PD is preferred.</li>
       <li>Explain why the split DC link drifts, and design an offset-based balancing loop, including its limits.</li>
       <li>Choose flying-capacitor states and MMC submodules in closed loop, and explain why an MMC needs circulating-current control.</li>
       <li>Place modulation and balancing inside a grid current controller, and compare L and LCL filters for 2- and 3-level legs.</li>
@@ -353,22 +353,22 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2.5" data-title="Carrier-based PWM lab">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · more levels, and phase-shifted carriers · read: Holmes &amp; Lipo</div><h2>More levels, and carriers side by side</h2></div></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="1.5" data-title="Carrier-based PWM lab">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · more levels · read: Holmes &amp; Lipo</div><h2>More levels: more carriers, same rule</h2></div></div>
   <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
     <div class="stack" style="gap:10px">
       <div><h3 style="font-size:20px;margin:0">① Five levels: four carriers, same rule</h3><p class="small" style="font-size:18px">Stack four carriers between −1 and +1. The level is how many carriers are below the reference: 0 → −400 V, … 4 → +400 V, in steps of 200 V. <span class="m">N</span> levels need <span class="m">N</span> − 1 carriers.</p></div>
       <div data-step="1"><h3 style="font-size:20px;margin:0">② PD still wins</h3><p class="small" style="font-size:18px">Mirror the lower two carriers (POD) and the line THD rises from 18 % to 30 %: same reason as the last slide, phases in opposite halves switch together.</p></div>
-      <div data-step="2"><h3 style="font-size:20px;margin:0">③ Phase-shifted: one carrier per cell</h3><p class="small" style="font-size:18px">Each carrier spans the whole −1 … +1 and drives <b>one cell</b> (a switch pair), shifted in time by 360°/(<span class="m">N</span> − 1). The output alone is nothing new: for three levels it is POD with the carrier at 2<span class="m">f</span><sub>c</sub>. What changes is the hardware: every cell switches at <span class="m">f</span><sub>c</sub> and does the same work, while the output steps (<span class="m">N</span> − 1) times as often. Used where the leg is built from identical cells: flying capacitor, CHB (next talk), MMC.</p></div>
+    
     </div>
-    <div data-sim="carrier" data-config='{"n":5,"arr":"PD","w":620,"simple":true,"sig":"ab","steps":{"0":{"arr":"PD","sig":"ab","onlyA":false,"n":5},"1":{"arr":"POD","sig":"ab","onlyA":false,"n":5},"2":{"arr":"PS","sig":"ab","onlyA":false,"n":5}}}'></div>
+    <div data-sim="carrier" data-config='{"n":5,"arr":"PD","w":620,"simple":true,"noPS":true,"sig":"ab","steps":{"0":{"arr":"PD","sig":"ab","onlyA":false,"n":5},"1":{"arr":"POD","sig":"ab","onlyA":false,"n":5}}}'></div>
   </div>
   <aside class="notes">
-    <p><b>2.5 min.</b> Five levels, all three phases, line voltage. Click 1 shows POD, click 2 phase-shifted.</p>
+    <p><b>1.5 min.</b> Five levels, all three phases, line voltage. Click 1 switches to POD.</p>
     <ul>
       <li><b>①</b> Same counting rule as for three levels, just more carriers. Point at the finer staircase in v<sub>ab</sub>.</li>
-      <li><b>②</b> Read the THD: PD 18.1 %, POD 29.8 %. If asked about APOD (every carrier mirrored against its neighbour): with three levels it is identical to POD; with five it gives 28.5 %, almost the same as POD. That is why it is not on the slide; Elif names it for the CHB.</li>
-      <li><b>③ “Isn’t this just a faster POD?”</b> For the output, yes: with two carriers 180° apart, both are below r exactly when |c| &lt; r, and |c| is a triangle at 2f<sub>c</sub>. So a 3-level leg gives the same pulses as POD at 2f<sub>c</sub> (switch to 3-level and compare the spectra: the first group sits near h = 30). The difference is which switch follows which carrier: in level-shifted PWM the upper switches only work in the positive half and the lower ones in the negative half; in phase-shifted PWM each cell follows its own full-range carrier, so all cells switch at f<sub>c</sub> all the time and share losses and capacitor charge evenly. That is why cell-based converters use it. For five levels the strongest harmonic moves to about 4 × 15 = 60 (readout h = 55). Elif compares PS and level-shifted on the CHB, so stop here.</li>
+      <li><b>②</b> Read the THD: PD 18.1 %, POD 29.8 %. If asked about APOD (every carrier mirrored against its neighbour): with three levels it is identical to POD; with five it gives 28.5 %, almost the same as POD.</li>
+      <li>Phase-shifted carriers are left to Elif’s CHB talk.</li>
     </ul>
   </aside>
 </section>
@@ -537,7 +537,7 @@
       <p class="small">Each arm: <span class="m">N</span> half-bridge submodules (SMs) and an arm inductor. Each SM capacitor holds <span class="m">V</span><sub>C</sub> ≈ <span class="m">V</span><sub>dc</sub>/<span class="m">N</span>.</p>
       <div class="eq" style="font-size:25px"><span class="m">v</span><sub>u</sub> = Σ<sub>k</sub> <span class="m">S</span><sub>k</sub><span class="m">v</span><sub>Ck</sub> ≈ <span class="m">n</span><sub>u</sub><span class="m">V</span><sub>C</sub>, &nbsp; <span class="m">v</span><sub>l</sub> ≈ <span class="m">n</span><sub>l</sub><span class="m">V</span><sub>C</sub></div>
       <div class="eq" style="font-size:25px"><span class="m">v</span><sub>a</sub> = (<span class="m">v</span><sub>l</sub> − <span class="m">v</span><sub>u</sub>)/2 − (<span class="m">L</span><sub>arm</sub>/2) d<span class="m">i</span><sub>a</sub>/d<span class="m">t</span></div>
-      <p class="small" data-step="1">Keep <span class="m">n</span><sub>u</sub> + <span class="m">n</span><sub>l</sub> = <span class="m">N</span>, so <span class="m">v</span><sub>u</sub> + <span class="m">v</span><sub>l</sub> ≈ <span class="m">V</span><sub>dc</sub>. Nearest level: <span class="m">n</span><sub>u</sub> = round(<span class="m">N</span>(1 − <span class="m">r</span>)/2) gives <span class="m">N</span> + 1 levels (or phase-shifted carriers, one per SM).</p>
+      <p class="small" data-step="1">Keep <span class="m">n</span><sub>u</sub> + <span class="m">n</span><sub>l</sub> = <span class="m">N</span>, so <span class="m">v</span><sub>u</sub> + <span class="m">v</span><sub>l</sub> ≈ <span class="m">V</span><sub>dc</sub>. Nearest level: <span class="m">n</span><sub>u</sub> = round(<span class="m">N</span>(1 − <span class="m">r</span>)/2) gives <span class="m">N</span> + 1 levels.</p>
       <div class="eq" data-step="2" style="font-size:25px"><span class="m">i</span><sub>u</sub> = <span class="m">i</span><sub>a</sub>/2 + <span class="m">i</span><sub>c</sub>, &nbsp; <span class="m">i</span><sub>l</sub> = −<span class="m">i</span><sub>a</sub>/2 + <span class="m">i</span><sub>c</sub>, &nbsp; <span class="m">i</span><sub>c</sub> = <span class="m">I</span><sub>dc</sub>/3 + <span class="m">i</span><sub>circ</sub></div>
       <p class="small" data-step="2">Every arm carries half the AC current plus its DC share: its capacitors charge and discharge every cycle. The balancing problem moves <b>inside the arm</b>.</p>
       <div class="callout" data-step="3" style="font-size:19px"><b>Compared with the legs so far:</b> no clamp diodes, no flying capacitors, no isolated sources (the CHB of the next talk needs them). One cell type, hundreds per arm in HVDC. The price: <span class="m">N</span> capacitors per arm to keep equal, and an internal current <span class="m">i</span><sub>c</sub> to control.</div>

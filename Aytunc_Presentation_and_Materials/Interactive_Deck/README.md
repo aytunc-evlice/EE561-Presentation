@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (28 slides, ≈ 62.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (28 slides, ≈ 61.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -39,7 +39,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 10 | ★ Why min-max equals SVPWM: one carrier period with three legs, the state sequence, active times fixed by the differences, the offset only moves zero time, min-max = equal split (simulation) | 3 |
 | 11 | ★ Three levels: one carrier for each half (upper P/O, lower O/N), same rule inside each half; PD = shifted copy, POD = mirror image (simulation, one leg) | 2.5 |
 | 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
-| 13 | More levels (5-level, PD vs POD) and phase-shifted carriers (simulation); APOD only in the notes | 2.5 |
+| 13 | More levels: five levels, four carriers, same rule; PD vs POD (simulation) | 1.5 |
 | 14 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
 | 15 | Why capacitors drift (recap of Sefer’s result) | 1 |
 | 16 | ★ Derivation: balancing authority ∝ cos φ | 3 |
