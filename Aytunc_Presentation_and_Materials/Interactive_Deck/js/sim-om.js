@@ -158,7 +158,7 @@
   SIMS.svmeq = function (host, cfg) {
     const N = 1800;
     const P = { m: cfg.m != null ? cfg.m : 0.8, th: cfg.th != null ? cfg.th : 10, mode: cfg.mode || 'none' };
-    const cv = K.canvas(cfg.w || 880, 560);
+    const cv = K.canvas(cfg.w || 880, 620);
     const ctl = [
       K.seg({ label: 'Common offset r₀', options: [['none', 'none'], ['mm', 'min-max']], value: P.mode, onChange: (v) => { P.mode = v; draw(); } }),
       K.slider({ label: 'm', min: 0, max: 1.15, step: 0.01, value: P.m, fmt: (v) => v.toFixed(2), onInput: (v) => { P.m = v; draw(); } }),
@@ -217,7 +217,30 @@
         ctx.fillStyle = cols[k]; ctx.font = '700 15px ' + K.font; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('leg ' + ph, x0 - 30, y + hh / 2);
       });
       ctx.fillStyle = mut; ctx.font = '600 13px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText('0', X(0), 372 + 2 * 56 + 40); ctx.fillText('T_s / 2', X(0.5), 372 + 2 * 56 + 40); ctx.fillText('T_s', X(1), 372 + 2 * 56 + 40);
+      ctx.fillText('0', X(0), 372 + 2 * 56 + 38); ctx.fillText('T_s / 2', X(0.5), 372 + 2 * 56 + 38); ctx.fillText('T_s', X(1), 372 + 2 * 56 + 38);
+      // dashed lines at the edges of NNN and PPP, and brackets comparing their total time
+      const yEnd = 372 + 2 * 56 + 34, cN = K.css('--s1'), cP = K.css('--lvL');
+      const zs = segs.filter((g) => g.name === 'NNN' || g.name === 'PPP');
+      ctx.save(); ctx.lineWidth = 1.8; ctx.setLineDash([6, 5]);
+      zs.forEach((g) => [g.a, g.b].forEach((t) => {
+        if (t < 1e-6 || t > 1 - 1e-6) return;
+        ctx.strokeStyle = g.name === 'NNN' ? cN : cP;
+        ctx.beginPath(); ctx.moveTo(X(t), yb); ctx.lineTo(X(t), yEnd + 6); ctx.stroke();
+      }));
+      ctx.restore();
+      const yB = yEnd + 34;
+      ctx.save(); ctx.lineWidth = 2; ctx.font = '700 14px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      zs.forEach((g) => {
+        const col = g.name === 'NNN' ? cN : cP;
+        ctx.strokeStyle = col; ctx.fillStyle = col;
+        ctx.beginPath(); ctx.moveTo(X(g.a) + 2, yB - 6); ctx.lineTo(X(g.a) + 2, yB); ctx.lineTo(X(g.b) - 2, yB); ctx.lineTo(X(g.b) - 2, yB - 6); ctx.stroke();
+        if (X(g.b) - X(g.a) > 30) ctx.fillText(g.name, (X(g.a) + X(g.b)) / 2, yB + 4);
+      });
+      const nT = share.NNN || 0, pT = share.PPP || 0, eq = Math.abs(nT - pT) < 0.002;
+      ctx.font = '700 17px ' + K.font; ctx.textAlign = 'center';
+      const msg = 'NNN ' + (nT * 100).toFixed(1) + ' %   ' + (eq ? '=' : '≠') + '   PPP ' + (pT * 100).toFixed(1) + ' %';
+      ctx.fillStyle = eq ? K.css('--good') : K.css('--bad'); ctx.fillText(msg + (eq ? '   equal split: SVPWM' : '   unequal split'), X(0.5), yB + 26);
+      ctx.restore();
       // table of shares
       const act = Object.keys(share).filter((k) => k !== 'PPP' && k !== 'NNN');
       const f = (v) => (v == null ? '0.0' : (v * 100).toFixed(1)) + ' %';
