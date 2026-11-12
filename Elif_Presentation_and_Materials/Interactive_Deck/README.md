@@ -1,4 +1,4 @@
-# Multilevel Converters: Cascaded H-bridge multilevel inverters (Elif Topaloğlu)
+# Multilevel Inverters: Cascaded H-bridge multilevel inverters (Elif Topaloğlu)
 
 Open `index.html` in Chrome or Edge. It is one self-contained file (plus the logos in `img/`), runs offline and computes
 every plot live in the browser.
@@ -18,31 +18,33 @@ Aytunç’s ([`../../Aytunc_Presentation_and_Materials/`](../../Aytunc_Presentat
 | `D` | Dark or light theme |
 | `F` | Fullscreen |
 
-The URL hash (`#slide-7`) opens a given slide.
+The URL hash (`#slide-9`) opens a given slide.
 
-## Outline (19 slides)
+## Outline (21 slides)
 
 | # | Slide |
 | --: | --- |
 | 1 | Title |
-| 2 | Single-phase H-bridge cell (pick a switching state, see the current path) |
-| 3 | Bipolar and unipolar PWM |
-| 4 | Unipolar PWM: shift the reference or the carrier |
-| 5 | CHB topology, equal DC voltages |
-| 6 | Five-level CHB: switching states and redundancy |
-| 7 | CHB with unequal DC voltages: more levels without more cells |
-| 8 | Seven levels: equal vs. unequal |
-| 9 | Phase-shifted PWM, seven levels |
-| 10 | Phase-shifted PWM, m<sub>f</sub> = 10 |
-| 11 | Phase-shifted PWM: switching frequency and output voltage |
-| 12 | Level-shifted PWM: carrier arrangements (IPD, APOD, POD) |
-| 13 | Level-shifted PWM, IPD, seven levels |
-| 14 | Level-shifted PWM: uneven device use and rotation |
-| 15 | Phase-shifted vs. level-shifted |
-| 16 | Staircase modulation: selective harmonic elimination |
-| 17 | Staircase modulation: drawbacks |
-| 18 | Summary, with the Perfect Harmony GH180 drive |
-| 19 | References |
+| 2 | References |
+| 3 | Why CHB multilevel inverters: 13-level example, when to use and when not |
+| 4 | Single-phase H-bridge cell (pick a switching state, see the current path) |
+| 5 | Bipolar and unipolar PWM |
+| 6 | Unipolar PWM: shift the reference or the carrier |
+| 7 | CHB topology, equal DC voltages |
+| 8 | Five-level CHB: switching states and redundancy |
+| 9 | CHB with unequal DC voltages: more levels without more cells |
+| 10 | Seven levels: equal vs. unequal |
+| 11 | CHB: advantages and disadvantages |
+| 12 | Phase-shifted PWM, seven levels |
+| 13 | Phase-shifted PWM, m<sub>f</sub> = 10 |
+| 14 | Phase-shifted PWM: switching frequency and output voltage |
+| 15 | Level-shifted PWM: carrier arrangements (IPD, APOD, POD) |
+| 16 | Level-shifted PWM, IPD, seven levels |
+| 17 | Level-shifted PWM: uneven device use and rotation |
+| 18 | Phase-shifted vs. level-shifted |
+| 19 | Staircase modulation: selective harmonic elimination |
+| 20 | Staircase modulation: drawbacks |
+| 21 | Summary |
 
 ## Assets
 
