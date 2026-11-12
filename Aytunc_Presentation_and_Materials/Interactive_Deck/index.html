@@ -315,7 +315,7 @@
       <div data-step="2"><h3 style="font-size:21px;margin:0">③ Inside each half: the same rule</h3><p class="small" style="font-size:19px">Above the upper carrier → P, otherwise O. Below the lower carrier → N, otherwise O. Each half is slide 4 again, so the average is still <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2, with jumps of only <span class="m">V</span><sub>dc</sub>/2.</p></div>
       <div data-step="3"><h3 style="font-size:21px;margin:0">④ Two ways to draw the lower carrier</h3><p class="small" style="font-size:19px">A shifted copy of the upper one (<b>PD</b>), or its mirror image (<b>POD</b>; that is using the same carrier for both halves). For one leg the result is the same. Next slide: why PD is used.</p></div>
     </div>
-    <div data-sim="carrier" data-config='{"n":3,"arr":"PD","w":620,"simple":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"PD","sig":"a","onlyA":true,"n":3},"3":{"arr":"POD","sig":"a","onlyA":true,"n":3}}}'></div>
+    <div data-sim="carrier" data-config='{"n":3,"arr":"PD","w":620,"simple":true,"noPS":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"PD","sig":"a","onlyA":true,"n":3},"3":{"arr":"POD","sig":"a","onlyA":true,"n":3}}}'></div>
   </div>
   <aside class="notes">
     <p><b>2.5 min.</b> Only leg a is shown. Click 3 switches the lower carrier from shifted (PD) to mirrored (POD).</p>
@@ -359,7 +359,7 @@
     <div class="stack" style="gap:10px">
       <div><h3 style="font-size:20px;margin:0">① Five levels: four carriers, same rule</h3><p class="small" style="font-size:18px">Stack four carriers between −1 and +1. The level is how many carriers are below the reference: 0 → −400 V, … 4 → +400 V, in steps of 200 V. <span class="m">N</span> levels need <span class="m">N</span> − 1 carriers.</p></div>
       <div data-step="1"><h3 style="font-size:20px;margin:0">② PD still wins</h3><p class="small" style="font-size:18px">Mirror the lower two carriers (POD) and the line THD rises from 18 % to 30 %: same reason as the last slide, phases in opposite halves switch together.</p></div>
-      <div data-step="2"><h3 style="font-size:20px;margin:0">③ Phase-shifted: side by side, not stacked</h3><p class="small" style="font-size:18px">Each carrier spans the whole −1 … +1 and drives one cell; the carriers are shifted in time by 360°/(<span class="m">N</span> − 1). The output steps more often, so the first harmonics move up to (<span class="m">N</span> − 1)·<span class="m">f</span><sub>c</sub> while each switch still runs at <span class="m">f</span><sub>c</sub>. Used for flying-capacitor and H-bridge cells (next talk).</p></div>
+      <div data-step="2"><h3 style="font-size:20px;margin:0">③ Phase-shifted: one carrier per cell</h3><p class="small" style="font-size:18px">Each carrier spans the whole −1 … +1 and drives <b>one cell</b> (a switch pair), shifted in time by 360°/(<span class="m">N</span> − 1). The output alone is nothing new: for three levels it is POD with the carrier at 2<span class="m">f</span><sub>c</sub>. What changes is the hardware: every cell switches at <span class="m">f</span><sub>c</sub> and does the same work, while the output steps (<span class="m">N</span> − 1) times as often. Used where the leg is built from identical cells: flying capacitor, CHB (next talk), MMC.</p></div>
     </div>
     <div data-sim="carrier" data-config='{"n":5,"arr":"PD","w":620,"simple":true,"sig":"ab","steps":{"0":{"arr":"PD","sig":"ab","onlyA":false,"n":5},"1":{"arr":"POD","sig":"ab","onlyA":false,"n":5},"2":{"arr":"PS","sig":"ab","onlyA":false,"n":5}}}'></div>
   </div>
@@ -368,7 +368,7 @@
     <ul>
       <li><b>①</b> Same counting rule as for three levels, just more carriers. Point at the finer staircase in v<sub>ab</sub>.</li>
       <li><b>②</b> Read the THD: PD 18.1 %, POD 29.8 %. If asked about APOD (every carrier mirrored against its neighbour): with three levels it is identical to POD; with five it gives 28.5 %, almost the same as POD. That is why it is not on the slide; Elif names it for the CHB.</li>
-      <li><b>③</b> Phase-shifted: the strongest harmonic moves to about 4 × 15 = 60. Elif builds the CHB on this; she also compares PS and level-shifted carriers there, so stop here.</li>
+      <li><b>③ “Isn’t this just a faster POD?”</b> For the output, yes: with two carriers 180° apart, both are below r exactly when |c| &lt; r, and |c| is a triangle at 2f<sub>c</sub>. So a 3-level leg gives the same pulses as POD at 2f<sub>c</sub> (switch to 3-level and compare the spectra: the first group sits near h = 30). The difference is which switch follows which carrier: in level-shifted PWM the upper switches only work in the positive half and the lower ones in the negative half; in phase-shifted PWM each cell follows its own full-range carrier, so all cells switch at f<sub>c</sub> all the time and share losses and capacitor charge evenly. That is why cell-based converters use it. For five levels the strongest harmonic moves to about 4 × 15 = 60 (readout h = 55). Elif compares PS and level-shifted on the CHB, so stop here.</li>
     </ul>
   </aside>
 </section>

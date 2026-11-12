@@ -13,7 +13,7 @@
     const roThd = K.readout('THD of selected signal', 'big'), roClu = K.readout('Strongest harmonic'), roF = K.readout('Fundamental (peak)');
     const ctl = [
       K.seg({ label: 'Levels', options: [[3, '3-level'], [5, '5-level']], value: P.n, onChange: (v) => { P.n = v; calc(); } }),
-      K.seg({ label: 'Carrier arrangement', options: cfg.simple ? [['PD', 'PD (shifted)'], ['POD', 'POD (mirrored)'], ['PS', 'Phase-shifted']] : [['PD', 'PD'], ['POD', 'POD'], ['APOD', 'APOD'], ['PS', 'Phase-shifted']], value: P.arr, onChange: (v) => { P.arr = v; calc(); } }),
+      K.seg({ label: 'Carrier arrangement', options: cfg.simple ? [['PD', 'PD (shifted)'], ['POD', 'POD (mirrored)']].concat(cfg.noPS ? [] : [['PS', 'Phase-shifted']]) : [['PD', 'PD'], ['POD', 'POD'], ['APOD', 'APOD'], ['PS', 'Phase-shifted']], value: P.arr, onChange: (v) => { P.arr = v; calc(); } }),
       K.slider({ label: 'm', min: 0.1, max: 1.2, step: 0.01, value: P.m, fmt: (v) => v.toFixed(2), onInput: (v) => { P.m = v; calc(); } }),
       K.slider({ label: 'f<sub>c</sub>/f<sub>1</sub>', min: 3, max: 41, step: 1, value: P.mf, fmt: (v) => String(v), onInput: (v) => { P.mf = v; calc(); } }),
       K.seg({ label: 'Zero-sequence', options: [[false, 'none (SPWM)'], [true, 'min-max injection']], value: P.mm, onChange: (v) => { P.mm = v; calc(); } }),
