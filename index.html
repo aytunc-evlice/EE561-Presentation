@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EE561 Multilevel Converters</title>
+<style>
+:root{
+  --paper:#ffffff; --surface:#f5f5f5; --ink:#111111; --ink2:#333333; --muted:#6b6b6b; --line:#d6d6d6; --accent:#cf0a2c;
+  --font:Calibri, Carlito, "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-d:"Calibri Light", Calibri, Carlito, "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#141414; --surface:#1d1d1d; --ink:#f2f2f2; --ink2:#d2d2d2; --muted:#9a9a9a; --line:#363636; --accent:#ff4d63; color-scheme:dark; }
+  :root:not([data-theme="light"]) .logos{background:#fff; border-radius:8px; padding:6px 12px}
+}
+:root[data-theme="dark"]{ --paper:#141414; --surface:#1d1d1d; --ink:#f2f2f2; --ink2:#d2d2d2; --muted:#9a9a9a; --line:#363636; --accent:#ff4d63; color-scheme:dark; }
+:root[data-theme="dark"] .logos{background:#fff; border-radius:8px; padding:6px 12px}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--font); line-height:1.4}
+main{max-width:1000px; margin:0 auto; padding:32px 16px 48px}
+.logos{display:flex; justify-content:space-between; align-items:center; gap:16px}
+.logos .odtu{height:52px; max-width:60%} .logos .pl{height:32px; max-width:35%}
+header{margin:44px 0 36px}
+.course{font:300 clamp(36px,7vw,56px)/1 var(--font-d)}
+.cname{font-weight:700; font-size:clamp(20px,3.4vw,28px); margin-top:8px}
+h1{font:300 clamp(28px,5vw,40px)/1.15 var(--font-d); margin:22px 0 6px}
+.lead{font-size:19px; color:var(--ink2); margin:0; max-width:46em}
+ol{list-style:none; margin:0; padding:0; display:grid; gap:18px}
+li.talk{border:1.5px solid var(--line); border-radius:14px; padding:22px 24px; display:grid; grid-template-columns:44px 1fr; gap:4px 18px}
+.n{grid-row:span 4; font:300 40px/1 var(--font-d); color:var(--accent)}
+.talk h2{margin:0; font-size:24px; font-weight:700}
+.who{color:var(--muted); font-size:18px}
+.talk p{margin:6px 0 0; color:var(--ink2); font-size:17px}
+.links{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+.links a{font-size:16px; color:var(--ink2); text-decoration:none; border:1.5px solid var(--line); border-radius:9px; padding:6px 12px}
+.links a.deck{background:var(--ink); color:var(--paper); border-color:var(--ink); font-weight:700}
+.links a:hover{border-color:var(--accent)}
+.links a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+footer{margin-top:36px; color:var(--muted); font-size:15px}
+footer a{color:inherit}
+@media (max-width:560px){ li.talk{grid-template-columns:1fr} .n{grid-row:auto; font-size:30px} }
+</style>
+</head>
+<body>
+<main>
+  <div class="logos"><img class="odtu" src="Sefer_Presentation_and_Materials/Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ — Middle East Technical University"><img class="pl" src="Sefer_Presentation_and_Materials/Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <header>
+    <div class="course">EE561</div>
+    <div class="cname">Advanced Static Power Conversion</div>
+    <h1>Multilevel Converters</h1>
+    <p class="lead">A student-led module in three talks, Fall 2026. Each deck runs in the browser with live simulations; press <b>N</b> in a deck for speaker notes and <b>F</b> for fullscreen.</p>
+  </header>
+  <ol>
+    <li class="talk">
+      <span class="n">1</span>
+      <h2>Building the levels</h2>
+      <span class="who">Sefer İdacı</span>
+      <p>Why multilevel, NPC, T-type and ANPC legs, the flying capacitor, device losses, topology selection and switching states.</p>
+      <div class="links">
+        <a class="deck" href="Sefer_Presentation_and_Materials/Interactive_Deck/">Open the deck</a>
+        <a href="Sefer_Presentation_and_Materials/quiz/Quiz%20-%20Building%20the%20Levels.pdf">Quiz (PDF)</a>
+        <a href="Sefer_Presentation_and_Materials/quiz/Potential%20Final%20Questions%20-%20Building%20the%20Levels.pdf">Final questions (PDF)</a>
+      </div>
+    </li>
+    <li class="talk">
+      <span class="n">2</span>
+      <h2>Running the levels: Modulate · Balance · Control</h2>
+      <span class="who">M. Aytunç Evlice</span>
+      <p>Sine-triangle PWM from the basics, overmodulation, min-max injection and space vectors, PD and POD carriers, the grid filter, neutral-point and flying-capacitor balancing, and grid connection with dq current control.</p>
+      <div class="links">
+        <a class="deck" href="Aytunc_Presentation_and_Materials/Interactive_Deck/">Open the deck</a>
+      </div>
+    </li>
+    <li class="talk">
+      <span class="n">3</span>
+      <h2>Cascaded H-Bridge Multilevel Inverters</h2>
+      <span class="who">Elif Topaloğlu</span>
+      <p>The H-bridge cell, CHB with equal and unequal DC voltages, phase-shifted and level-shifted PWM, staircase modulation and an industrial CHB drive.</p>
+      <div class="links">
+        <a class="deck" href="Elif_Presentation_and_Materials/Interactive_Deck/">Open the deck</a>
+      </div>
+    </li>
+  </ol>
+  <footer>Department of Electrical and Electronics Engineering · METU PowerLab · <a href="https://github.com/aytunc-evlice/EE561-Presentation">Source on GitHub</a></footer>
+</main>
+</body>
+</html>

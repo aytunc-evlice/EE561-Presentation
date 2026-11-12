@@ -2,7 +2,7 @@
 
 Open `index.html` in Chrome or Edge. It runs offline, with no installation or internet connection required. All plots are computed live in the browser.
 
-Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/`](../../Sefer_Presentation_and_Materials/)) comes before, Elif’s cascaded H-bridge after.
+Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/`](../../Sefer_Presentation_and_Materials/)) comes before, Elif’s cascaded H-bridge ([`../../Elif_Presentation_and_Materials/`](../../Elif_Presentation_and_Materials/)) after.
 
 ## Presenter keys
 

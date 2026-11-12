@@ -12,7 +12,7 @@ Topics: sine-triangle PWM from the basics (one switching period, m_a, overmodula
 states and space-vector PWM (and why min-max gives the same pulses), multilevel carrier PWM (PD vs POD),
 neutral-point and flying-capacitor balancing, the averaged model and dq current control, and L vs. LCL grid filters.
 
-Order in the module: Sefer (building the levels) → this talk → Elif (cascaded H-bridge). This talk starts from Sefer’s
+Order in the module: Sefer (building the levels) → this talk → Elif (cascaded H-bridge, [`../Elif_Presentation_and_Materials/`](../Elif_Presentation_and_Materials/)). This talk starts from Sefer’s
 ⟨i<sub>O</sub>⟩ = (1 − |r|)·i<sub>a</sub> and redundant states, and hands over to Elif’s phase-shifted and level-shifted carriers on the CHB.
 
 The deck started as Part II of the original joint deck (commit `d01966a`) and was reworked in November 2026 for three

@@ -10,7 +10,7 @@
 <style>
 :root{
   --paper:#FFFFFF; --surface:#F5F6F8; --ink:#111418; --ink2:#3B4048; --muted:#6B717B; --rule:#D9DCE1; --faint:#EEF0F3;
-  --c1:#156082; --c2:#E97132; --c3:#196B24; --c4:#A02B93; --carrier:#AAB0B9;
+  --c1:#156082; --c2:#E97132; --c3:#196B24; --c4:#A02B93; --carrier:#AAB0B9; --accent:#CF0A2C;
   --font:Aptos, "Segoe UI", Inter, "Helvetica Neue", Arial, sans-serif;
   color-scheme:light; box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
@@ -18,12 +18,12 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --paper:#121417; --surface:#1B1E23; --ink:#ECEEF1; --ink2:#C9CDD3; --muted:#959BA5; --rule:#33373E; --faint:#24272D;
-    --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; color-scheme:dark;
+    --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; --accent:#FF4D63; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#121417; --surface:#1B1E23; --ink:#ECEEF1; --ink2:#C9CDD3; --muted:#959BA5; --rule:#33373E; --faint:#24272D;
-  --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; color-scheme:dark;
+  --c1:#4FA3C7; --c2:#F08C55; --c3:#52B56E; --c4:#D46BC8; --carrier:#5D636C; --accent:#FF4D63; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -86,18 +86,32 @@ button:focus-visible{outline:3px solid var(--c1); outline-offset:2px}
 @media (prefers-reduced-motion: reduce){ .bar i{transition:none} }
 
 /* footer */
-#foot{position:absolute; left:110px; right:60px; bottom:28px; display:flex; justify-content:space-between; align-items:flex-end; font-size:16px; color:var(--muted); pointer-events:none}
+#foot{position:absolute; left:110px; right:60px; bottom:18px; display:flex; justify-content:space-between; align-items:flex-end; font-size:16px; color:var(--muted); pointer-events:none}
+#foot .fl{display:flex; flex-direction:column; gap:6px}
+#fline{font-size:15px}
 #foot > *{pointer-events:auto}
 #nav{display:none; gap:6px} @media (hover:none){ #nav{display:flex} }
 #nav button{font:inherit; font-size:16px; color:var(--muted); background:transparent; border:1px solid var(--rule); border-radius:8px; padding:4px 12px}
 #drawer{position:absolute; left:50%; transform:translateX(-50%); bottom:76px; width:1100px; background:var(--paper); border:1.5px solid var(--rule); border-radius:14px; padding:18px 24px; font-size:21px; line-height:1.45; color:var(--ink2); display:none; box-shadow:0 14px 34px rgba(0,0,0,.14)}
 #drawer.open{display:block}
 
-/* title slide */
-#s-title{justify-content:center; align-items:center; text-align:center}
-#s-title h1{font-size:84px; font-weight:700; line-height:1.08; margin:0; letter-spacing:-0.015em}
-#s-title .who{font-size:32px; margin-top:44px}
-#s-title .course{font-size:22px; color:var(--muted); margin-top:10px}
+/* title slide: same layout as the other two talks of the module */
+#s-title{padding:40px 64px; justify-content:space-between}
+.tlogos{display:flex; justify-content:space-between; align-items:center}
+.tlogos .odtu{height:64px} .tlogos .pl{height:40px}
+.tcenter{text-align:center; display:flex; flex-direction:column; gap:14px; align-items:center}
+.tcenter .course{font-size:64px; font-weight:300; line-height:1}
+.tcenter .cname{font-size:34px; font-weight:700; line-height:1.2}
+.tcenter .topic{font-size:46px; font-weight:300; line-height:1.15; margin-top:18px}
+.tcenter h1{font-size:30px; font-weight:400; line-height:1.3; margin:0; color:var(--accent)}
+.tcenter .by{font-size:30px; font-weight:300; color:var(--ink2); margin-top:18px}
+.tfoot{display:flex; justify-content:space-between; font-size:17px; color:var(--muted)}
+#stage:has(#s-title.active) #count, #stage:has(#s-title.active) #fline{visibility:hidden}
+/* logos in the top-right corner of every slide (stacked, so long titles keep one line) */
+.logos{position:absolute; top:22px; right:28px; display:flex; flex-direction:column; align-items:flex-end; gap:8px}
+.logos img{display:block} .logos .em{height:44px} .logos .pl{height:24px}
+:root[data-theme="dark"] .logos, :root[data-theme="dark"] .tlogos{background:#fff; border-radius:8px; padding:6px 12px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logos, :root:not([data-theme="light"]) .tlogos{background:#fff; border-radius:8px; padding:6px 12px} }
 
 /* schematic */
 .w{stroke:var(--ink); stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round}
@@ -116,6 +130,7 @@ button:focus-visible{outline:3px solid var(--c1); outline-offset:2px}
 #supSvg .lbl.s{font-size:22px}
 #supSvg .lbl{font-size:24px}
 .mc{cursor:pointer; transition:opacity .2s}
+.mini .w{vector-effect:non-scaling-stroke; stroke-width:1.5px !important}
 .mc.dim{opacity:.35}
 
 /* lists, cards, tables */
@@ -132,6 +147,9 @@ table.cmp td{padding:14px 0; border-top:1.5px solid var(--rule); color:var(--ink
 table.cmp td:first-child{color:var(--ink); padding-right:18px}
 ol.refs{margin:0; padding-left:30px; font-size:21px; line-height:1.45; color:var(--ink2); max-width:1340px}
 ol.refs li{margin-bottom:12px; padding-left:8px}
+.refblock{max-width:1340px}
+.refblock h3{margin:0 0 12px; font-size:28px; font-weight:700; color:var(--ink)}
+.refblock p{margin:0; font-size:24px; line-height:1.45; color:var(--ink2)}
 </style>
 </head>
 <body>
@@ -139,13 +157,62 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
 
 <!-- 1 title -->
 <section class="slide" id="s-title" data-ref="">
-  <h1>Cascaded H-Bridge<br>Multilevel Inverters</h1>
-  <div class="who">Elif Topaloğlu</div>
-  <div class="course">EE561 Advanced Static Power Conversion, ODTÜ</div>
-  <aside class="notes">From one H-bridge cell to the full CHB inverter, its modulation schemes and where it is used. Main reference: Wu and Narimani, Chapter 7.</aside>
+  <div class="tlogos"><img class="odtu" src="img/odtu_logo.svg" alt="ODTÜ — Middle East Technical University"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="tcenter">
+    <div class="course">EE561</div>
+    <div class="cname">Advanced Static Power Conversion</div>
+    <div class="topic">Multilevel Inverters</div>
+    <h1>Cascaded H-Bridge Multilevel Inverters</h1>
+    <div class="by">Elif Topaloğlu</div>
+  </div>
+  <div class="tfoot"><span>Department of Electrical and Electronics Engineering · METU PowerLab</span><span>Fall 2026</span></div>
+  <aside class="notes">Third of the three talks: Sefer built the levels, Aytunç ran them with carriers, balancing and control. This talk applies those carriers cell by cell. From one H-bridge cell to the full CHB inverter, its modulation schemes and where it is used. Main reference: Wu and Narimani, Chapter 7.</aside>
 </section>
 
-<!-- 2 H-bridge cell -->
+<!-- 2 references -->
+<section class="slide" data-ref="">
+  <div class="head"><h2>References</h2></div>
+  <div class="refblock">
+    <h3>Book</h3>
+    <p>B. Wu and M. Narimani, <i>High-Power Converters and AC Drives</i>, 2nd ed., Wiley-IEEE Press, 2017.</p>
+    <h3 style="margin-top:56px">Useful paper</h3>
+    <p>M. Malinowski, K. Gopakumar, J. Rodríguez and M. A. Pérez, “A survey on cascaded multilevel inverters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 57, no. 7, pp. 2197–2206, 2010.</p>
+  </div>
+  <aside class="notes">Main reference for the whole talk; the cascaded H-bridge is Chapter 7. Simulations use ideal switches and a 60 Hz fundamental.</aside>
+</section>
+
+<!-- 3 why CHB: 13-level example -->
+<section class="slide" data-ref="Wu &amp; Narimani, Ch. 1 and Ch. 7">
+  <div class="head"><h2>Why Cascaded H-Bridge Multilevel Inverters?</h2><div class="sub">Example: three-phase 13-level CHB inverter</div></div>
+  <div class="body" style="gap:40px">
+    <div data-sim="chb13" style="flex:none; width:840px; display:flex; justify-content:center">
+      <svg viewBox="0 0 880 660" width="830" height="622" role="img" aria-label="Three-phase 13-level cascaded H-bridge inverter: six H-bridge cells in series in each phase, Y-connected, feeding a three-phase load"></svg>
+    </div>
+    <div class="side" style="width:500px; gap:12px">
+      <div class="colhead" style="font-size:24px; margin:0"><span class="k" style="background:var(--c1)"></span>Why needed</div>
+      <ul class="say" style="gap:8px">
+        <li>MV loads need 2.3–13.8 kV.</li>
+        <li>Cells in series share the voltage.</li>
+        <li>More levels give a smoother output.</li>
+      </ul>
+      <div class="colhead" style="font-size:24px; margin:10px 0 0"><span class="k" style="background:var(--c3)"></span>Use when</div>
+      <ul class="say" style="gap:8px">
+        <li>MV drives: pumps, fans, compressors.</li>
+        <li>STATCOM, PV and battery systems.</li>
+        <li>Many levels are needed.</li>
+      </ul>
+      <div class="colhead" style="font-size:24px; margin:10px 0 0"><span class="k" style="background:var(--c4)"></span>Avoid when</div>
+      <ul class="say" style="gap:8px">
+        <li>Power must flow back to the grid.</li>
+        <li>A common DC link is needed.</li>
+        <li>Voltage is low or few levels are enough.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">A three-phase 13-level CHB: six identical H-bridge cells in series in each phase, each with its own isolated DC source E; the three phases are Y-connected and feed the load. Each cell gives +E, 0 or −E, so the phase voltage has 13 levels. Why: medium-voltage loads need kilovolts, cells in series share that voltage, and many small steps give a nearly sinusoidal output. Use it for MV drives of pumps, fans and compressors, and where separate DC sources already exist (PV, batteries) or are not needed (STATCOM). Avoid it when power must flow back: the cells are fed by diode rectifiers, which conduct one way only. Avoid it when one shared DC link is needed, such as HVDC: every CHB cell has its own isolated DC side, so there is no single DC bus; the MMC is used there. For low voltage or three levels, a two-level or NPC inverter is simpler.</aside>
+</section>
+
+<!-- 4 H-bridge cell -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.2, Fig. 7.2-1">
   <div class="head"><h2>Single-Phase H-Bridge Cell</h2></div>
   <div class="body">
@@ -169,7 +236,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Press the rows. +Vd: S1 and S2. −Vd: S3 and S4. Zero from +Vd: S2 turns off and the load current freewheels through S1 and D3. The other zero state: S1 turns off and the current freewheels through S2 and D4. The table shows gate signals: S3 (or S4) gets its complementary gate signal, but it only carries current if the load current reverses. Switches in one leg are complementary, so two gate signals per cell are enough.</aside>
 </section>
 
-<!-- 3 bipolar vs unipolar -->
+<!-- 5 bipolar vs unipolar -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.2, Figs. 7.2-2 and 7.2-4">
   <div class="head"><h2>Bipolar and Unipolar PWM</h2><div class="sub">f<sub>m</sub> = 60 Hz, f<sub>cr</sub> = f<sub>sw,dev</sub> = 900 Hz (m<sub>f</sub> = 15), m<sub>a</sub> = 0.8</div></div>
   <div class="body">
@@ -183,7 +250,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">A sine reference is compared with a triangular carrier; the carrier frequency is the IGBT switching frequency. Bipolar: S1 and S3 are complementary, vAB is only +Vd or −Vd and the harmonics sit around mf. Unipolar: two references 180° apart, S1 and S3 switch independently, vAB has three levels and the inverter switching frequency doubles while the IGBT frequency is unchanged.</aside>
 </section>
 
-<!-- 4 unipolar: shift reference or carrier -->
+<!-- 6 unipolar: shift reference or carrier -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.2">
   <div class="head"><h2>Unipolar PWM</h2><div class="sub">Shift the reference or shift the carrier: same result</div></div>
   <div class="body">
@@ -205,7 +272,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Top: two references, vm and −vm, against one carrier. Middle: one reference against two carriers 180° apart. Both give the same gate signals, so vAN, vBN and vAB are the same. Each leg pulses at fcr and vAB at 2fcr. In a CHB every cell needs its own carrier phase anyway, so all shifting is done on the carriers and one common reference drives every cell.</aside>
 </section>
 
-<!-- 5 CHB topology -->
+<!-- 7 CHB topology -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.3.1, Fig. 7.3-1">
   <div class="head"><h2>Cascaded H-Bridge Topology – Equal DC Voltages</h2></div>
   <div class="body" data-sim="topo" style="gap:40px">
@@ -226,7 +293,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Fig. 7.3-1: each phase has two H-bridge cells, H1 and H2, connected in series. The bottoms of the three phases join at the neutral N, and A, B and C feed the load. Every cell has its own isolated DC source E, so it can output +E, 0 or −E, and the phase voltage vAN = vH1 + vH2 has five levels.</aside>
 </section>
 
-<!-- 6 switching states -->
+<!-- 8 switching states -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.3.1, Table 7.3-1">
   <div class="head"><h2>Five-Level CHB Topology</h2><div class="sub">Switching states and redundancy</div></div>
   <div class="body" style="gap:50px">
@@ -246,7 +313,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">vAN = vH1 + vH2. Choose a level, then a row: the drawing shows which switches are on. +E can be made in four ways and 0 in six. The number of levels is always odd, which differs from other multilevel topologies, and the three-phase inverter needs 6(m − 1) switches, 24 for five levels.</aside>
 </section>
 
-<!-- 7 unequal DC -->
+<!-- 9 unequal DC -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.3.2, Fig. 7.3-3">
   <div class="head"><h2>Cascaded H-Bridge Topology – Unequal DC Voltages</h2><div class="sub">More levels without more cells</div></div>
   <div class="body" data-sim="unequal" style="gap:28px">
@@ -261,7 +328,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Three equal cells give seven levels. Two cells with E and 2E also give seven, and E with 3E gives nine, the same as four equal cells.</aside>
 </section>
 
-<!-- 8 redundancy -->
+<!-- 10 redundancy -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.3.2, Table 7.3-2">
   <div class="head"><h2>Cascaded H-Bridge Topology – Unequal DC Voltages</h2><div class="sub">Seven levels: equal vs unequal</div></div>
   <div class="body">
@@ -278,7 +345,34 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Number of switching states for each level, counting both zero states of every cell. Equal DC (three cells) has up to 20 ways to make zero; unequal DC (E and 2E) has at most four. Different cells also mean different spare parts and designs.</aside>
 </section>
 
-<!-- 9 PS-PWM principle -->
+<!-- 11 CHB pros/cons -->
+<section class="slide" data-ref="Malinowski et al., 2010; Wu &amp; Narimani, Ch. 7">
+  <div class="head"><h2>Cascaded H-Bridge Inverters</h2><div class="sub">Advantages and disadvantages</div></div>
+  <div class="body"><div style="display:flex; gap:80px; width:100%; align-items:flex-start">
+    <div style="flex:1">
+      <div class="colhead"><span class="k" style="background:var(--c3)"></span>Advantages</div>
+      <ul class="plain">
+        <li><b>Modular</b>Identical cells; add cells for more voltage.</li>
+        <li><b>Many levels</b>Low THD and dv/dt, small filter.</li>
+        <li><b>Low-voltage devices</b>Each cell blocks only E.</li>
+        <li><b>Redundant states</b>Flexible switching patterns.</li>
+        <li><b>Fault tolerant</b>A failed cell can be bypassed.</li>
+      </ul>
+    </div>
+    <div style="flex:1">
+      <div class="colhead"><span class="k" style="background:var(--c4)"></span>Disadvantages</div>
+      <ul class="plain">
+        <li><b>Isolated DC sources</b>Bulky phase-shifting transformer.</li>
+        <li><b>Many components</b>6(m&nbsp;−&nbsp;1) switches, drivers and sensors.</li>
+        <li><b>No regeneration</b>Diode-fed cells cannot return power.</li>
+        <li><b>No common DC link</b>Unsuited to back-to-back or HVDC.</li>
+      </ul>
+    </div>
+  </div></div>
+  <aside class="notes">The advantages come from building the phase out of identical low-voltage cells: modular, many levels, redundant switching states and cell bypass. The price is the isolated DC supply of every cell, which for a drive means a phase-shifting transformer with diode rectifiers. With diode rectifiers the cells cannot send power back, and there is no common DC link.</aside>
+</section>
+
+<!-- 12 PS-PWM principle -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.1, Fig. 7.4-1">
   <div class="head"><h2>Carrier-Based PWM Schemes – Phase-Shifted PWM</h2><div class="sub">Seven levels, m<sub>f</sub> = 3 for clarity, m<sub>a</sub> = 0.8</div></div>
   <div class="body" data-sim="ps" style="gap:24px">
@@ -302,7 +396,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Pick a cell, or click it in the drawing. Its carrier pair is highlighted: vcrk (solid) gives S1k, vcrk− (dashed, inverted) gives S3k. The lower switches get the complementary signals. Each cell works like the unipolar H-bridge; only the carrier phase differs between cells, by 60° for seven levels.</aside>
 </section>
 
-<!-- 10 PS-PWM harmonics -->
+<!-- 13 PS-PWM harmonics -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.1, Fig. 7.4-2">
   <div class="head"><h2>Phase-Shifted PWM</h2><div class="sub">m<sub>f</sub> = 10, f<sub>cr</sub> = 600 Hz, m<sub>a</sub> = 0.8</div></div>
   <div class="body">
@@ -317,7 +411,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Grey bars show the previous waveform's spectrum. The sideband group around 2mf that each cell has cancels when the three cells add up, so vAN starts at 6mf. In the line voltage the triplen harmonics also cancel, and vAB has 13 levels with a peak of 6E.</aside>
 </section>
 
-<!-- 11 PS-PWM frequency and voltage -->
+<!-- 14 PS-PWM frequency and voltage -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.1">
   <div class="head"><h2>Phase-Shifted PWM</h2><div class="sub">Switching frequency and output voltage</div></div>
   <div class="body" style="gap:60px; align-items:stretch">
@@ -340,7 +434,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Every device switches at fsw,dev, but the phase voltage sees 2H times that, because the cells are interleaved. Third-harmonic injection flattens the reference so ma can rise to 1.155 without overmodulation; the third harmonic cancels in the line voltage.</aside>
 </section>
 
-<!-- 12 LS carriers -->
+<!-- 15 LS carriers -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.2, Fig. 7.4-4; McGrath &amp; Holmes, 2002">
   <div class="head"><h2>Carrier-Based PWM Schemes – Level-Shifted PWM</h2><div class="sub">Carrier arrangements</div></div>
   <div class="body">
@@ -359,7 +453,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">IPD: in phase disposition, APOD: alternative phase opposite disposition, POD: phase opposite disposition. The modulation index is defined differently only because the carriers are arranged differently; in both cases ma = 1 gives the same maximum linear output.</aside>
 </section>
 
-<!-- 13 LS waveforms -->
+<!-- 16 LS waveforms -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.2, Fig. 7.4-5">
   <div class="head"><h2>Level-Shifted PWM</h2><div class="sub">IPD, seven levels, f<sub>cr</sub> = 1080 Hz (m<sub>f</sub> = 18), m<sub>a</sub> = 0.8</div></div>
   <div class="body" data-sim="ls" style="gap:24px">
@@ -375,7 +469,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">H1 takes the outer bands, H3 the inner bands. The upper carrier of a pair gives S1 of that cell, the lower one gives S3. Each cell output is 0 or +E in the positive half cycle and 0 or −E in the negative half, so it is unipolar. Counting pulses: the cells switch at 240, 180 and 120 Hz, average 180 Hz = 1080/6.</aside>
 </section>
 
-<!-- 14 LS rotation -->
+<!-- 17 LS rotation -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.2, Fig. 7.4-6">
   <div class="head"><h2>Level-Shifted PWM</h2><div class="sub">Uneven device use and rotation</div></div>
   <div class="body">
@@ -389,7 +483,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Without rotation the inner cell conducts 86% of the time and the outer cell 10%, and their devices switch at different rates. Rotating which band each cell uses every fundamental cycle makes all cells equal over three cycles, and the phase voltage does not change.</aside>
 </section>
 
-<!-- 15 comparison -->
+<!-- 18 comparison -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.4.3, Table 7.4-1">
   <div class="head"><h2>Phase-Shifted vs Level-Shifted</h2><div class="sub">Same average f<sub>sw,dev</sub> = 600 Hz for a fair comparison</div></div>
   <div class="body" style="gap:60px">
@@ -411,7 +505,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Same average device switching frequency: phase-shifted uses fcr = 600 Hz, level-shifted uses fcr = 3600 Hz. Level-shifted gives lower line-voltage THD, most clearly at low modulation index. Phase-shifted shares the stress equally and needs no rotation.</aside>
 </section>
 
-<!-- 16 staircase SHE -->
+<!-- 19 staircase SHE -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.5, Fig. 7.5-1">
   <div class="head"><h2>Staircase Modulation</h2><div class="sub">Selective harmonic elimination, seven levels, m<sub>a</sub> = 0.8</div></div>
   <div class="body" style="gap:40px">
@@ -426,7 +520,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Each cell gives one pulse per half cycle with its own angle. With three cells we have three equations: one fixes the fundamental, two cancel the 5th and 7th. At ma = 0.8 the angles are 57.1°, 28.7° and 11.5°. Triplen harmonics stay in vAN but cancel in vAB.</aside>
 </section>
 
-<!-- 17 staircase pros/cons -->
+<!-- 20 staircase pros/cons -->
 <section class="slide" data-ref="Wu &amp; Narimani, §7.5">
   <div class="head"><h2>Staircase Modulation</h2><div class="sub">Looks simple, but has drawbacks</div></div>
   <div class="body"><div style="display:flex; gap:80px; width:100%; align-items:flex-start">
@@ -452,11 +546,11 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
   <aside class="notes">Compared with carrier-based PWM the losses are very low, but the remaining harmonics are close to the fundamental, the waveform degrades at low speed, the angle tables have gaps, and the cells do not share power equally unless the angles are rotated.</aside>
 </section>
 
-<!-- 18 summary -->
-<section class="slide" data-ref="Wu &amp; Narimani, §7.6; Innomotics, Catalog D 17, 2024">
+<!-- 21 summary -->
+<section class="slide" data-ref="Wu &amp; Narimani, §7.6">
   <div class="head"><h2>Summary</h2></div>
   <div class="body" style="align-items:center; gap:56px">
-    <ul class="say" style="flex:1; gap:16px">
+    <ul class="say" style="flex:1; gap:20px; max-width:1200px">
       <li>CHB: single-phase H-bridge cells in series on the ac side.</li>
       <li>Number of cells set by operating voltage, harmonic requirements and cost.</li>
       <li>Identical cells: modular design, redundant states, low dv/dt and THD.</li>
@@ -465,39 +559,11 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
       <li>PS-PWM shares the stress evenly; LS-PWM gives lower THD but needs rotation; staircase has the lowest losses.</li>
       <li>Widely used in high-power medium-voltage drives.</li>
     </ul>
-    <div class="card" style="width:520px; flex:none">
-      <div class="note" style="font-size:18px">Real-world example</div>
-      <h3>Perfect Harmony GH180</h3>
-      <div class="note" style="margin-top:-6px">Innomotics, formerly Siemens and ROBICON</div>
-      <ul class="say" style="gap:10px; margin-top:8px">
-        <li style="font-size:21px">Cell-based CHB drive since 1994</li>
-        <li style="font-size:21px">Up to 8 cells per phase, 2.3 to 11 kV output</li>
-        <li style="font-size:21px">18- to 54-pulse diode rectifier</li>
-        <li style="font-size:21px">13 to 33 levels in the line voltage</li>
-        <li style="font-size:21px">Bypasses a failed cell and keeps running</li>
-        <li style="font-size:21px">Pumps, fans, compressors; 25,000+ units</li>
-      </ul>
-    </div>
   </div>
-  <aside class="notes">The Perfect Harmony drive is the classic industrial CHB: P. Hammond's design, launched by ROBICON in 1994 and now sold by Innomotics. Figures from the 2024 catalog D 17.</aside>
+  <aside class="notes">The CHB in one slide: identical H-bridge cells in series, each with its own isolated DC supply; equal DC voltages keep the design modular; phase-shifted PWM, level-shifted PWM or staircase modulation, chosen by losses, THD and how evenly the cells must be used.</aside>
 </section>
 
-<!-- 19 references -->
-<section class="slide" data-ref="">
-  <div class="head"><h2>References</h2></div>
-  <ol class="refs">
-    <li>B. Wu and M. Narimani, <i>High-Power Converters and AC Drives</i>, 2nd ed., Wiley-IEEE Press, 2017, Ch. 7.</li>
-    <li>B. P. McGrath and D. G. Holmes, “Multicarrier PWM strategies for multilevel inverters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 49, no. 4, pp. 858–867, 2002.</li>
-    <li>M. Malinowski, K. Gopakumar, J. Rodríguez and M. A. Pérez, “A survey on cascaded multilevel inverters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 57, no. 7, 2010.</li>
-    <li>J. Rodríguez, J.-S. Lai and F. Z. Peng, “Multilevel inverters: a survey of topologies, controls, and applications,” <i>IEEE Trans. Ind. Electron.</i>, vol. 49, no. 4, 2002.</li>
-    <li>P. W. Hammond, “A new approach to enhance power quality for medium voltage AC drives,” <i>IEEE Trans. Ind. Appl.</i>, vol. 33, no. 1, 1997.</li>
-    <li>S. Kouro et al., “Recent advances and industrial applications of multilevel converters,” <i>IEEE Trans. Ind. Electron.</i>, vol. 57, no. 8, 2010.</li>
-    <li>Innomotics, <i>Perfect Harmony GH180 Medium Voltage Drives</i>, Catalog D 17, ed. 09/2024.</li>
-  </ol>
-  <aside class="notes">Simulations use ideal switches and a 60 Hz fundamental.</aside>
-</section>
-
-<div id="foot"><div id="ref"></div><div style="display:flex; gap:14px; align-items:center"><span id="nav"><button id="bPrev" aria-label="Previous slide">◀</button><button id="bNext" aria-label="Next slide">▶</button></span><span id="count"></span></div></div>
+<div id="foot"><div class="fl"><div id="ref"></div><div id="fline">EE561 Advanced Static Power Conversion · Multilevel Inverters · Cascaded H-bridge · Elif Topaloğlu</div></div><div style="display:flex; gap:14px; align-items:center"><span id="nav"><button id="bPrev" aria-label="Previous slide">◀</button><button id="bNext" aria-label="Next slide">▶</button></span><span id="count"></span></div></div>
 <div id="drawer" role="note"><div id="noteText"></div></div>
 </div></div>
 <script>
@@ -1271,6 +1337,47 @@ D.register('stair', el => {
   return { draw };
 });
 
+/* ================= why CHB: three-phase 13-level figure ================= */
+D.register('chb13', el => {
+  const svg = el.querySelector('svg');
+  let done = false;
+  function draw() {
+    if (done) return; done = true;
+    const s = .44, H = 6, X0 = [64, 344, 624], ph = ['A', 'B', 'C'], y1 = 150, step = 78, yt = 132, yN = 636;
+    const dot = (x, y) => `<circle cx="${x}" cy="${y}" r="3.4" fill="var(--ink)"/>`;
+    const Y = k => y1 + k * step, cw = 210 * s;
+    let q = '';
+    X0.forEach((x0, j) => {
+      const xT = x0 + cw;
+      for (let k = 0; k < H; k++) {
+        q += `<g class="mini" transform="translate(${x0} ${Y(k)}) scale(${s})">${bookCell(0, 0, { E: ' ' })}</g>`;
+        q += `<text class="lbl" x="${x0 - 10}" y="${Y(k) + 42}" text-anchor="end" style="font-size:15px; font-style:italic">E</text>`;
+        if (j === 0) q += `<text class="lbl" x="${x0 - 28}" y="${Y(k) + 42}" text-anchor="end" style="font-size:17px; font-weight:700; font-style:italic">H${k + 1}</text>`;
+      }
+      let w = `M${xT} ${yt + 5} V${Y(0) + 68 * s}`;
+      for (let k = 0; k < H - 1; k++) w += ` M${xT} ${Y(k) + 95 * s} V${Y(k + 1) + 68 * s}`;
+      w += ` M${xT} ${Y(H - 1) + 95 * s} V${yN}`;
+      q += `<path class="w" d="${w}" style="stroke-width:2"/>`;
+      q += `<circle cx="${xT}" cy="${yt}" r="5" fill="var(--paper)" class="w" style="stroke-width:2"/><text class="lbl" x="${xT + 11}" y="${yt + 6}" style="font-size:19px; font-style:italic">${ph[j]}</text>`;
+    });
+    const xA = X0[0] + cw, xB = X0[1] + cw, xC = X0[2] + cw, lx = xB, ly = 68, lr = 42, yl = 48;
+    const eL = [lx - 32, yl], eR = [lx + 32, yl], eB = [lx, ly + 28], O = [lx, ly];
+    q += `<path class="w" d="M${xA} ${yt - 5} V${yl} H${eL[0]} M${xC} ${yt - 5} V${yl} H${eR[0]} M${xB} ${yt - 5} V${eB[1]}" style="stroke-width:2"/>`;
+    q += `<circle cx="${lx}" cy="${ly}" r="${lr}" fill="none" class="w" style="stroke-width:2.4"/>`;
+    [eL, eR, eB].forEach(([ex, ey]) => {
+      const mx = (ex + O[0]) / 2, my = (ey + O[1]) / 2, ang = Math.atan2(ey - O[1], ex - O[0]) * 180 / Math.PI;
+      q += `<path class="w" d="M${ex} ${ey} L${O[0]} ${O[1]}" style="stroke-width:2"/>`;
+      q += `<rect x="${mx - 8}" y="${my - 4}" width="16" height="8" fill="var(--ink)" transform="rotate(${ang} ${mx} ${my})"/>`;
+    });
+    q += dot(O[0], O[1]) + `<text class="lbl" x="${lx + lr + 12}" y="${ly + 6}" style="font-size:17px">LOAD</text>`;
+    q += `<path class="w" d="M${xA} ${yN} H${xC}" style="stroke-width:2"/>` + dot(xB, yN);
+    q += `<text class="lbl" x="${xB + 10}" y="${yN - 8}" style="font-size:19px; font-style:italic">N</text>`;
+    svg.innerHTML = q;
+  }
+  return { draw };
+});
+
+document.querySelectorAll(".slide:not(#s-title)").forEach(h => h.insertAdjacentHTML("beforeend", '<div class="logos"><img class="em" src="img/odtu_emblem.svg" alt="ODTÜ"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>'));
 D.boot();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => D.redraw());
 </script>

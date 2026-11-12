@@ -31,7 +31,7 @@
     if (!s.classList.contains('no-chrome')) {
       s.append(K.h('footer', { class: 'sf' },
         K.h('span', null, 'EE561 Advanced Static Power Conversion · Multilevel Converters · Sefer İdacı' + (s.dataset.section === 'backup' ? ' · backup' : '')),
-        K.h('span', null, String(i + 1))));
+        K.h('span', null, (s._dots = K.h('span', { class: 'dots' })), String(i + 1))));
       const head = s.querySelector('.sh');
       if (head) head.append(K.h('div', { class: 'logos' },
         K.h('img', { class: 'em', src: 'img/odtu_emblem.svg', alt: 'ODTÜ' }),
@@ -92,6 +92,10 @@
     }
     step = Math.max(0, Math.min(maxStep(s), k == null ? 0 : k));
     applyStep(s, step);
+    if (s._dots) { // one dot per click of this slide
+      const m = maxStep(s);
+      s._dots.replaceChildren(...(m ? Array.from({ length: m + 1 }, (_, j) => K.h('i', { class: j <= step ? 'on' : '' })) : []));
+    }
     progress.style.width = ((i + 1) / slides.length) * 100 + '%';
     try { history.replaceState(null, '', '#' + (i + 1) + (step ? '.' + step : '')); } catch (e) { /* file:// quirk */ }
     renderNotes();
