@@ -629,3 +629,77 @@
     return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o != null && o !== P.r0) { P.r0 = o; rS.set(o); draw(); } } };
   };
 })();
+
+/* Flying-capacitor leg, simplest view: states 10 and 01 both give 0 V; one charges the capacitor, the other
+   discharges it (for a positive output current). Below: capacitor voltage after a disturbance, switching period by
+   switching period, when the two states are simply alternated or chosen by the error. */
+(function () {
+  'use strict';
+  const { h, s } = K;
+  SIMS.fcsimple = function (host, cfg) {
+    const P = { st: '10', mode: null, k: 0 };
+    const svg = s('svg', { viewBox: '0 10 420 360', style: 'width:519px;height:445px' });
+    const add = (tag, a, txt) => { const e = s(tag, a); if (txt != null) e.textContent = txt; svg.append(e); return e; };
+    const ln = (x1, y1, x2, y2) => add('line', { x1, y1, x2, y2, style: 'stroke:var(--ink2);stroke-width:2.2' });
+    const X = 230, yP = 24, yN = 356, n1 = 112, a = 190, n2 = 268, xc = 120;
+    const path = add('polyline', { points: '', style: 'fill:none;stroke:var(--flow);stroke-width:7;opacity:.55;stroke-linejoin:round' });
+    ln(60, yP, 300, yP); ln(60, yN, 300, yN);
+    add('text', { x: 310, y: yP + 5, style: 'font:700 15px var(--font);fill:var(--ink)' }, '+400 V');
+    add('text', { x: 310, y: yN + 5, style: 'font:700 15px var(--font);fill:var(--ink)' }, '−400 V');
+    const sw = {}, swT = {};
+    [['S1', 44], ['S2', 126], ['S2′', 206], ['S1′', 288]].forEach(([n, y]) => {
+      sw[n] = add('rect', { x: X - 26, y, width: 52, height: 40, rx: 4 });
+      swT[n] = add('text', { x: X, y: y + 25, 'text-anchor': 'middle' }, n);
+    });
+    ln(X, yP, X, 44); ln(X, 84, X, 126); ln(X, 166, X, 206); ln(X, 246, X, 288); ln(X, 328, X, yN);
+    add('circle', { cx: X, cy: n1 - 7, r: 4, style: 'fill:var(--ink2)' }); add('circle', { cx: X, cy: n2 - 2, r: 4, style: 'fill:var(--ink2)' });
+    ln(X, n1 - 7, xc, n1 - 7); ln(xc, n1 - 7, xc, 180); ln(xc - 24, 180, xc + 24, 180); ln(xc - 24, 192, xc + 24, 192); ln(xc, 192, xc, n2 - 2); ln(xc, n2 - 2, X, n2 - 2);
+    const cl = add('text', { x: xc - 34, y: 190, 'text-anchor': 'end', style: 'font:700 16px var(--font);fill:var(--ink)' }, 'C'); const sub = s('tspan', { 'baseline-shift': 'sub', style: 'font-size:12px' }); sub.textContent = 'fc'; cl.append(sub);
+    add('text', { x: xc - 34, y: 208, 'text-anchor': 'end', style: 'font:600 13px var(--font);fill:var(--muted)' }, '400 V');
+    add('text', { x: xc + 30, y: 172, style: 'font:700 15px var(--font);fill:var(--ink)' }, '+');
+    add('circle', { cx: X, cy: a - 4, r: 4, style: 'fill:var(--ink2)' }); ln(X, a - 4, 330, a - 4);
+    add('circle', { cx: 336, cy: a - 4, r: 6, style: 'fill:var(--paper);stroke:var(--ink2);stroke-width:2' });
+    add('text', { x: 348, y: a - 18, style: 'font:700 16px var(--font);fill:var(--ink)' }, 'a: 0 V');
+    add('path', { d: `M300,${a - 12} l14,8 l-14,8 z`, style: 'fill:var(--s2)' }); add('text', { x: 290, y: a + 22, style: 'font:600 13px var(--font);fill:var(--s2)' }, 'i > 0');
+    const capArrow = add('text', { x: xc - 14, y: 246, 'text-anchor': 'end', style: 'font:700 15px var(--font)' });
+    const segSt = K.seg({ label: 'Zero state', options: [['10', 'state 10'], ['01', 'state 01']], value: P.st, onChange: (v) => { P.st = v; draw(); } });
+    const segM = K.seg({ label: 'After a −60 V disturbance', options: [['alt', 'alternate 10/01'], ['bal', 'choose by the error']], value: P.mode, onChange: (v) => { P.mode = v; draw(); } });
+    const cv = K.canvas(cfg.w2 || 560, 340);
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = '520px 1fr';
+    host.style.gap = '16px';
+    host.append(h('div', { class: 'sim-col' }, svg, segSt.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, segM.el, cv.el,
+      h('div', { class: 'tiny', html: 'Each switching period the leg spends some time at 0 V; with 20 A output current that moves the capacitor voltage by about 10 V per period.' })));
+    function draw() {
+      const ten = P.st === '10';
+      const on = ten ? ['S1', 'S2′'] : ['S2', 'S1′'];
+      Object.entries(sw).forEach(([n, r]) => { const o = on.includes(n); r.setAttribute('style', `fill:${o ? 'var(--s2)' : 'var(--panel)'};stroke:var(--ink2);stroke-width:2`); swT[n].setAttribute('style', `font:700 15px var(--font);fill:${o ? '#fff' : 'var(--ink)'}`); });
+      path.setAttribute('points', ten
+        ? `${X},${yP} ${X},${n1 - 7} ${xc},${n1 - 7} ${xc},${n2 - 2} ${X},${n2 - 2} ${X},${a - 4} 330,${a - 4}`
+        : `${X},${yN} ${X},${n2 - 2} ${xc},${n2 - 2} ${xc},${n1 - 7} ${X},${n1 - 7} ${X},${a - 4} 330,${a - 4}`);
+      capArrow.textContent = ten ? 'charges ↑' : 'discharges ↓';
+      capArrow.setAttribute('style', `font:700 15px var(--font);fill:${ten ? 'var(--good)' : 'var(--bad)'}`);
+      const ctx = cv.ctx; cv.clear();
+      const N = 30, v = [340], st = [];
+      for (let n = 0; n < N; n++) {
+        let s10;
+        if (P.mode === 'bal') s10 = v[n] < 400; else s10 = n % 2 === 0;
+        st.push(s10); v.push(v[n] + (s10 ? 10 : -10));
+      }
+      const show = P.mode != null;
+      K.plot(ctx, { x: 56, y: 30, w: cv.w - 70, h: cv.h - 70 }, {
+        xlim: [0, N], ylim: [320, 420], yticks: [[340, '340'], [360, '360'], [380, '380'], [400, '400']], xticks: [[0, '0'], [10, '10'], [20, '20'], [30, '30 periods']],
+        hlines: [{ v: 400, color: K.css('--good'), dash: [6, 4], label: 'target 400 V' }],
+        series: show ? [{ y: v, x0: 0, dx: 1, color: K.css('--s1'), width: 3, step: true, n: N + 1 }] : [],
+        title: 'Flying-capacitor voltage [V], period by period',
+      });
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; const o = {}; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) Object.assign(o, ST[key]); let ch = false;
+      if (o.st && o.st !== P.st) { P.st = o.st; segSt.set(o.st); ch = true; }
+      if ('mode' in o && o.mode !== P.mode) { P.mode = o.mode; if (o.mode) segM.set(o.mode); ch = true; }
+      if (ch) draw(); } };
+  };
+})();

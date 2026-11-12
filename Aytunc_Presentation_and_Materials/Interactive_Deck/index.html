@@ -480,23 +480,23 @@
     </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="2.5" data-title="Flying-capacitor balancing">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · the same idea inside one leg</div><h2>Flying capacitor: the same free choice, inside one leg</h2></div></div>
-  <div class="body" style="grid-template-columns: 430px 1fr; gap:24px">
-    <div class="stack" style="gap:14px">
-      <div><h3 style="font-size:22px;margin:0">① Two ways to make 0 V</h3><p class="small" style="font-size:20px">A flying-capacitor leg has a capacitor charged to <span class="m">V</span><sub>dc</sub>/2 between its switch pairs. The middle level can be made with state 10 or state 01.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② They push its voltage opposite ways</h3><p class="small" style="font-size:20px">In one of them the load current charges the capacitor, in the other it discharges it. Same output, opposite effect: just like POO and ONN.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Just alternating is not enough</h3><p class="small" style="font-size:20px">Taking 10 and 01 in turn keeps the charge equal on average, but a disturbance stays (press “Disturb”): nothing pulls it back.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ Choose by the error</h3><p class="small" style="font-size:20px">Measure the capacitor voltage. Too low: pick the state that charges it; too high: the one that discharges it. The error is gone within a few switching periods.</p></div>
+<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="Flying-capacitor balancing">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · the same idea inside one leg</div><h2>Flying capacitor: two ways to make 0 V</h2></div></div>
+  <div class="body" style="grid-template-columns: 380px 1fr; gap:24px">
+    <div class="stack" style="gap:16px">
+      <div><h3 style="font-size:22px;margin:0">① Two ways to make 0 V</h3><p class="small" style="font-size:20px">A capacitor sits between the switch pairs, charged to 400 V. State 10 and state 01 both put the output at 0 V.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② They push it opposite ways</h3><p class="small" style="font-size:20px">Follow the current: in 10 it charges the capacitor, in 01 it discharges it. Same output, opposite effect.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ Just taking turns</h3><p class="small" style="font-size:20px">After a disturbance the capacitor is 60 V low. Taking 10 and 01 in turn does not fix it: the error stays.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ Choose by the error</h3><p class="small" style="font-size:20px">Too low? Pick the state that charges it. Too high? The one that discharges it. Back at 400 V in a few periods.</p></div>
     </div>
-    <div data-sim="leg" data-config='{"topo":"fc","mode":"run","lockMode":true,"pol":"alt","m":0.8,"plotAH":236,"plotBH":206,"steps":{"0":{"pol":"alt"},"3":{"pol":"bal"}}}'></div>
+    <div data-sim="fcsimple" data-config='{"w2":500,"steps":{"0":{"st":"10","mode":null},"1":{"st":"01"},"2":{"mode":"alt"},"3":{"mode":"bal"}}}'></div>
   </div>
-  <aside class="notes"><p><b>2.5 min.</b> Clicks 0–2 alternate 10/01; click 3 switches to “balance V<sub>fc</sub>”.</p>
+  <aside class="notes"><p><b>2 min.</b> Same idea as POO / ONN on the NPC, but inside one leg.</p>
     <ul>
-      <li><b>①</b> Point at the schematic: the capacitor between S1/S2 and S1′/S2′.</li>
-      <li><b>②</b> Which one charges depends on the current direction: for i<sub>a</sub> &gt; 0 state 10 charges, 01 discharges; the rule flips when the current flips.</li>
-      <li><b>③</b> Press “Disturb V<sub>fc</sub>”: with alternating states the error just stays.</li>
-      <li><b>④</b> Click: closed loop. The rule is sign(i<sub>a</sub>)·(V<sub>fc</sub>* − V<sub>fc</sub>). Press Disturb again: it comes back within a few switching periods.</li>
+      <li><b>①</b> State 10 = S1 and S2′ on; state 01 = S2 and S1′ on. In both, the output sits at +400 − 400 = 0 V (through the capacitor).</li>
+      <li><b>②</b> Click shows state 01: the current now flows through the capacitor the other way. For i<sub>a</sub> &gt; 0, 10 charges and 01 discharges; when the current reverses, the rule flips.</li>
+      <li><b>③</b> Alternating keeps the average charge zero, so an error that is already there is never removed.</li>
+      <li><b>④</b> The rule: pick 10 if sign(i<sub>a</sub>)·(V<sub>fc</sub>* − V<sub>fc</sub>) &gt; 0, else 01. In practice ΔV per period = i·t<sub>0</sub>/C<sub>fc</sub>; the plot uses 10 V per period for clarity.</li>
     </ul></aside>
 </section>
 
