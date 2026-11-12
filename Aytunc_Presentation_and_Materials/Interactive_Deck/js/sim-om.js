@@ -409,3 +409,111 @@
     return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o && o !== P.L.join('')) setState(o); } };
   };
 })();
+
+/* Neutral-point current over one output cycle (carrier PWM, average model): time at O per leg, each leg's share,
+   their sum, and the resulting capacitor voltage ripple. Builds up with the slide's clicks. */
+(function () {
+  'use strict';
+  const { h } = K;
+  SIMS.npripple = function (host, cfg) {
+    const N = 720, F1 = 50, I = 50;
+    const P = { m: 0.8, phi: 0, C: 4.7, k: 99 };
+    const cv = K.canvas(cfg.w || 680, 600);
+    const ctl = [
+      K.slider({ label: 'm', min: 0.1, max: 1, step: 0.01, value: P.m, fmt: (v) => v.toFixed(2), onInput: (v) => { P.m = v; draw(); } }),
+      K.slider({ label: 'φ (current lag)', min: -180, max: 180, step: 5, value: P.phi, fmt: (v) => v + '°', onInput: (v) => { P.phi = v; draw(); } }),
+      K.slider({ label: 'C (each)', min: 1, max: 10, step: 0.1, value: P.C, fmt: (v) => v.toFixed(1) + ' mF', onInput: (v) => { P.C = v; draw(); } }),
+    ];
+    const roF = K.readout('Midpoint current repeats at', 'big'), roI = K.readout('Midpoint current, peak'), roV = K.readout('Wiggle of each capacitor (peak-to-peak)');
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = (cfg.w || 680) + 'px 1fr';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, ctl.map((c) => c.el), roF.el, roI.el, roV.el,
+      h('div', { class: 'tiny', html: 'Average over each switching period, 50 A peak phase current, f<sub>1</sub> = 50 Hz, V<sub>dc</sub> = 800 V.' })));
+    function draw() {
+      const phi = (P.phi * Math.PI) / 180, C = P.C * 1e-3, dt = 1 / F1 / N;
+      const x = [], tO = [[], [], []], sh = [[], [], []], iO = [];
+      for (let q = 0; q <= N; q++) {
+        const th = (K.TAU * q) / N; x.push((q / N) * 20);
+        let s = 0;
+        for (let k = 0; k < 3; k++) {
+          const r = P.m * Math.sin(th - (k * K.TAU) / 3), i = I * Math.sin(th - (k * K.TAU) / 3 - phi), t = 1 - Math.abs(r);
+          tO[k].push(t); sh[k].push(t * i); s += t * i;
+        }
+        iO.push(s);
+      }
+      const dv = [0]; for (let q = 1; q <= N; q++) dv.push(dv[q - 1] + ((iO[q - 1] + iO[q]) / 2) * dt / C);
+      const mean = dv.slice(0, N).reduce((a, b) => a + b, 0) / N;
+      const v1 = dv.map((d) => 400 + (d - mean) / 2), v2 = dv.map((d) => 400 - (d - mean) / 2);
+      const ctx = cv.ctx; cv.clear();
+      const cols = [K.css('--s2'), K.css('--s3'), K.css('--s4')], ink = K.css('--ink');
+      const xt = [0, 5, 10, 15, 20].map((v) => [v, v + ' ms']);
+      const k = P.k;
+      K.plot(ctx, { x: 62, y: 30, w: cv.w - 78, h: 130 }, {
+        xlim: [0, 20], ylim: [0, 1.05], yticks: [[0, '0'], [0.5, '50 %'], [1, '100 %']], xticks: xt,
+        series: tO.map((y, i) => ({ x, y, color: cols[i], width: 2.4 })), title: 'Time each leg spends at O: 1 − |r|', legend: [['leg a', cols[0]], ['leg b', cols[1]], ['leg c', cols[2]]],
+      });
+      if (k >= 1) {
+        const ser = sh.map((y, i) => ({ x, y, color: cols[i], width: 1.6, alpha: 0.75 }));
+        if (k >= 2) ser.push({ x, y: iO, color: ink, width: 3.2 });
+        K.plot(ctx, { x: 62, y: 210, w: cv.w - 78, h: 160 }, {
+          xlim: [0, 20], ylim: [-55, 55], yticks: [[-50, '−50'], [0, '0'], [50, '50']], xticks: xt,
+          series: ser, title: k >= 2 ? 'Each leg’s share (thin) and their sum: the midpoint current i_O [A]' : 'Each leg’s share of the midpoint current [A]',
+        });
+      }
+      if (k >= 3) {
+        const lo = Math.min(...v2, ...v1), hi = Math.max(...v1, ...v2), pad = Math.max(2, (hi - lo) * 0.3);
+        K.plot(ctx, { x: 62, y: 420, w: cv.w - 78, h: 140 }, {
+          xlim: [0, 20], ylim: [Math.floor(lo - pad), Math.ceil(hi + pad)], yticks: [[400, '400']], xticks: xt,
+          series: [{ x, y: v1, color: K.css('--s2'), width: 2.8 }, { x, y: v2, color: K.css('--s1'), width: 2.8 }],
+          title: 'Capacitor voltages [V]', legend: [['C1', K.css('--s2')], ['C2', K.css('--s1')]],
+        });
+      }
+      // dominant frequency of i_O
+      const sig = new Float64Array(512); for (let q = 0; q < 512; q++) { const th = (K.TAU * q) / 512; let s = 0; for (let kk = 0; kk < 3; kk++) { const r = P.m * Math.sin(th - (kk * K.TAU) / 3); s += (1 - Math.abs(r)) * I * Math.sin(th - (kk * K.TAU) / 3 - phi); } sig[q] = s; }
+      const amp = K.harmonics(sig); let hk = 1; for (let q = 1; q < 40; q++) if (amp[q] > amp[hk]) hk = q;
+      roF.set(k >= 2 ? hk * 50 + ' Hz <small class="muted">= ' + hk + ' × 50 Hz</small>' : '–');
+      roI.set(k >= 2 ? Math.round(Math.max(...iO.map(Math.abs))) + ' A' : '–');
+      roV.set(k >= 3 ? (Math.max(...v1) - Math.min(...v1)).toFixed(1) + ' V' : '–');
+    }
+    K.onTheme(draw);
+    draw();
+    return { step(kk) { P.k = kk; draw(); } };
+  };
+
+  /* Strength of the offset knob over one cycle: Σ sign(r_x)·i_x, its average (6/π)·I·cos φ. */
+  SIMS.authority = function (host, cfg) {
+    const N = 720, I = 50;
+    const P = { m: 0.8, phi: 0 };
+    const cv = K.canvas(cfg.w || 680, 430);
+    const phS = K.slider({ label: 'φ (current lag)', min: -180, max: 180, step: 5, value: P.phi, fmt: (v) => v + '°', onInput: (v) => { P.phi = v; draw(); } });
+    const roA = K.readout('Average strength', 'big'), roR = K.readout('Compared with unity power factor');
+    const quick = h('div', { class: 'row' }, ...[[0, 'φ = 0° (inverter)'], [90, '90° (reactive)'], [180, '180° (rectifier)']].map(([v, t]) => K.btn(t, () => { P.phi = v; phS.set(v); draw(); })));
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = (cfg.w || 680) + 'px 1fr';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '10px' } }, phS.el, quick, roA.el, roR.el,
+      h('div', { class: 'tiny', html: 'Strength = Σ sign(r<sub>x</sub>)·i<sub>x</sub>: current of the legs with a positive reference minus current of the legs with a negative one. A small offset r<sub>0</sub> changes the midpoint current by −r<sub>0</sub> × strength. 50 A peak.' })));
+    function draw() {
+      const phi = (P.phi * Math.PI) / 180, x = [], g = [];
+      for (let q = 0; q <= N; q++) {
+        const th = (K.TAU * q) / N; x.push((q / N) * 20);
+        let s = 0; for (let k = 0; k < 3; k++) s += Math.sign(Math.sin(th - (k * K.TAU) / 3)) * I * Math.sin(th - (k * K.TAU) / 3 - phi);
+        g.push(s);
+      }
+      const avg = g.slice(0, N).reduce((a, b) => a + b, 0) / N, ref = (6 / Math.PI) * I;
+      const ctx = cv.ctx; cv.clear();
+      const col = avg > 5 ? K.css('--good') : avg < -5 ? K.css('--bad') : K.css('--muted');
+      K.plot(ctx, { x: 62, y: 30, w: cv.w - 78, h: cv.h - 70 }, {
+        xlim: [0, 20], ylim: [-110, 110], yticks: [[-100, '−100'], [-50, '−50'], [0, '0'], [50, '50'], [100, '100']], xticks: [0, 5, 10, 15, 20].map((v) => [v, v + ' ms']),
+        bands: [{ y0: 0, y1: 110, color: 'rgba(46,125,50,.06)' }, { y0: -110, y1: 0, color: 'rgba(192,57,43,.06)' }],
+        hlines: [{ v: avg, color: col, width: 3, dash: [8, 5], label: 'average ' + Math.round(avg) + ' A' }],
+        series: [{ x, y: g, color: K.css('--ink'), width: 2.6 }], title: 'Strength of the offset knob over one cycle [A]',
+      });
+      roA.set(Math.round(avg) + ' A <small class="muted">= (6/π)·I·cos φ</small>');
+      roR.set((avg / ref * 100).toFixed(0) + ' % ' + (avg > 5 ? '<span class="pill ok">balances</span>' : avg < -5 ? '<span class="pill bad">sign flipped</span>' : '<span class="pill warn">no grip</span>'));
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o != null && o !== P.phi) { P.phi = o; phS.set(o); draw(); } } };
+  };
+})();

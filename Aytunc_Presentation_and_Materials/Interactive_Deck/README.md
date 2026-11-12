@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 55.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 58 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -41,25 +41,26 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
 | 13 | More levels: five levels, four carriers, same rule; PD vs POD (simulation) | 1.5 |
 | 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
-| 15 | ★ Why the two capacitors drift apart: legs at O move charge, it cancels on average, nothing pulls it back, so the modulator must steer it (simulation: the two capacitor voltages, leakage on at click 3) | 2 |
-| 16 | ★ Derivation: balancing authority ∝ cos φ | 3 |
-| 17 | Neutral-point balancing simulation | 3.5 |
-| 18 | Flying-capacitor balancing | 2 |
-| 19 | ★ Averaged model for control | 2 |
-| 20 | Control structure | 2 |
-| 21 | dq current control (simulation) | 2.5 |
-| 22 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
-| 23 | Where multilevel lives today | 1.5 |
-| 24 | Three things to remember, handover to Elif | 1 |
-| 25 | References | |
+| 15 | ★ Why the capacitor voltages wiggle at 150 Hz: time at O per leg, each leg’s share, the sum repeats three times per cycle, the capacitors follow it (simulation, built step by step) | 2.5 |
+| 16 | ★ Why the two capacitors drift apart: only the wiggle in the ideal case, nothing pulls them back, so the modulator must steer it (simulation: leakage on at click 2) | 2 |
+| 17 | ★ How strong is the offset knob? Lifting the references changes time at O; strength = (6/π)·I·cos φ; no grip at 90°, sign flips in rectifier mode (simulation) | 3 |
+| 18 | Neutral-point balancing simulation | 3.5 |
+| 19 | Flying-capacitor balancing | 2 |
+| 20 | ★ Averaged model for control | 2 |
+| 21 | Control structure | 2 |
+| 22 | dq current control (simulation) | 2.5 |
+| 23 | Grid filter: L vs. LCL, 2-level vs. 3-level (simulation, new) | 3 |
+| 24 | Where multilevel lives today | 1.5 |
+| 25 | Three things to remember, handover to Elif | 1 |
+| 26 | References | |
 
 ## Simulation models: what to say if asked
 
 - **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
-- **Neutral-point balancing (slide 17):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 16 (τ ≈ 33 ms at unity PF).
-- **Flying-capacitor balancing (slide 18):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
-- **dq control (slide 21):** an L-filter average model with a voltage limit and an optional one-sample delay.
-- **Grid filter (slide 22):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
+- **Neutral-point balancing (slide 18):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant matches the derivation on slide 17 (τ ≈ 33 ms at unity PF).
+- **Flying-capacitor balancing (slide 19):** the leg explorer in run mode with ideal switches; the zero-level state is alternated, fixed, or chosen in closed loop.
+- **dq control (slide 22):** an L-filter average model with a voltage limit and an optional one-sample delay.
+- **Grid filter (slide 23):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
 
 ## Printed handouts (`../quiz/`)
 

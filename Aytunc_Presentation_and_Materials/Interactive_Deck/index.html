@@ -397,54 +397,74 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="Why capacitors drift">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · why the midpoint needs a controller</div><h2>Why the two capacitors drift apart</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
-    <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① Legs at O push charge into the middle</h3><p class="small" style="font-size:20px">Every time a leg sits at O, its current flows into or out of the midpoint (slide 14). That charges one capacitor and discharges the other.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② On average it cancels</h3><p class="small" style="font-size:20px">With a balanced load, over one cycle as much charge goes in as comes out. The two voltages only wiggle around 400 V.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ But nothing pulls them back</h3><p class="small" style="font-size:20px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ So the modulator must steer it</h3><p class="small" style="font-size:20px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next slide: how well that works.</p></div>
+<section class="slide" data-part="2" data-section="balance" data-min="2.5" data-title="Why the capacitors wiggle at 150 Hz">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · the midpoint current over one cycle</div><h2>Why the capacitor voltages wiggle at 150 Hz</h2></div></div>
+  <div class="body" style="grid-template-columns: 1fr 960px; gap:22px">
+    <div class="stack" style="gap:14px">
+      <div><h3 style="font-size:21px;margin:0">① Time at O, leg by leg</h3><p class="small" style="font-size:19px">A leg sits at O for 1 − |<span class="m">r</span>| of each period: longest when its reference crosses zero, never at its peak. The pattern repeats every half cycle.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② Each leg’s share</h3><p class="small" style="font-size:19px">While at O, the leg’s own current goes through the midpoint (slide 14). Its share: time at O × its current.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Add the three legs</h3><p class="small" style="font-size:19px">Balanced load: the sum has no average. The three legs are 120° apart, so what is left repeats every third of a cycle: <b>3 × 50 Hz = 150 Hz</b>.</p></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ The capacitors follow it</h3><p class="small" style="font-size:19px">This current flows in and out of the midpoint, so C1 and C2 wiggle at 150 Hz in opposite directions. It does not grow. Bigger C: smaller wiggle; more current: bigger wiggle.</p></div>
     </div>
-    <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"2":{"bleed":1}}}'></div>
+    <div data-sim="npripple" data-config='{"w":660}'></div>
   </div>
   <aside class="notes">
-    <p><b>2 min.</b> No balancing in this simulation; we only watch the two capacitor voltages (2 × 4.7 mF, 50 A peak, unity power factor, speed ×0.1).</p>
+    <p><b>2.5 min.</b> One output cycle, 20 ms. The plots build up with the clicks.</p>
     <ul>
-      <li><b>①</b> Recall slide 14: POO pushes current into O, ONN pulls it out.</li>
-      <li><b>②</b> Point at the two lines: they wiggle at 150 Hz around 400 V but have no trend.</li>
-      <li><b>③</b> Click: 1 A of leakage on the top capacitor. C1 sinks, C2 rises, until the trip line. With leakage 0, press “Kick”: the voltages just stay where they were pushed. No restoring force, like a ball on a flat table.</li>
-      <li><b>④</b> The DC controller only sees v<sub>C1</sub> + v<sub>C2</sub>. The difference needs its own knob: the midpoint current, chosen by the modulator.</li>
-      <li>If asked for the formula: a leg sits at O for (1 − |r|) of each period, so ⟨i<sub>O</sub>⟩ = Σ (1 − |r<sub>x</sub>|)·i<sub>x</sub>, and C·d(v<sub>C1</sub> − v<sub>C2</sub>)/dt = ⟨i<sub>O</sub>⟩. The next slide uses it.</li>
+      <li><b>①</b> Red, green, orange: each leg’s time at O. 100 % when its sine crosses zero, 20 % at the peak (m = 0.8).</li>
+      <li><b>②</b> Multiply by that leg’s current (here in phase with its voltage).</li>
+      <li><b>③ “Why 150 Hz?”</b> The sum (black) has no average, but it is not zero: it repeats three times per cycle. Readout: 150 Hz. In words: each leg’s share flips sign every half cycle (only odd harmonics), and adding three phases 120° apart keeps only the harmonics that are the same in all three: 3rd, 9th … The 3rd is the big one.</li>
+      <li><b>④</b> Readout: a few volts peak-to-peak with 4.7 mF and 50 A. Drag C down to 1 mF: the wiggle grows. Drag φ to 90°: the shape changes, still 150 Hz.</li>
+      <li>This ripple is not a fault and the balancing loop should not chase it (it is far too fast for it): it is handled by choosing C. The real problem is the slow drift: next slide.</li>
+      <li>If asked for a number: at unity PF the 3rd-harmonic amplitude of i<sub>O</sub> is 8mI/(5π) ≈ 20 A here; ripple of ΔV peak-to-peak ≈ 2 · 20 A / (3ω · 4.7 mF) ≈ 9 V, about 4.6 V on each capacitor.</li>
     </ul>
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Derivation: balancing authority">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · analysis · read: Celanovic &amp; Boroyevich, IEEE TPEL 2000</div><h2>Why an offset can balance the midpoint — and when it cannot</h2></div></div>
-  <div class="body cols-2">
-    <div class="stack">
-      <p>Add a common offset <span class="m">r</span><sub>0</sub> to all three references (line-to-line voltages unchanged):</p>
-      <div class="eq"><span class="m">i</span><sub>O</sub> = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub> + <span class="m">r</span><sub>0</sub>|) <span class="m">i</span><sub>x</sub></div>
-      <p data-step="1">Sensitivity to a small offset:</p>
-      <div class="eq" data-step="1">∂<span class="m">i</span><sub>O</sub>/∂<span class="m">r</span><sub>0</sub> = −Σ<sub>x</sub> sign(<span class="m">r</span><sub>x</sub>) <span class="m">i</span><sub>x</sub></div>
-      <p data-step="2">Average over a period with <span class="m">r</span><sub>x</sub> = <span class="m">m</span> cos θ<sub>x</sub>, <span class="m">i</span><sub>x</sub> = <span class="m">I</span> cos(θ<sub>x</sub> − φ):</p>
-      <div class="eq" data-step="2">⟨sign(cos θ) cos(θ − φ)⟩ = (2/π) cos φ</div>
-      <div data-step="2"><span class="eq box">⟨∂<span class="m">i</span><sub>O</sub>/∂<span class="m">r</span><sub>0</sub>⟩ = −(6/π) <span class="m">I</span> cos φ</span></div>
+<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="Why capacitors drift">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · why the midpoint needs a controller</div><h2>Why the two capacitors drift apart</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:21px;margin:0">① Ideal case: only the wiggle</h3><p class="small" style="font-size:19px">Last slide: with a balanced load the midpoint current has no average. The two voltages wiggle at 150 Hz around 400 V and stay there.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② But nothing pulls them back</h3><p class="small" style="font-size:19px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ So the modulator must steer it</h3><p class="small" style="font-size:19px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next slide: how strong that knob is.</p></div>
     </div>
-    <div class="stack" data-step="3">
-      <p>Close the loop with <span class="m">r</span><sub>0</sub> = <span class="m">K</span> · sign(<span class="m">P</span>) · Δ<span class="m">V</span>:</p>
-      <div class="eq"><span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = −(6/π) <span class="m">I</span> <span class="m">K</span> |cos φ| Δ<span class="m">V</span></div>
-      <div><span class="eq box">τ = π<span class="m">C</span> / (6 <span class="m">I K</span> |cos φ|)</span></div>
-      <p class="small">C = 4.7 mF, I = 50 A, K = 0.0015 V<sup>−1</sup> → τ ≈ 33 ms at unity PF; τ → ∞ at PF = 0.</p>
-      <ul class="small">
-        <li>The authority is proportional to active power: it is lost at low power factor.</li>
-        <li>Its sign follows the power direction: a fixed-sign gain is unstable in rectifier mode.</li>
-      </ul>
-      <div class="callout"><span class="qlabel">Question:</span> check both claims in the simulation on the next slide.</div>
-    </div>
+    <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"1":{"bleed":1}}}'></div>
   </div>
-  <aside class="notes"><p><b>3 min.</b> Derive on the board; the simulation then confirms it (set φ = 90°, then φ = 180° with the naive sign).</p></aside>
+  <aside class="notes">
+    <p><b>2 min.</b> No balancing in this simulation; we only watch the two capacitor voltages (2 × 4.7 mF, 50 A peak, unity power factor, speed ×0.1).</p>
+    <ul>
+      <li><b>①</b> Point at the two lines: the 150 Hz wiggle of the last slide, no trend.</li>
+      <li><b>②</b> Click: 1 A of leakage on the top capacitor. C1 sinks, C2 rises, until the trip line. With leakage 0, press “Kick”: the voltages just stay where they were pushed. No restoring force, like a ball on a flat table.</li>
+      <li><b>③</b> The DC controller only sees v<sub>C1</sub> + v<sub>C2</sub>. The difference needs its own knob: the midpoint current, chosen by the modulator.</li>
+      <li>If asked for the formula: a leg sits at O for (1 − |r|) of each period, so ⟨i<sub>O</sub>⟩ = Σ (1 − |r<sub>x</sub>|)·i<sub>x</sub>, and C·d(v<sub>C1</sub> − v<sub>C2</sub>)/dt = ⟨i<sub>O</sub>⟩.</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="How strong is the offset knob">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · what a small offset does to the midpoint current · read: Celanovic &amp; Boroyevich, IEEE TPEL 2000</div><h2>How strong is the offset knob? It depends on the power factor</h2></div></div>
+  <div class="body" style="grid-template-columns: 450px 1fr; gap:22px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:21px;margin:0">① Lift all three references a little</h3><p class="small" style="font-size:19px">Add a small <span class="m">r</span><sub>0</sub> &gt; 0. Legs with a positive reference move towards their peak: <b>less</b> time at O. Legs with a negative reference: <b>more</b> time at O.</p></div>
+      <div data-step="1"><h3 style="font-size:21px;margin:0">② So the midpoint current changes</h3><p class="small" style="font-size:19px">By −<span class="m">r</span><sub>0</sub> × (current of the positive legs − current of the negative legs). That bracket is the <b>strength</b> of the knob (plot).</p></div>
+      <div data-step="2"><h3 style="font-size:21px;margin:0">③ Current in phase with voltage: strong</h3><p class="small" style="font-size:19px">The legs with a positive reference also carry positive current, so the strength is always positive. On average:</p>
+        <div><span class="eq box" style="font-size:22px">strength = (6/π) · <span class="m">I</span> · cos φ</span></div></div>
+      <div data-step="3"><h3 style="font-size:21px;margin:0">④ 90° out of phase: no grip</h3><p class="small" style="font-size:19px">Half the cycle it helps, half it hurts: the average is zero. The offset cannot balance at zero power factor.</p></div>
+      <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Rectifier: the sign flips</h3><p class="small" style="font-size:19px">Same size, opposite sign. So the loop uses <span class="m">r</span><sub>0</sub> = <span class="m">K</span> · sign(<span class="m">P</span>) · (<span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>), and it gets slower as |cos φ| drops.</p></div>
+    </div>
+    <div data-sim="authority" data-config='{"w":620,"steps":{"0":0,"3":90,"4":180}}'></div>
+  </div>
+  <aside class="notes">
+    <p><b>3 min.</b> The plot shows the strength over one cycle and its average. Click 3 sets φ = 90°, click 4 sets φ = 180°; the buttons do the same.</p>
+    <ul>
+      <li><b>①</b> Time at O is 1 − |r| (slide 15). Lifting a positive r makes |r| bigger; lifting a negative r makes |r| smaller.</li>
+      <li><b>②</b> Algebra if asked: i<sub>O</sub> = Σ(1 − |r<sub>x</sub> + r<sub>0</sub>|)·i<sub>x</sub>, so ∂i<sub>O</sub>/∂r<sub>0</sub> = −Σ sign(r<sub>x</sub>)·i<sub>x</sub>.</li>
+      <li><b>③</b> Average of sign(cos θ)·cos(θ − φ) is (2/π)·cos φ per phase; three phases give (6/π)·I·cos φ ≈ 95 A at 50 A peak (readout).</li>
+      <li><b>④</b> φ = 90°: the curve is half above, half below zero, average 0.</li>
+      <li><b>⑤</b> φ = 180°: the average is −95 A. A loop tuned on an inverter would push the wrong way in a rectifier, so multiply by sign(P). Closed-loop time constant τ = πC/(6·I·K·|cos φ|): with C = 4.7 mF, I = 50 A, K = 0.0015 per volt, τ ≈ 33 ms at unity PF. Next slide: the loop in action.</li>
+    </ul>
+  </aside>
 </section>
 
 <section class="slide" data-part="2" data-section="balance" data-min="3.5" data-title="Neutral-point balancing simulation">
