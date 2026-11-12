@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 53.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 54.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -40,7 +40,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 11 | ★ Three levels: one carrier for each half (upper P/O, lower O/N), same rule inside each half; PD = shifted copy, POD = mirror image (simulation, one leg) | 2.5 |
 | 12 | ★ PD or POD? Two phases at one instant: POD makes both legs switch together (800 V jumps), PD one at a time (400 V); full-cycle line THD (simulation) | 3 |
 | 13 | More levels: five levels, four carriers, same rule; PD vs POD (simulation) | 1.5 |
-| 14 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
+| 14 | ★ Same output, two ways: split DC link and midpoint O, POO and ONN give the same line voltages but opposite midpoint current; the free choice balances the capacitors (simulation) | 3 |
 | 15 | Why capacitors drift (recap of Sefer’s result) | 1 |
 | 16 | ★ Derivation: balancing authority ∝ cos φ | 3 |
 | 17 | Neutral-point balancing simulation | 3.5 |

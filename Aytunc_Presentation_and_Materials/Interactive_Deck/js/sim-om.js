@@ -327,3 +327,85 @@
     return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o && o !== P.arr) { P.arr = o; ctl[0].set(o); draw(); } } };
   };
 })();
+
+/* Three-phase, three-level leg set on a split DC link: pick P, O or N per leg. Shows that POO and ONN give the same
+   line voltages but opposite midpoint current, so the choice between them moves the capacitor voltages. */
+(function () {
+  'use strict';
+  const { h, s } = K;
+  SIMS.states3l = function (host, cfg) {
+    const VH = 400, I = { a: 10, b: -5, c: -5 };
+    const P = { L: (cfg.state || 'POO').split('') };
+    const W = 600, H = 360;
+    const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, style: `width:${W}px;height:${H}px` });
+    const add = (tag, a, txt) => { const e = s(tag, a); if (txt != null) e.textContent = txt; svg.append(e); return e; };
+    const st = (w) => 'stroke:var(--ink2);stroke-width:' + (w || 2.2) + ';fill:none';
+    const yP = 40, yO = 180, yN = 320, xC = 70, legX = [250, 360, 470];
+    // DC link
+    add('line', { x1: xC, y1: yP, x2: 520, y2: yP, style: st() }); add('line', { x1: xC, y1: yN, x2: 520, y2: yN, style: st() });
+    add('line', { x1: xC, y1: yP, x2: xC, y2: 96, style: st() }); add('line', { x1: xC - 22, y1: 96, x2: xC + 22, y2: 96, style: st() }); add('line', { x1: xC - 22, y1: 106, x2: xC + 22, y2: 106, style: st() }); add('line', { x1: xC, y1: 106, x2: xC, y2: 254, style: st() });
+    add('line', { x1: xC - 22, y1: 254, x2: xC + 22, y2: 254, style: st() }); add('line', { x1: xC - 22, y1: 264, x2: xC + 22, y2: 264, style: st() }); add('line', { x1: xC, y1: 264, x2: xC, y2: yN, style: st() });
+    add('text', { x: xC - 30, y: 104, 'text-anchor': 'end', style: 'font:700 16px var(--font);fill:var(--ink)' }, 'C1');
+    add('text', { x: xC - 30, y: 262, 'text-anchor': 'end', style: 'font:700 16px var(--font);fill:var(--ink)' }, 'C2');
+    add('text', { x: 528, y: yP + 5, style: 'font:700 15px var(--font);fill:var(--ink)' }, 'P');
+    add('text', { x: 528, y: yN + 5, style: 'font:700 15px var(--font);fill:var(--ink)' }, 'N');
+    // midpoint rail
+    const oRail = add('line', { x1: xC, y1: yO, x2: 500, y2: yO, style: 'stroke:var(--ink2);stroke-width:2.2' });
+    add('circle', { cx: xC, cy: yO, r: 5.5, style: 'fill:var(--ink2)' });
+    add('text', { x: xC - 14, y: yO + 5, 'text-anchor': 'end', style: 'font:700 18px var(--font);fill:var(--ink)' }, 'O');
+    const iOarrow = add('path', { d: '', style: 'fill:var(--s1)' });
+    const iOtext = add('text', { x: 150, y: yO - 14, 'text-anchor': 'middle', style: 'font:700 15px var(--font);fill:var(--s1)' });
+    // legs: three contacts and a blade to the output
+    const legs = legX.map((x, i) => {
+      [yP, yO, yN].forEach((y) => { add('line', { x1: x, y1: y, x2: x, y2: y + (y === yP ? 0 : 0), style: st() }); });
+      add('line', { x1: x, y1: yP, x2: x, y2: yP + 20, style: st() }); add('line', { x1: x, y1: yN - 20, x2: x, y2: yN, style: st() });
+      const cP = add('circle', { cx: x, cy: yP + 24, r: 4.5 }), cO = add('circle', { cx: x - 2, cy: yO, r: 4.5 }), cN = add('circle', { cx: x, cy: yN - 24, r: 4.5 });
+      const blade = add('line', { x1: x + 34, y1: yO + 40, x2: x, y2: yO, style: 'stroke:var(--s2);stroke-width:3.5' });
+      add('circle', { cx: x + 34, cy: yO + 40, r: 4.5, style: 'fill:var(--ink2)' });
+      add('line', { x1: x + 34, y1: yO + 40, x2: x + 34, y2: yO + 92, style: st() });
+      add('circle', { cx: x + 34, cy: yO + 98, r: 6, style: 'fill:var(--paper);stroke:var(--ink2);stroke-width:2' });
+      add('text', { x: x + 46, y: yO + 103, style: 'font:700 17px var(--font);fill:var(--ink)' }, 'abc'[i]);
+      add('text', { x: x + 46, y: yO + 66, style: 'font:600 13px var(--font);fill:var(--muted)' }, 'i' + 'abc'[i] + ' = ' + (I['abc'[i]] > 0 ? '+' : '') + I['abc'[i]] + ' A');
+      return { x, cP, cO, cN, blade };
+    });
+    // controls
+    const segs = [0, 1, 2].map((i) => K.seg({ label: 'Leg ' + 'abc'[i], options: [['P', 'P'], ['O', 'O'], ['N', 'N']], value: P.L[i], onChange: (v) => { P.L[i] = v; draw(); } }));
+    const quick = h('div', { class: 'row' }, K.btn('POO', () => setState('POO')), K.btn('ONN', () => setState('ONN')));
+    const tbl = h('table', { class: 'tb nocase', style: { fontSize: '17px' } });
+    const roI = K.readout('Current drawn from the midpoint O', 'big'), roE = K.readout('Effect on the two capacitors');
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = W + 'px 1fr';
+    host.style.gap = '18px';
+    host.append(h('div', { class: 'sim-col', style: { gap: '8px' } }, svg, tbl),
+      h('div', { class: 'sim-col', style: { gap: '10px' } }, quick, h('div', { class: 'row', style: { gap: '8px', flexWrap: 'nowrap' } }, ...segs.map((g) => g.el)), roI.el, roE.el,
+        h('div', { class: 'tiny', html: 'One instant: i<sub>a</sub> = +10 A out of leg a, i<sub>b</sub> = i<sub>c</sub> = −5 A. V<sub>dc</sub> = 800 V, so P = +400 V, O = 0, N = −400 V (measured from O).' })));
+    function setState(x) { P.L = x.split(''); segs.forEach((g, i) => g.set(P.L[i])); draw(); }
+    const lv = (L) => (L === 'P' ? VH : L === 'O' ? 0 : -VH);
+    const fv = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + ' V';
+    function draw() {
+      const yy = { P: yP + 24, O: yO, N: yN - 24 }, xo = { P: 0, O: -2, N: 0 };
+      legs.forEach((g, i) => {
+        const L = P.L[i];
+        g.blade.setAttribute('x2', g.x + xo[L]); g.blade.setAttribute('y2', yy[L]);
+        [['P', g.cP], ['O', g.cO], ['N', g.cN]].forEach(([k, c]) => c.setAttribute('style', k === L ? 'fill:var(--s2)' : 'fill:var(--paper);stroke:var(--ink2);stroke-width:2'));
+      });
+      const [va, vb, vc] = P.L.map(lv);
+      tbl.innerHTML = `<tr><th>state ${P.L.join('')}</th><td>v<sub>aO</sub> ${fv(va)}</td><td>v<sub>bO</sub> ${fv(vb)}</td><td>v<sub>cO</sub> ${fv(vc)}</td></tr>
+        <tr class="hl"><th>what the load sees</th><td>v<sub>ab</sub> ${fv(va - vb)}</td><td>v<sub>bc</sub> ${fv(vb - vc)}</td><td>v<sub>ca</sub> ${fv(vc - va)}</td></tr>`;
+      let iO = 0; P.L.forEach((L, i) => { if (L === 'O') iO += I['abc'[i]]; });
+      const onO = P.L.some((L) => L === 'O');
+      oRail.setAttribute('style', 'stroke:' + (onO ? 'var(--s1)' : 'var(--ink2)') + ';stroke-width:' + (onO ? 3.5 : 2.2));
+      if (iO !== 0) {
+        const dir = iO > 0 ? 1 : -1, x0 = 150; // arrow along the rail: + means current leaves O towards the legs
+        iOarrow.setAttribute('d', `M${x0 - 14 * dir},${yO - 7} L${x0 + 14 * dir},${yO} L${x0 - 14 * dir},${yO + 7} Z`);
+        iOtext.textContent = (iO > 0 ? 'out of O: ' : 'into O: ') + Math.abs(iO) + ' A';
+      } else { iOarrow.setAttribute('d', ''); iOtext.textContent = ''; }
+      roI.set((iO > 0 ? '+' : iO < 0 ? '−' : '') + Math.abs(iO) + ' A' + (iO ? ' <small class="muted">' + (iO > 0 ? 'out of O' : 'into O') + '</small>' : ''));
+      roE.set(iO > 0 ? 'v<sub>C1</sub> rises, v<sub>C2</sub> falls' : iO < 0 ? 'v<sub>C1</sub> falls, v<sub>C2</sub> rises' : 'no change');
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; let o = null; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) o = ST[key]; if (o && o !== P.L.join('')) setState(o); } };
+  };
+})();

@@ -373,32 +373,28 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="2" data-title="Two decisions: level, then state">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> → <b>Balance</b></div><h2>Two decisions: which level, then which state</h2></div></div>
-  <div class="body" style="grid-template-rows: auto 1fr auto; gap:20px">
-    <svg class="bd" viewBox="0 0 1472 230" style="height:230px">
-      <defs>
-        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker>
-      </defs>
-      <g class="box"><rect x="10" y="70" width="190" height="80"/><text x="105" y="100">controller</text><text x="105" y="126" class="sig">v*(t)</text></g>
-      <path class="ar" d="M200,110 H280"/>
-      <g class="box acc" data-step="1"><rect x="280" y="50" width="330" height="120"/><text x="445" y="90">① Level selection</text><text x="445" y="122" class="nt" style="text-anchor:middle">carriers (PD)</text></g>
-      <path class="ar" d="M610,110 H690" data-step="1"/><text x="650" y="96" class="sig" data-step="1">k</text>
-      <g class="box acc" data-step="2"><rect x="690" y="50" width="380" height="120"/><text x="880" y="90">② State selection</text><text x="880" y="122" class="nt" style="text-anchor:middle">redundancy → midpoint, V_fc, losses</text></g>
-      <path class="ar" d="M1070,110 H1150" data-step="2"/>
-      <g class="box" data-step="2"><rect x="1150" y="70" width="300" height="80"/><text x="1300" y="100">gate signals</text><text x="1300" y="126" class="nt" style="text-anchor:middle">+ dead time, safe transitions</text></g>
-    </svg>
-    <div class="cols-2" style="display:grid;gap:24px">
-      <div class="card stack" data-step="1"><h3>① Which level, when?</h3><p>The modulator turns a continuous reference into a sequence of levels whose <b>switching-period average</b> equals the reference.</p>
-        <div class="callout" style="font-size:20px"><b>Example:</b> 3L NPC, reference r = 0.6. Within one carrier period the leg sits in <span class="lvP">P</span> for 60 % and in O for 40 % of the time → average 0.6 · V<sub>dc</sub>/2 = 240 V on an 800 V link.</div>
-        <p class="small muted">Carrier comparison and space vectors are two views of the same averaging.</p></div>
-      <div class="card stack" data-step="2"><h3>② Which state for that level?</h3><p>When several states give the same level, the choice is free for the output — so we spend it on something else: <b>midpoint balance, V<sub>fc</sub>, or losses</b>.</p>
-        <div class="callout" style="font-size:20px"><b>Examples of redundant states:</b> ANPC zero → O<sub>U</sub> or O<sub>L</sub>. FC zero → 10 (charges C<sub>fc</sub> if i<sub>a</sub> &gt; 0) or 01 (discharges). 5L-ANPC +200 V → “a” or “b”.</div>
-        <p class="small muted">Rule: decide the level from the reference, then the state from the capacitor error and the current sign.</p></div>
+<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Same output, two ways">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> → <b>Balance</b> · the free choice that balances the capacitors</div><h2>Same output, two ways: the free choice</h2></div></div>
+  <div class="body" style="grid-template-columns: 430px 1fr; gap:22px">
+    <div class="stack" style="gap:10px">
+      <div><h3 style="font-size:20px;margin:0">① The DC link is two capacitors</h3><p class="small" style="font-size:18px">In a three-level converter the DC link is split: C1 on top, C2 below, and the midpoint O between them. Each leg can connect its output to P, O or N.</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② Two states, the same output</h3><p class="small" style="font-size:18px"><b>POO</b>: leg a at P, legs b and c at O. <b>ONN</b>: leg a at O, legs b and c at N. The load sees exactly the same line voltages (table): +400 V, 0, −400 V.</p></div>
+      <div data-step="2"><h3 style="font-size:20px;margin:0">③ Why they look the same</h3><p class="small" style="font-size:18px">ONN is POO with every leg moved down by one level. Moving all legs together is the common offset <span class="m">r</span><sub>0</sub> of slide 7: the load cannot see it.</p></div>
+      <div data-step="3"><h3 style="font-size:20px;margin:0">④ But the midpoint can</h3><p class="small" style="font-size:18px">A leg at O takes its current from the midpoint. POO: b and c are at O, 10 A flows <b>into</b> O. ONN: a is at O, 10 A flows <b>out of</b> O. One state charges C1 and discharges C2, the other does the opposite.</p></div>
+      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ So the modulator decides twice</h3><p class="small" style="font-size:18px">First which <b>voltage</b> (the carriers of the last slides). Then, where two states give it, which <b>state</b>: the one that pushes the capacitor voltages back to equal. In carrier terms that is a small <span class="m">r</span><sub>0</sub>: the balancing knob of the next slides.</p></div>
     </div>
-    <div class="callout" data-step="3" style="font-size:20px"><b>In the carrier world:</b> POO and ONN differ only by moving all three legs one level. Adding the same offset <span class="m">r</span><sub>0</sub> to all three references moves time between them without changing the line voltages, so <span class="m">r</span><sub>0</sub> is the balancing knob of the next slides.</div>
+    <div data-sim="states3l" data-config='{"state":"POO","steps":{"0":"POO","3":"ONN"}}'></div>
   </div>
-  <aside class="notes"><p><b>2 min.</b> The two-stage picture is the key idea of this talk: separate the output decision (level) from the internal decision (state). For a 2-level leg the first stage is exactly the SPWM comparator of the basics slides; for more levels it is the stacked carriers of the last three slides.</p></aside>
+  <aside class="notes">
+    <p><b>3 min.</b> The figure is one instant: i<sub>a</sub> = +10 A, i<sub>b</sub> = i<sub>c</sub> = −5 A. Click 3 switches from POO to ONN; you can also press the POO / ONN buttons or set each leg by hand.</p>
+    <ul>
+      <li><b>① “Where is O?”</b> Point at the two capacitors: 400 V each on an 800 V link. O is the node between them; each leg is a three-position switch.</li>
+      <li><b>② “Can two different states give the same output?”</b> Read the table for POO, then press ONN: the second row does not change.</li>
+      <li><b>③ “Why?”</b> Every pole voltage drops by 400 V; differences stay. Same idea as r<sub>0</sub> on slide 7, now in whole levels.</li>
+      <li><b>④ “So what is different?”</b> Point at the blue midpoint rail. POO: legs b and c hang on O and their −5 A + −5 A come back into O. ONN: leg a hangs on O and draws its +10 A out of O. Readout: which capacitor rises.</li>
+      <li><b>⑤</b> The rule for the rest of the talk: decide the voltage from the reference, then the state from the capacitor error and the current direction. The same choice exists inside one flying-capacitor leg (states 10 / 01), which comes after the neutral-point slides.</li>
+    </ul>
+  </aside>
 </section>
 
 <section class="slide" data-part="2" data-section="balance" data-min="1" data-title="Why capacitors drift">
