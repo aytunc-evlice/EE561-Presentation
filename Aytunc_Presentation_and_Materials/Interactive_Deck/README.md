@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 59 min)
+## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 58.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -37,7 +37,7 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 8 | ★ Switching states of a two-level inverter: P/N per leg, 8 states, line voltages, zero states, states as hexagon corners (simulation) | 2.5 |
 | 9 | ★ Space-vector PWM step by step: v* as a rotating arrow, mix the two nearest corners and a zero state, inner-circle limit 1.155, equal zero split = min-max | 2.5 |
 | 10 | ★ Why min-max equals SVPWM: one carrier period with three legs, the state sequence, active times fixed by the differences, the offset only moves zero time, min-max = equal split (simulation) | 3 |
-| 11 | Carrier lab (PD/POD/APOD/phase-shifted); the module’s main carrier-PWM slide, Elif builds on it | 4.5 |
+| 11 | Multilevel sine PWM, one carrier per step: two stacked carriers for three levels, count the carriers below the reference, PD vs POD/APOD in the line voltage, phase-shifted carriers (simulation, built step by step) | 4 |
 | 12 | Two decisions: which level, then which state; the offset r<sub>0</sub> as the balancing knob (bridge into balancing) | 2 |
 | 13 | Why capacitors drift (recap of Sefer’s result) | 1 |
 | 14 | ★ Derivation: balancing authority ∝ cos φ | 3 |

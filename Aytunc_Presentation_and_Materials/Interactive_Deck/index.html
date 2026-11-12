@@ -306,17 +306,28 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="modulate" data-min="4.5" data-title="Carrier-based PWM lab">
-  <div class="sh"><div><div class="kicker"><b>Modulate</b> · carrier-based PWM · read: Holmes &amp; Lipo</div><h2>Carrier lab: PD, POD, APOD, phase-shifted</h2></div></div>
-  <div class="body" data-sim="carrier" data-config='{"n":3,"arr":"PD"}'></div>
+<section class="slide" data-part="2" data-section="modulate" data-min="4" data-title="Carrier-based PWM lab">
+  <div class="sh"><div><div class="kicker"><b>Modulate</b> · sine PWM for more than two levels · read: Holmes &amp; Lipo</div><h2>Multilevel sine PWM: one carrier per step</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
+    <div class="stack" style="gap:8px">
+      <div><h3 style="font-size:20px;margin:0">① Three levels, two carriers</h3><p class="small" style="font-size:18px">A 3-level leg has P (+<span class="m">V</span><sub>dc</sub>/2), O (0, the midpoint) and N (−<span class="m">V</span><sub>dc</sub>/2). Use two carriers, stacked: upper from 0 to +1, lower from −1 to 0.</p></div>
+      <div data-step="1"><h3 style="font-size:20px;margin:0">② Count the carriers below the reference</h3><p class="small" style="font-size:18px">Above both → P. Between them → O. Below both → N. So for r &gt; 0 the leg only switches P ↔ O, for r &lt; 0 only O ↔ N.</p></div>
+      <div data-step="2"><h3 style="font-size:20px;margin:0">③ Same average, half the jump</h3><p class="small" style="font-size:18px">Each half works like slide 4: the average is still <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2, but every jump is <span class="m">V</span><sub>dc</sub>/2 instead of <span class="m">V</span><sub>dc</sub>. <span class="m">N</span> levels need <span class="m">N</span> − 1 carriers (try 5-level).</p></div>
+      <div data-step="3"><h3 style="font-size:20px;margin:0">④ PD: all carriers in phase</h3><p class="small" style="font-size:18px">Now all three phases, line voltage. The harmonic at the carrier frequency is the same in all three legs, so it cancels in v<sub>ab</sub>, just like the common offset r<sub>0</sub> on slide 7: the lowest THD.</p></div>
+      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ POD / APOD: carriers mirrored</h3><p class="small" style="font-size:18px">Upper and lower carriers in opposition (for 3 levels POD = APOD). Same fundamental, but that harmonic no longer cancels: higher THD.</p></div>
+      <div data-step="5"><h3 style="font-size:20px;margin:0">⑥ Phase-shifted: side by side</h3><p class="small" style="font-size:18px">Each carrier spans −1 … +1 and drives one cell, shifted in time by 360°/(<span class="m">N</span> − 1). The output steps more often, so the first harmonics move up to (<span class="m">N</span> − 1)·<span class="m">f</span><sub>c</sub>. Used for flying-capacitor and H-bridge cells (next talk).</p></div>
+    </div>
+    <div data-sim="carrier" data-config='{"n":3,"arr":"PD","w":620,"simple":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"PD","sig":"a","onlyA":true},"3":{"arr":"PD","sig":"ab","onlyA":false},"4":{"arr":"POD","sig":"ab","onlyA":false},"5":{"arr":"PS","sig":"ab","onlyA":false}}}'></div>
+  </div>
   <aside class="notes">
-    <p><b>4.5 min.</b> Chain: compare reference with N−1 carriers → count how many it exceeds → that is the level k. Same m and f<sub>c</sub>/f<sub>1</sub> as on the basics slides.</p>
+    <p><b>4 min.</b> m = 0.9, f<sub>c</sub> = 15 f<sub>1</sub>. Clicks 0–2 show only leg a and its output; click 3 switches to all three phases and v<sub>ab</sub>; clicks 4 and 5 change the carriers.</p>
     <ul>
-      <li><span class="say">Question: 5-level, PD vs POD — which gives lower line-to-line THD?</span> PD: its carrier-frequency harmonics are in phase in all three legs, so they cancel in v<sub>ab</sub>. Show v<sub>aO</sub> vs v<sub>ab</sub>.</li>
-      <li>For 3 levels POD and APOD are identical (only two carriers).</li>
-      <li>This is the module’s main treatment of carrier PWM: define PD/POD/APOD and phase-shifted here in full. Elif’s CHB talk builds on it (cell-by-cell phase shift, band rotation, PS vs LS on the CHB), so she can refer back to this slide.</li>
-      <li>Phase-shifted (flying-capacitor cells): the first carrier cluster appears near (N−1)·f<sub>c</sub>.</li>
-      <li>m &gt; 1 without injection: the reference clips → low-order harmonics. Turn on min-max → clean again up to m ≈ 1.155.</li>
+      <li><b>① “How do we get three levels from comparators?”</b> One carrier per step between levels. The labels in the plot say which carrier decides what.</li>
+      <li><b>② “Which level at a given instant?”</b> Count how many carriers are below the reference: 2 → P, 1 → O, 0 → N. Point at the output plot: positive half only P/O pulses, negative half only O/N.</li>
+      <li><b>③</b> Switch to 5-level: four carriers, five output levels, a finer staircase. Same averaging argument as slide 4 inside each band.</li>
+      <li><b>④</b> Read the THD readout for PD (line-to-line). Why it cancels: with PD the carriers are identical in every phase, so the component at f<sub>c</sub> is common to a, b and c, and v<sub>ab</sub> subtracts it out.</li>
+      <li><b>⑤</b> POD: THD goes up; look at the spectrum near h = 15. Holmes &amp; Lipo: PD gives the best line-voltage spectrum for three-phase.</li>
+      <li><b>⑥</b> Phase-shifted: the first cluster moves to about 2 × 15 = 30 for 3 levels (4 × 15 for 5 levels), while each device still switches at f<sub>c</sub>. Elif builds the CHB on exactly this, and PD/POD/APOD on the CHB.</li>
     </ul>
   </aside>
 </section>
