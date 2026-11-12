@@ -138,11 +138,6 @@ a { color: #1a56b5; }
 
 .lvP { color: var(--lvP); } .lvH { color: var(--lvH); } .lvO { color: var(--lvO); } .lvL { color: var(--lvL); } .lvN { color: var(--lvN); }
 
-/* numbered design steps / derivation steps */
-.steps { list-style: none; padding: 0; counter-reset: st; gap: 12px; }
-.steps > li { counter-increment: st; display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: baseline; font-size: 22px; }
-.steps > li::before { content: "Step " counter(st) "."; font-weight: 700; color: var(--ink); }
-
 /* build steps */
 [data-step] { transition: opacity .3s ease; }
 [data-step]:not(.shown) { opacity: 0; pointer-events: none; }
@@ -151,6 +146,9 @@ a { color: #1a56b5; }
 
 /* footer */
 .sf { position: absolute; left: 64px; right: 64px; bottom: 18px; display: flex; justify-content: space-between; font: 500 15px/1 var(--font); color: var(--muted); }
+.sf .dots { margin-right: 14px; }
+.sf .dots i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--line); margin-left: 6px; }
+.sf .dots i.on { background: var(--accent); }
 
 /* tables */
 table.tb { border-collapse: collapse; width: 100%; font-size: 20px; color: var(--ink2); }
@@ -158,7 +156,6 @@ table.tb { border-collapse: collapse; width: 100%; font-size: 20px; color: var(-
 .tb td { border-bottom: 1px solid var(--line); padding: 9px 10px; vertical-align: top; }
 .tb tr.hl td { background: var(--accent-soft); color: var(--ink); }
 .tb td.c, .tb th.c { text-align: center; }
-.tb.nocase th { font-size: 16px; }
 
 /* Part I slides (.p1): fewer words, larger type */
 .p1 p, .p1 li { font-size: 29px; line-height: 1.38; }
@@ -169,55 +166,67 @@ table.tb { border-collapse: collapse; width: 100%; font-size: 20px; color: var(-
 .p1 .fig figcaption { font-size: 22px; line-height: 1.3; }
 .p1 table.tb { font-size: 27px; }
 .p1 .tb th { font-size: 20px; }
-.p1 .steps > li { grid-template-columns: 112px 1fr; font-size: 29px; }
 .p1 .idea svg text { font-size: 21px; }
 .p1 .statetab { font-size: 18px; }
 .p1 .statetab th { font-size: 16px; }
-.p1 .idea svg { height: 360px; }
-/* one-line definitions under the title, and labels under equation terms */
+.p1 .idea svg { height: 440px; }
+/* one-line definitions under the title */
 .terms { font: 400 21px/1.35 var(--font); color: var(--muted); margin-top: 10px; }
 .terms b { color: var(--ink2); }
-.ub { display: inline-flex; flex-direction: column; align-items: center; }
-.ub > small { font: 600 15px/1.25 var(--font); font-style: normal; color: var(--accent); border-top: 2px solid var(--accent); width: 100%; text-align: center; margin-top: 2px; }
-/* equation slides: one size up, vertically centred */
-.p1 .xl .eq { font-size: 42px; }
-.p1 .xl p, .p1 .xl li { font-size: 32px; }
-.p1 .xl table.tb { font-size: 32px; }
-.p1 .xl .tb th { font-size: 24px; }
-.p1 .xl .tb td { padding: 14px 12px; }
-.p1 .xl .steps > li { font-size: 31px; grid-template-columns: 124px 1fr; gap: 18px; }
 .p1 .xl .steps { gap: 22px; }
 .p1 .xl > .stack, .p1 .xl > .steps { align-self: center; }
 /* gains / costs: a big factor and a few words per line */
 .p1 .ledger { display: flex; flex-direction: column; gap: 26px; align-self: center; }
 .p1 .ledger .lh { font: 700 30px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; padding-bottom: 12px; border-bottom: 3px solid currentColor; }
-.p1 .ledger .li { display: grid; grid-template-columns: 128px 1fr; gap: 22px; align-items: baseline; font-size: 32px; line-height: 1.25; color: var(--ink); }
-.p1 .ledger .li > b:first-child { font: 700 62px/1 var(--font); text-align: right; }
+.p1 .ledger .li { display: grid; grid-template-columns: 236px 1fr; gap: 22px; align-items: baseline; font-size: 32px; line-height: 1.25; color: var(--ink); }
+.p1 .ledger .li > b:first-child { font: 700 50px/1 var(--font); text-align: right; white-space: nowrap; }
 .p1 .ledger.gain .lh, .p1 .ledger.gain .li > b:first-child { color: var(--good); }
 .p1 .ledger.cost .lh, .p1 .ledger.cost .li > b:first-child { color: var(--bad); }
+.p1 .ledger.cost .li { grid-template-columns: 150px 1fr; }
+.p1 .ledger.plain { gap: 14px; align-self: stretch; }
+.p1 .ledger.plain .li { grid-template-columns: 1fr; font-size: 28px; line-height: 1.3; }
+.p1 .ledger.plain .li b { font: inherit; font-weight: 700; color: inherit; }
+/* advantage / disadvantage cards */
+.factors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-height: 0; height: 100%; }
+.fcard { border: 1px solid var(--line); border-radius: 4px; padding: 22px 22px 16px; display: grid; grid-template-rows: auto auto 1fr; gap: 10px; min-height: 0; }
+.fbig { font: 700 50px/1 var(--font); white-space: nowrap; }
+.ftxt { font-size: 27px; line-height: 1.3; color: var(--ink); min-height: 2.6em; }
+.fbars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: end; min-height: 0; padding-top: 34px; border-top: 1px solid var(--line); }
+.fbar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; min-height: 0; gap: 6px; }
+.fbar i { display: block; width: 100%; border-radius: 3px 3px 0 0; flex: 0 0 auto; }
+.fbar .fv { font: 700 22px/1 var(--font); color: var(--ink); white-space: nowrap; }
+.fbar .fn { font: 600 18px/1 var(--font); color: var(--muted); padding-top: 4px; }
+.factors.gain .fbig { color: var(--good); } .factors.gain .fbar i { background: var(--good); }
+.factors.cost .fbig { color: var(--bad); } .factors.cost .fbar i { background: var(--bad); }
+/* what is a multilevel converter: one card per level count */
+.fig.lvl { gap: 4px; padding: 10px 14px 12px; }
+.fig.lvl .lvh { font: 700 32px/1 var(--font); text-align: center; color: var(--ink); }
+.p1 .fig.lvl figcaption { text-align: center; font-size: 27px; }
 .p1 table.gc { font-size: 30px; }
 .p1 table.gc th { font-size: 24px; }
 .p1 table.gc td { padding: 13px 12px; }
+.p1 table.topo { font-size: 24px; }
+.p1 table.topo th { font-size: 20px; }
+.p1 table.topo td { padding: 6px 10px; vertical-align: middle; }
+.p1 table.topo td.th { width: 96px; padding: 4px 6px; }
+.p1 table.topo td b { color: var(--ink); }
+.sch.thumb { display: block; width: 84px; height: 84px; overflow: hidden; }
+.sch.thumb text, .sch.thumb .flow, .sch.thumb .flow-glow, .sch.thumb .iarrow, .sch.thumb .term + text { display: none; }
+.sch.thumb .wire, .sch.thumb .cap, .sch.thumb .dev .body, .sch.thumb .dev .dio, .sch.thumb .dev .dtri { stroke: var(--ink2); stroke-width: 10; }
+.sch.thumb .dev .gate { display: none; }
 .p1 table.gc th.g { color: var(--good); }
 .p1 table.gc th.b { color: var(--bad); }
-/* state slides */
-.p1 table.st td.hl { color: var(--accent); font-weight: 700; }
-.fig.redund { border: none; padding: 0; gap: 4px; }
-.fig.redund .stname { font: 700 50px/1 var(--font); letter-spacing: .12em; text-align: center; }
-.fig > svg.sch { flex: 1 1 0; min-height: 0; }
-.p1 .fig.redund figcaption { text-align: center; font-size: 26px; color: var(--ink2); }
-.sch .flow.still { animation: none; }
-.sch .lbl.io { font-size: 24px; }
 
-.p1 table.mini { font-size: 26px; width: auto; }
-.p1 table.mini td, .p1 table.mini th { padding: 6px 18px; }
 
+/* simulation result figure */
+.simfig { width: 100%; height: 100%; min-height: 0; object-fit: contain; background: #fff; border-radius: 4px; }
 /* photo cards (real devices) */
 .photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; min-height: 0; }
 .photo { margin: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-.photo img { width: 100%; height: 480px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+.photo img { width: 100%; height: 320px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
 .photo figcaption { font-size: 24px; line-height: 1.3; color: var(--ink2); }
 .photo figcaption b { color: var(--ink); }
+.photos.ex .photo img { height: 300px; object-fit: contain; }
 .photo .credit { font: 400 13px/1.3 var(--font); color: var(--muted); }
 
 /* ---------- controls ---------- */
@@ -232,6 +241,7 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 .seg-btn:last-child { border-right: 0; }
 .seg-btn:hover { background: var(--accent-soft); }
 .seg-btn.on { background: var(--sel); color: var(--paper); }
+.seg-none .seg-btn, .seg-none .seg-btn.on, .seg-none .seg-btn.on span { background: transparent; color: var(--muted) !important; cursor: default; font-weight: 500; text-align: left; }
 .seg-btn.on span, .seg-btn.on small { color: var(--paper) !important; }
 .btn { padding: 9px 16px; font: 600 17px/1.1 var(--font); border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; white-space: nowrap; }
 .btn:hover { border-color: var(--ink2); }
@@ -273,7 +283,7 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 .sch .lbl.sm { font-size: 14px; font-weight: 600; fill: var(--muted); }
 .sch .rail { font: 700 21px var(--font); }
 .sch .blk { fill: var(--block); font: 700 14px var(--font); }
-.sch .capv { fill: var(--ink2); font: 600 15px var(--mono); }
+.sch .capv { fill: var(--ink2); font: 600 15px var(--font); }
 .sch .dot { fill: var(--ink2); }
 .sch .flow-glow { stroke: var(--flow); stroke-opacity: .28; stroke-width: 14; fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .sch .flow { stroke: var(--flow); stroke-width: 8; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: .1 18; animation: flowmove .7s linear infinite; }
@@ -285,7 +295,7 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 /* ---------- sims layout ---------- */
 .sim { display: grid; gap: 22px; min-height: 0; height: 100%; }
 .sim-col { display: flex; flex-direction: column; gap: 14px; min-height: 0; min-width: 0; }
-.statetab { border-collapse: collapse; font: 600 16px/1 var(--mono); color: var(--ink2); }
+.statetab { border-collapse: collapse; font: 600 16px/1 var(--font); font-variant-numeric: tabular-nums; color: var(--ink2); }
 .statetab th { font: 700 14px/1 var(--font); color: var(--muted); padding: 6px 8px; text-align: center; border-bottom: 2px solid var(--line); }
 .statetab td { padding: 5px 8px; text-align: center; border-bottom: 1px solid var(--grid); }
 .statetab td.g1 { color: var(--good); }

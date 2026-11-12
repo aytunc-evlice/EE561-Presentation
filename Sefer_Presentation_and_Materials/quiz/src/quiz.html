@@ -12,43 +12,45 @@
   <div class="title">
     <div class="c1">EE561 Advanced Static Power Conversion</div>
     <div class="c2">Multilevel Converters: Building the Levels — Quiz</div>
-    <div class="c3">about 8 minutes · closed book · calculator allowed · prepared by Sefer İdacı</div>
   </div>
   <div class="fields"><span>Name:</span><span>Student ID:</span><span>Date:</span></div>
-  <div class="instr">Answer both questions in the space provided; show your reasoning. Each question is worth 25 points (total 50). Both questions cover the topologies talk: device ratings, NPC and T-type legs.</div>
+  <div class="instr">Answer both questions in the space provided. Each question is worth 25 points (total 50). Both questions cover the basics of the talk: what a multilevel leg is, its advantages and disadvantages, and the topologies of the talk.</div>
 
   <div class="q">
-    <div class="qh"><b>Question 1 · Device selection</b><span class="tag">numerical design</span><span class="pts">25 pts</span></div>
-    <p>A PV string inverter has a DC link of <b>1100 V</b>. In steady state a switch may block at most <b>2/3 of its voltage rating</b>; the available classes are 650 V, 1200 V, 1700 V and 3300 V.</p>
+    <div class="qh"><b>Question 1 · Levels</b><span class="tag">concept and numbers</span><span class="pts">25 pts</span></div>
+    <p>A leg with <span class="m">N</span> levels connects its output to one of <span class="m">N</span> equally spaced DC voltages. The DC link is <span class="m">V</span><sub>dc</sub> = <b>800 V</b>.</p>
     <ol class="parts" type="a">
       <li>Complete the table. <span class="pp">[15]</span></li>
     </ol>
     <table class="fill">
-      <tr><th style="width:38%">Leg / device</th><th style="width:31%">Voltage blocked by the device [V]</th><th>Required class [V]</th></tr>
-      <tr><td>2-level leg, each switch</td><td class="blank"></td><td class="blank"></td></tr>
-      <tr><td>3-level NPC leg, each switch</td><td class="blank"></td><td class="blank"></td></tr>
-      <tr><td>3-level T-type leg, outer switches S1, S4</td><td class="blank"></td><td class="blank"></td></tr>
-      <tr><td>3-level T-type leg, inner switches S2, S3</td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><th style="width:28%">Number of levels <span class="m">N</span></th><th style="width:36%">Voltage step = voltage blocked by each switch [V]</th><th>Number of switches in one leg</th></tr>
+      <tr><td>2</td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>3</td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>5</td><td class="blank"></td><td class="blank"></td></tr>
     </table>
     <ol class="parts" type="a" start="2">
-      <li>Give one advantage and one disadvantage of the T-type leg compared with the NPC leg at this DC link. <span class="pp">[10]</span></li>
+      <li>Give <b>two advantages</b> and <b>two disadvantages</b> of a multilevel leg compared with a two-level leg. <span class="pp">[10]</span></li>
     </ol>
-    <div class="space" style="height:24mm"></div>
+    <div class="space" style="height:14mm"></div>
   </div>
 
   <div class="q">
-    <div class="qh"><b>Question 2 · NPC leg in the zero state</b><span class="tag">concept and critique</span><span class="pts">25 pts</span></div>
-    <div class="figq">
-      <div class="fig"><div id="npcfig"></div><div class="cap">3-level NPC leg, V<sub>dc</sub> = 800 V, state O (gated switches marked green).</div></div>
+    <div class="qh"><b>Question 2 · Reading the circuits</b><span class="tag">circuits</span><span class="pts">25 pts</span></div>
+    <ol class="parts" type="a">
+      <li>Each leg below is in its <b>0 V state</b> (gated switches green) and the current flows <b>out of the leg</b> (<span class="m">i</span><sub>a</sub> &gt; 0). <b>Draw the current path</b> on each figure, from the DC link to the output a, and write the name of the leg under it. <span class="pp">[15]</span></li>
+    </ol>
+    <div class="legs3">
+      <div class="fig"><div id="legA"></div><div class="cap name"><b>Leg A:</b></div></div>
+      <div class="fig"><div id="legB"></div><div class="cap name"><b>Leg B:</b></div></div>
+      <div class="fig"><div id="legC"></div><div class="cap name"><b>Leg C:</b></div></div>
+    </div>
+    <div class="figq" style="grid-template-columns: 70mm 1fr">
+      <div class="fig"><div id="legDE"></div><div class="cap"><b>D</b> (left) and <b>E</b> (right): gated switches green, current path dotted</div></div>
       <div>
-        <p>The leg is in state <b>O</b> and the phase current is negative, <span class="m">i</span><sub>a</sub> &lt; 0 (flowing <i>into</i> the leg).</p>
-        <ol class="parts" type="a">
-          <li>Draw the current path on the figure and name the conducting devices. <span class="pp">[7]</span></li>
-          <li>Does the leg draw current from the midpoint O or push current into it? <span class="pp">[5]</span></li>
-          <li>Which devices block voltage, and how much? <span class="pp">[6]</span></li>
-          <li>A designer proposes to switch directly from P to N “to save one commutation”. Critique this proposal. <span class="pp">[7]</span></li>
+        <ol class="parts" type="a" start="2">
+          <li>Figures D and E show a flying-capacitor leg in two states. Both give 0 V at the output. What are such states called, and what is different for the capacitor C<sub>fc</sub>? <span class="pp">[10]</span></li>
         </ol>
-        <div class="space" style="height:41mm"></div>
+        <div class="space" style="height:20mm"></div>
       </div>
     </div>
   </div>
@@ -58,8 +60,13 @@
 <script src="../../Interactive_Deck/js/kit.js"></script>
 <script src="../../Interactive_Deck/js/sim-leg.js"></script>
 <script>
-  SIMS.legfig(document.getElementById('npcfig'), { topo: 'npc', figs: [{ state: 'O', sign: 0 }] });
-  document.querySelectorAll('#npcfig svg').forEach((s) => s.classList.add('gates'));
+  // three legs in their zero state, gates marked, no path; the flying-capacitor leg in its two zero states with the path
+  SIMS.legfig(document.getElementById('legA'), { topo: 'npc', figs: [{ state: 'O', sign: 0 }] });
+  SIMS.legfig(document.getElementById('legB'), { topo: 'ttype', figs: [{ state: 'O', sign: 0 }] });
+  SIMS.legfig(document.getElementById('legC'), { topo: 'anpc', figs: [{ state: 'Ou', sign: 0 }] });
+  document.querySelectorAll('#legA svg, #legB svg, #legC svg').forEach((s) => s.classList.add('gates'));
+  SIMS.legfig(document.getElementById('legDE'), { topo: 'fc', figs: [{ state: '10', sign: 1 }, { state: '01', sign: 1 }] });
+  document.querySelectorAll('#legDE svg').forEach((s) => s.classList.add('gates', 'path'));
 </script>
 </body>
 </html>

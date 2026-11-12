@@ -18,30 +18,42 @@
     <div class="c3">Sefer İdacı · for the presenter and the instructor · not for distribution to students</div>
   </div>
 
-  <div class="qh"><b>Question 1 · Device selection</b><span class="pts">25 pts</span></div>
+  <div class="qh"><b>Question 1 · Levels</b><span class="pts">25 pts</span></div>
   <div class="sol">
-    <p><b>(a)</b> Required rating = blocked voltage ÷ (2/3) = 1.5 × blocked voltage; pick the next class.</p>
+    <p><b>(a)</b> Step = voltage on each switch = V<sub>dc</sub>/(N − 1); switches per leg = 2(N − 1).</p>
     <table class="key">
-      <tr><th>Leg / device</th><th>Blocked voltage</th><th>Needed rating</th><th>Class</th></tr>
-      <tr><td>2-level, each switch</td><td>1100 V</td><td>1650 V</td><td><b>1700 V</b></td></tr>
-      <tr><td>3L NPC, each switch</td><td>550 V</td><td>825 V</td><td><b>1200 V</b></td></tr>
-      <tr><td>3L T-type, outer S1, S4</td><td>1100 V</td><td>1650 V</td><td><b>1700 V</b></td></tr>
-      <tr><td>3L T-type, inner S2, S3</td><td>550 V</td><td>825 V</td><td><b>1200 V</b></td></tr>
+      <tr><th>Levels N</th><th>Step = voltage blocked by each switch</th><th>Switches in one leg</th></tr>
+      <tr><td>2</td><td><b>800 V</b></td><td><b>2</b></td></tr>
+      <tr><td>3</td><td><b>400 V</b></td><td><b>4</b></td></tr>
+      <tr><td>5</td><td><b>200 V</b></td><td><b>8</b></td></tr>
     </table>
-    <p><b>(b)</b> Advantage: in P and N only one device conducts (NPC: two) → lower conduction loss; no clamp diodes. Disadvantage: the outer switches must block the full 1100 V → 1700 V class: slower, more switching loss, fewer and costlier parts.</p>
-    <p class="mark">Marking: (a) 3 pts per row + 3 pts for the 2/3 rule; (b) 5 + 5.</p>
+    <p><b>(b)</b> Any two of each (slides 5 and 6).<br>
+    Advantages: lower voltage on each device (lower-voltage, faster parts); smaller voltage steps (less dv/dt and EMI); smaller current ripple (smaller filter); lower switching loss.<br>
+    Disadvantages: more switches and gate drivers; more devices in series (more conduction loss); capacitor voltages that must be kept balanced; more switching states (harder control).</p>
+    <p class="mark">Marking: (a) 2.5 pts per cell; (b) 2.5 pts per correct item, at most two of each kind.</p>
   </div>
 
-  <div class="qh"><b>Question 2 · NPC leg in the zero state</b><span class="pts">25 pts</span></div>
+  <div class="qh"><b>Question 2 · Reading the circuits</b><span class="pts">25 pts</span></div>
   <div class="sol">
-    <p><b>(a)</b> Path: output a → <b>S3</b> → node between S3 and S4 → <b>D6</b> → midpoint O. Conducting devices: S3 and D6.</p>
-    <p><b>(b)</b> Current flows from the output into O: the leg <b>pushes current into the midpoint</b> (current drawn from O is i<sub>O</sub> = i<sub>a</sub> &lt; 0).</p>
-    <p><b>(c)</b> <b>S1 blocks 400 V</b> (P to node X, which sits at O through S2) and <b>S4 blocks 400 V</b> (node Y at O to N). S2, S3, D5, D6 see ≈ 0 V.</p>
-    <p><b>(d)</b> Going P → N directly switches both complementary pairs at once: the output jumps by the full 800 V (twice the dv/dt and EMI of a normal step), and during the transient the series devices S1–S2 or S3–S4 must share 800 V with no clamp guaranteeing equal sharing → one device can be overvoltaged. Nothing is saved: switching loss scales with the voltage step. Always pass through O.</p>
-    <p class="mark">Marking: (a) path 4 + devices 3; (b) 5; (c) 3 + 3; (d) step size 3, voltage sharing 3, conclusion 1.</p>
+    <p><b>(a)</b> The current paths (i<sub>a</sub> &gt; 0, from the midpoint O to the output):</p>
+    <div class="legs3" style="grid-template-columns: repeat(3, 48mm)">
+      <div class="fig"><div id="keyA"></div><div class="cap"><b>A: NPC</b> · O → D5 → S2 → a</div></div>
+      <div class="fig"><div id="keyB"></div><div class="cap"><b>B: T-type</b> · O → S2 → diode of S3 → a</div></div>
+      <div class="fig"><div id="keyC"></div><div class="cap"><b>C: ANPC</b> · O → diode of S5 → S2 → a</div></div>
+    </div>
+    <p><b>(b)</b> They are <b>redundant states</b>: different switching states with the same output voltage. In D (state 10: S1 and S2′ on) the load current flows into the + terminal of C<sub>fc</sub> and <b>charges</b> it; in E (state 01: S2 and S1′ on) it flows the other way and <b>discharges</b> it. Choosing between them keeps V<sub>fc</sub> at V<sub>dc</sub>/2.</p>
+    <p class="mark">Marking: (a) path 3, name 2 per leg; (b) “redundant” 4, charge / discharge 6.</p>
   </div>
 
 </div>
 <script src="keep_together.js"></script>
+<script src="../../Interactive_Deck/js/kit.js"></script>
+<script src="../../Interactive_Deck/js/sim-leg.js"></script>
+<script>
+  SIMS.legfig(document.getElementById('keyA'), { topo: 'npc', figs: [{ state: 'O', sign: 1 }] });
+  SIMS.legfig(document.getElementById('keyB'), { topo: 'ttype', figs: [{ state: 'O', sign: 1 }] });
+  SIMS.legfig(document.getElementById('keyC'), { topo: 'anpc', figs: [{ state: 'Ou', sign: 1 }] });
+  document.querySelectorAll('.legs3 svg').forEach((s) => s.classList.add('gates', 'path'));
+</script>
 </body>
 </html>

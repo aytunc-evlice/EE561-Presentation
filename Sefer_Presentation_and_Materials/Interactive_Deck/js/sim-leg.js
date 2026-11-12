@@ -440,6 +440,15 @@
     return {};
   };
 
+  // a small unlabelled drawing of a leg, for the comparison table
+  SIMS.legthumb = function (host, cfg) {
+    const T = TOPO[cfg.topo], sch = Schematic(T);
+    sch.update(T.states[0], 0, { v1: 400, v2: 400, vf: T.fcNom || 0 });
+    sch.svg.classList.add('thumb');
+    host.append(sch.svg);
+    return {};
+  };
+
   function lossLegend(ctx, lx, ly) {
     ctx.font = '600 13px ' + K.font; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     ctx.fillStyle = K.css('--s1'); ctx.fillRect(lx, ly - 6, 12, 12); ctx.fillStyle = K.css('--muted'); ctx.fillText('conduction', lx + 17, ly);
@@ -517,30 +526,41 @@
     // ----- explore -----
     function buildExplore(right) {
       const hasNp = T.states.some((x) => x.np), hasFc = !!T.fcap;
+      // first line: one button per output level; second line: the states that give that level
+      const levels = [];
+      for (const st of T.states) if (!levels.includes(st.lv)) levels.push(st.lv);
+      const ofLevel = (lv) => T.states.filter((st) => st.lv === lv);
+      const curLv = T.st[P.state].lv, same = ofLevel(curLv);
+      const lvSeg = K.seg({
+        label: 'Output level',
+        options: levels.map((lv) => { const st = ofLevel(lv)[0]; return [lv, `<span class="lv${lv}">${'PON'.includes(lv) ? lv + ' ' : ''}${K.fmtV(st.vnom)}</span>`]; }),
+        value: curLv, onChange: (lv) => { P.state = ofLevel(lv)[0].id; build(); },
+      });
       const stSeg = K.seg({
-        label: 'Switching state',
-        options: T.states.map((st) => [st.id, `<span class="lv${st.lv}">${st.name}</span>` + (T.key === 'anpc5' ? '' : ` <small>${K.fmtV(st.vnom)}</small>`)]),
+        label: same.length > 1 ? `Redundant states: ${same.length} ways to make ${K.fmtV(same[0].vnom)}` : 'Redundant states',
+        options: same.length > 1 ? same.map((st) => [st.id, `<span class="lv${st.lv}">${st.name}</span>`]) : [[P.state, '<span>none: only one state gives this level</span>']],
         value: P.state, onChange: (v) => { P.state = v; refresh(); },
       });
+      if (same.length < 2) stSeg.el.classList.add('seg-none');
       const iSeg = K.seg({ label: 'Phase current', options: [[1, 'i<sub>a</sub> &gt; 0 (out of leg)'], [-1, 'i<sub>a</sub> &lt; 0 (into leg)']], value: P.sign, onChange: (v) => { P.sign = v; refresh(); } });
       const row2 = h('div', { class: 'row', style: { alignItems: 'flex-end' } }, iSeg.el);
       ui.vo = K.readout('Pole voltage v<sub>aO</sub>', 'big');
       ui.cd = K.readout('Conducting devices');
       ui.cx = K.readout(hasFc ? 'Flying-capacitor current' : hasNp ? 'Midpoint current i<sub>O</sub>' : 'Blocking (off devices)');
       const sws = T.devs.filter((d) => d.kind === 'sw');
-      const thead = h('tr', null, h('th', null, 'state'), sws.map((d) => h('th', null, d.lab)), h('th', null, 'v_aO'), (hasFc || hasNp) ? h('th', { html: hasFc ? 'i<sub>fc</sub>' : 'i<sub>O</sub>' }) : null);
+      const thead = h('tr', null, h('th', null, 'state'), sws.map((d) => h('th', null, d.lab)), h('th', { html: 'v<sub>aO</sub>' }), (hasFc || hasNp) ? h('th', { html: hasFc ? 'i<sub>fc</sub>' : 'i<sub>O</sub>' }) : null);
       ui.rows = {};
       const tbody = h('tbody');
       for (const st of T.states) {
         const tr = h('tr', null, h('td', { class: 'st', html: `<span class="lv${st.lv}">${st.name}</span>` }),
           sws.map((d) => h('td', { class: st.g[d.id] ? 'g1' : 'g0' }, st.g[d.id] ? '1' : '0')),
           h('td', { class: `lv${st.lv}` }, K.fmtV(st.vnom)),
-          (hasFc || hasNp) ? h('td', null, hasFc ? (st.fc > 0 ? '+i_a' : st.fc < 0 ? '−i_a' : '0') : (st.np ? 'i_a' : '0')) : null);
-        tr.addEventListener('click', () => { P.state = st.id; stSeg.set(st.id); refresh(); });
+          (hasFc || hasNp) ? h('td', { html: hasFc ? (st.fc > 0 ? '+i<sub>a</sub>' : st.fc < 0 ? '−i<sub>a</sub>' : '0') : (st.np ? 'i<sub>a</sub>' : '0') }) : null);
+        tr.addEventListener('click', () => { P.state = st.id; build(); });
         ui.rows[st.id] = tr; tbody.append(tr);
       }
       ui.stSeg = stSeg;
-      right.append(stSeg.el, row2,
+      right.append(lvSeg.el, stSeg.el, row2,
         h('div', { class: 'ro-grid', style: { gridTemplateColumns: '0.9fr 1.3fr 1.2fr' } }, ui.vo.el, ui.cd.el, ui.cx.el));
       if (cfg.table !== false) right.append(h('table', { class: 'statetab' }, h('thead', null, thead), tbody));
     }
@@ -671,7 +691,7 @@
         ui.cx.set(st.np ? (P.sign > 0 ? `+${I_EXP} A <small class="muted">drawn from O</small>` : `−${I_EXP} A <small class="muted">pushed into O</small>`) : '0');
       } else {
         const off = T.devs.filter((d) => !st.g[d.id]).map((d) => d.lab).join(', ');
-        ui.cx.set(off + ' <small class="muted">block 800 V</small>');
+        ui.cx.set(off + ` <small class="muted">${off.includes(',') ? 'block' : 'blocks'} 800 V</small>`);
       }
       for (const id in ui.rows) ui.rows[id].classList.toggle('cur', id === P.state);
       if (ui.stSeg.get() !== P.state) ui.stSeg.set(P.state);
@@ -680,6 +700,7 @@
       if (P.mode === 'run') advanceRun(dt);
     }
     function toggle() {
+      if (P.mode === 'explore') { P.sign = -P.sign; build(); return; } // P key: flip the phase current
       P.playing = !P.playing;
       if (ui.play) ui.play.innerHTML = P.playing ? '❚❚ Pause' : '▶ Play';
     }
