@@ -397,29 +397,25 @@
   </aside>
 </section>
 
-<section class="slide" data-part="2" data-section="balance" data-min="3" data-title="Why capacitors drift">
-  <div class="sh"><div><div class="kicker"><b>Balance</b> · why the midpoint voltage drifts</div><h2>Why the two capacitors drift apart</h2></div></div>
-  <div class="body" style="grid-template-columns: 440px 1fr; gap:22px">
-    <div class="stack" style="gap:8px">
-      <div><h3 style="font-size:20px;margin:0">① How long each leg sits at O</h3><p class="small" style="font-size:18px">Slide 11: for <span class="m">r</span> &gt; 0 a leg is at P for a fraction <span class="m">r</span> of each period and at O for the rest; for <span class="m">r</span> &lt; 0 the same with N. So leg x sits at O for (1 − |<span class="m">r</span><sub>x</sub>|) of the period.</p></div>
-      <div data-step="1"><h3 style="font-size:20px;margin:0">② The average midpoint current</h3><p class="small" style="font-size:18px">While a leg is at O, its current comes from O (slide 14). Over one switching period:</p>
-        <div class="eq" style="font-size:22px">⟨<span class="m">i</span><sub>O</sub>⟩ = Σ<sub>x</sub> (1 − |<span class="m">r</span><sub>x</sub>|) · <span class="m">i</span><sub>x</sub></div></div>
-      <div data-step="2"><h3 style="font-size:20px;margin:0">③ It moves the difference</h3><div class="eq" style="font-size:22px"><span class="m">C</span> dΔ<span class="m">V</span>/d<span class="m">t</span> = ⟨<span class="m">i</span><sub>O</sub>⟩, &nbsp; Δ<span class="m">V</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub></div><p class="small" style="font-size:18px">Current out of O raises C1 and lowers C2 (slide 14).</p></div>
-      <div data-step="3"><h3 style="font-size:20px;margin:0">④ Balanced load: zero on average</h3><p class="small" style="font-size:18px">Over a full cycle the three terms cancel (red curve), but not at every instant: Δ<i>V</i> ripples at 3 × 50 Hz and comes back.</p></div>
-      <div data-step="4"><h3 style="font-size:20px;margin:0">⑤ Nothing pulls it back</h3><p class="small" style="font-size:18px">Add a small leakage (1 A, a real capacitor or a sensor) or kick Δ<i>V</i>: it drifts or stays off. The DC source only fixes the sum v<sub>C1</sub> + v<sub>C2</sub>, not the difference.</p></div>
-      <div data-step="5"><h3 style="font-size:20px;margin:0">⑥ Only the state choice can</h3><p class="small" style="font-size:18px">Δ<i>V</i> moves only through <span class="m">i</span><sub>O</sub>, and slide 14 showed the modulator steers <span class="m">i</span><sub>O</sub> with <span class="m">r</span><sub>0</sub>. Next slide: how strong that knob is.</p></div>
+<section class="slide" data-part="2" data-section="balance" data-min="2" data-title="Why capacitors drift">
+  <div class="sh"><div><div class="kicker"><b>Balance</b> · why the midpoint needs a controller</div><h2>Why the two capacitors drift apart</h2></div></div>
+  <div class="body" style="grid-template-columns: 440px 1fr; gap:24px">
+    <div class="stack" style="gap:18px">
+      <div><h3 style="font-size:22px;margin:0">① Legs at O push charge into the middle</h3><p class="small" style="font-size:20px">Every time a leg sits at O, its current flows into or out of the midpoint (slide 14). That charges one capacitor and discharges the other.</p></div>
+      <div data-step="1"><h3 style="font-size:22px;margin:0">② On average it cancels</h3><p class="small" style="font-size:20px">With a balanced load, over one cycle as much charge goes in as comes out. The two voltages only wiggle around 400 V.</p></div>
+      <div data-step="2"><h3 style="font-size:22px;margin:0">③ But nothing pulls them back</h3><p class="small" style="font-size:20px">A small error (a leaky capacitor, a sensor offset, a load step) adds up, and the voltages drift apart until the converter trips. The DC source only holds the total, 800 V, not how it is split.</p></div>
+      <div data-step="3"><h3 style="font-size:22px;margin:0">④ So the modulator must steer it</h3><p class="small" style="font-size:20px">The only handle is the midpoint current, and slide 14 showed how to choose it: POO or ONN, that is the offset <span class="m">r</span><sub>0</sub>. Next slide: how well that works.</p></div>
     </div>
-    <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":620,"steps":{"0":{"bleed":0},"4":{"bleed":1}}}'></div>
+    <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"2":{"bleed":1}}}'></div>
   </div>
   <aside class="notes">
-    <p><b>3 min.</b> No balancing in this simulation: we only watch. 2 × 4.7 mF, 50 A peak, m = 0.8, unity power factor, speed ×0.1 so the 150 Hz ripple is visible.</p>
+    <p><b>2 min.</b> No balancing in this simulation; we only watch the two capacitor voltages (2 × 4.7 mF, 50 A peak, unity power factor, speed ×0.1).</p>
     <ul>
-      <li><b>① “Why 1 − |r|?”</b> Point back at slide 11: the upper carrier runs 0 … 1, so the leg is at P for exactly r of the period (the buck rule) and at O for the rest.</li>
-      <li><b>②</b> Each leg contributes its own current, weighted by its time at O. The grey curve is this per period.</li>
-      <li><b>③</b> Sign convention as on slide 14: current drawn out of O pushes v<sub>C1</sub> up and v<sub>C2</sub> down.</li>
-      <li><b>④</b> The red curve (20 ms average) sits at zero; ΔV wiggles a few volts at 150 Hz but has no trend.</li>
-      <li><b>⑤</b> Click: 1 A leakage on the upper half. ΔV ramps and trips at ±100 V. Also try “Kick ΔV +40 V” with leakage 0: it just stays at +40 V. There is no restoring force, like a ball on a flat table.</li>
-      <li><b>⑥</b> The DC-voltage controller (or source) sees only v<sub>C1</sub> + v<sub>C2</sub>. The difference needs its own knob, and the only one is the midpoint current, chosen by the modulator.</li>
+      <li><b>①</b> Recall slide 14: POO pushes current into O, ONN pulls it out.</li>
+      <li><b>②</b> Point at the two lines: they wiggle at 150 Hz around 400 V but have no trend.</li>
+      <li><b>③</b> Click: 1 A of leakage on the top capacitor. C1 sinks, C2 rises, until the trip line. With leakage 0, press “Kick”: the voltages just stay where they were pushed. No restoring force, like a ball on a flat table.</li>
+      <li><b>④</b> The DC controller only sees v<sub>C1</sub> + v<sub>C2</sub>. The difference needs its own knob: the midpoint current, chosen by the modulator.</li>
+      <li>If asked for the formula: a leg sits at O for (1 − |r|) of each period, so ⟨i<sub>O</sub>⟩ = Σ (1 − |r<sub>x</sub>|)·i<sub>x</sub>, and C·d(v<sub>C1</sub> − v<sub>C2</sub>)/dt = ⟨i<sub>O</sub>⟩. The next slide uses it.</li>
     </ul>
   </aside>
 </section>

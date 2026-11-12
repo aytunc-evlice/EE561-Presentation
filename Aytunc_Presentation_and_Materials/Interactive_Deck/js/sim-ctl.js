@@ -34,9 +34,9 @@
     host.classList.add('sim');
     host.style.gridTemplateColumns = CW + 'px 1fr';
     host.append(h('div', { class: 'sim-col' }, cv.el),
-      h('div', { class: 'sim-col', style: { gap: '10px' } }, ...(SIMPLE ? [ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el] : [ctl.on.el, ctl.law.el, ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el]),
-        h('div', { class: 'row' }, playB, K.btn('Kick ΔV +40 V', () => { st.dv += 40; }), K.btn('Reset', () => { reset(cfg.dv0 != null ? cfg.dv0 : 40); })),
-        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, ...(SIMPLE ? [roDv.el, roV.el, roSt.el] : [roDv.el, roV.el, roG.el, roSt.el]))));
+      h('div', { class: 'sim-col', style: { gap: '10px' } }, ...(SIMPLE ? [ctl.bleed.el, ctl.speed.el] : [ctl.on.el, ctl.law.el, ctl.m.el, ctl.phi.el, ctl.bleed.el, ctl.speed.el]),
+        h('div', { class: 'row' }, playB, K.btn(SIMPLE ? 'Kick: C1 +20 V, C2 −20 V' : 'Kick ΔV +40 V', () => { st.dv += 40; }), K.btn('Reset', () => { reset(cfg.dv0 != null ? cfg.dv0 : 40); })),
+        h('div', { class: 'ro-grid', style: { gridTemplateColumns: '1fr 1fr' } }, ...(SIMPLE ? [roV.el, roSt.el] : [roDv.el, roV.el, roG.el, roSt.el]))));
 
     function stepSim() {
       const w = K.TAU * F1;
@@ -77,6 +77,19 @@
     function chrono(buf) { const out = new Float32Array(NW), s0 = st.k % NW; for (let i = 0; i < NW; i++) out[i] = buf[(s0 + i) % NW]; return out; }
     function draw() {
       const ctx = cv.ctx; cv.clear();
+      if (SIMPLE) {
+        const dv = chrono(st.bDv), v1 = dv.map((d) => 400 + d / 2), v2 = dv.map((d) => 400 - d / 2);
+        K.plot(ctx, { x: 62, y: 34, w: cv.w - 78, h: cv.h - 80 }, {
+          xlim: [0, NW], ylim: [330, 470], xticks: [[0, '−200 ms'], [NW / 2, '−100 ms'], [NW, 'now']],
+          yticks: [[350, '350'], [400, '400'], [450, '450']],
+          hlines: [{ v: 450, color: K.css('--bad'), dash: [5, 4], label: 'trip' }, { v: 350, color: K.css('--bad'), dash: [5, 4] }],
+          series: [{ y: v1, x0: 0, dx: 1, color: K.css('--s2'), width: 3 }, { y: v2, x0: 0, dx: 1, color: K.css('--s1'), width: 3 }],
+          title: 'Capacitor voltages [V]', legend: [['C1 (top)', K.css('--s2')], ['C2 (bottom)', K.css('--s1')]],
+        });
+        roV.set(Math.round(400 + st.dv / 2) + ' / ' + Math.round(400 - st.dv / 2) + ' V');
+        roSt.set(st.trip ? '<span class="pill bad">trip</span>' : Math.abs(st.dv) < 5 ? '<span class="pill ok">balanced</span>' : '<span class="pill warn">drifting apart</span>');
+        return;
+      }
       const xt = [[0, '−200 ms'], [NW / 2, '−100 ms'], [NW, 'now']];
       const box = SIMPLE ? (k) => (k === 0 ? { x: 62, y: 30, w: cv.w - 78, h: 230 } : { x: 62, y: 330, w: cv.w - 78, h: 220 }) : (k) => ({ x: 62, y: 30 + k * 188, w: cv.w - 78, h: 138 });
       K.plot(ctx, box(0), {
