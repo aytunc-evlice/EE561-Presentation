@@ -46,10 +46,10 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 17 | ★ How the offset pushes charge into or out of the midpoint: one instant, time at P/O/N per leg, r₀ = 0, +0.1, −0.1 (simulation) | 2.5 |
 | 18 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
 | 19 | Flying capacitor: two ways to make 0 V (10 / 01), one charges the capacitor and one discharges it, taking turns leaves an error, choosing by the error removes it (schematic + period-by-period plot) | 2 |
-| 20 | To the controller, the converter is just a voltage source behind an inductor (figure) | 2 |
-| 21 | Three PI controllers, three jobs: current, DC voltage (sum), midpoint (difference) (block diagram) | 2 |
-| 22 | Current control: rotate with the grid so the sines become constants i_d, i_q; one PI each (simulation) | 2.5 |
-| 23 | Grid filter: ripple, 3-level halves it, LCL filters much more, damp the resonance (simulation) | 2.5 |
+| 20 | Connecting to the grid: the converter is a voltage source behind an inductor; the voltage difference drives the current (figure) | 2 |
+| 21 | Three PI controllers, three jobs: follow the wanted current, keep 800 V, keep C1 = C2 (block diagram) | 2 |
+| 22 | Current control: three sines are moving targets; seen from a frame turning with the grid they become two flat lines i_d, i_q; one PI each (simulation) | 2.5 |
+| 23 | Grid filter: the ripple on the current, 3-level halves it, LCL removes most of it, an LCL rings after a kick and a resistor calms it (simulation) | 2.5 |
 | 24 | Where multilevel converters are used (three cards) | 1 |
 | 25 | Three things to remember, handover to Elif | 1 |
 | 26 | References | |
@@ -59,8 +59,8 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 - **SPWM basics (slides 3 and 5):** natural sampling, 2-level leg, V<sub>dc</sub> = 800 V. The spectrum is the FFT of one period (8192 samples); the m<sub>a</sub> curve is the fundamental of the clipped local average.
 - **Neutral-point balancing (slide 18):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
 - **Flying-capacitor balancing (slide 19):** a simple leg schematic that highlights the current path in state 10 or 01, and the capacitor voltage period by period after a −60 V disturbance, with the states alternated or chosen by the error.
-- **dq control (slide 22):** an L-filter average model with a voltage limit and an optional one-sample delay.
-- **Grid filter (slide 23):** the phase-voltage spectrum of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) times the filter admittance i<sub>g</sub>/v<sub>c</sub>, with a stiff, clean grid. R<sub>d</sub> is in series with C<sub>f</sub>.
+- **Current control (slide 22):** an L-filter average model (2 mH, 400 Hz bandwidth, one-sample delay) in dq; the top plot turns i<sub>d</sub>, i<sub>q</sub> back into the three phase currents.
+- **Grid filter (slide 23):** the phase voltage of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) is passed through the complex filter admittance by FFT and inverse FFT; the result is the ripple added to a clean 102 A sine. The kick view is a time-domain simulation of a 200 V, 20 µs pulse on the converter side, with and without the 1.5 Ω resistor in series with the capacitor.
 
 ## Printed handouts
 
@@ -75,4 +75,4 @@ To be written once the slides are final (see `../quiz/README.md`).
 
 - **Slides:** each slide is a `<section class="slide">` in `index.html`. Speaker notes are in its `<aside class="notes">`, and the time slot is in `data-min`.
 - **Build steps:** elements with `data-step="k"` appear on the k-th click.
-- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing, dq control), `js/sim-mmc.js` (L/LCL filter; also an MMC sorting sim, unused), `js/sim-om.js` (overmodulation), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.
+- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing, dq control), `js/sim-mmc.js` (L/LCL filter; also an MMC sorting sim, unused), `js/sim-om.js` (overmodulation, states, PD/POD, midpoint ripple, flying capacitor, simple current control, grid filter), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.

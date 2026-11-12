@@ -703,3 +703,180 @@
       if (ch) draw(); } };
   };
 })();
+
+/* Grid filter, simple view: the grid current over one 50 Hz cycle and the ripple left on it, for a 2- or 3-level leg
+   with an L or LCL filter; a second view shows the reaction to a short voltage kick (LCL rings, LCL + R does not). */
+(function () {
+  'use strict';
+  const { h } = K;
+  SIMS.gridfilter = function (host, cfg) {
+    const TAU = K.TAU, VDC = 800, VPH = (400 / Math.sqrt(3)) * Math.SQRT2, MOD = VPH / (VDC / 2), MF = 200, M = 1 << 15;
+    const L1 = 1e-3, L2 = 0.3e-3, C = 10e-6, RD = 1.5, I1 = 102;
+    const P = { topo: 2, filt: 'l', view: 'ripple' };
+    for (const k of Object.keys(P)) if (cfg[k] != null) P[k] = cfg[k];
+    const Hs = (e0, e1) => (e0 >= 0 && e1 >= 0 ? 1 : e0 < 0 && e1 < 0 ? 0 : e0 >= 0 ? e0 / (e0 - e1) : e1 / (e1 - e0));
+    const vanCache = {}, ripCache = {};
+    function van(topo) {
+      if (vanCache[topo]) return vanCache[topo];
+      const v = new Float64Array(M);
+      const lev = (q, x) => {
+        const t0 = q / M, t1 = (q + 1) / M;
+        const r0 = MOD * Math.sin(TAU * t0 - (x * TAU) / 3), r1 = MOD * Math.sin(TAU * t1 - (x * TAU) / 3);
+        const c0 = K.tri(MF * t0), c1 = K.tri(MF * t1);
+        if (topo === 2) return 2 * Hs(r0 - (2 * c0 - 1), r1 - (2 * c1 - 1)) - 1;
+        return Hs(r0 - c0, r1 - c1) + Hs(r0 - (c0 - 1), r1 - (c1 - 1)) - 1;
+      };
+      for (let q = 0; q < M; q++) { const a = lev(q, 0), b = lev(q, 1), c = lev(q, 2); v[q] = (a - (a + b + c) / 3) * (VDC / 2); }
+      return (vanCache[topo] = v);
+    }
+    const cm = (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]], ca = (a, b) => [a[0] + b[0], a[1] + b[1]];
+    const cd = (a, b) => { const d = b[0] * b[0] + b[1] * b[1]; return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d]; };
+    function Y(w, filt) { // grid current per converter volt, grid side shorted
+      if (filt === 'l') return [0, -1 / (w * (L1 + L2))];
+      const zc = [filt === 'lcld' ? RD : 0, -1 / (w * C)], z1 = [0, w * L1], z2 = [0, w * L2];
+      const i1 = cd([1, 0], ca(z1, cd(cm(zc, z2), ca(zc, z2))));
+      return cm(i1, cd(zc, ca(zc, z2)));
+    }
+    function ripple(topo, filt) {
+      const key = topo + filt; if (ripCache[key]) return ripCache[key];
+      const re = Float64Array.from(van(topo)), im = new Float64Array(M); K.fft(re, im);
+      const R = new Float64Array(M), I = new Float64Array(M);
+      for (let k = 2; k < M / 2; k++) { const y = Y(TAU * 50 * k, filt); R[k] = re[k] * y[0] - im[k] * y[1]; I[k] = -(re[k] * y[1] + im[k] * y[0]); R[M - k] = R[k]; I[M - k] = -I[k]; }
+      K.fft(R, I);
+      const D = 4, n = M / D, out = new Float64Array(n);
+      let mx = -1e9, mn = 1e9;
+      for (let q = 0; q < n; q++) { const x = R[q * D] / M; out[q] = x; if (x > mx) mx = x; if (x < mn) mn = x; }
+      return (ripCache[key] = { y: out, pp: mx - mn });
+    }
+    function kick(damped) { // converter-side pulse of 200 V for 20 µs at 0.5 ms; parasitic 0.02 Ω per inductor
+      const dt = 0.1e-6, T = 3e-3, rp = 0.02, rd = damped ? RD : 0, out = [];
+      let i1 = 0, i2 = 0, vc = 0;
+      for (let n = 0, N = Math.round(T / dt); n <= N; n++) {
+        const t = n * dt, v = t >= 0.5e-3 && t < 0.52e-3 ? 200 : 0, vb = vc + rd * (i1 - i2);
+        i1 += ((v - vb - rp * i1) / L1) * dt; i2 += ((vb - rp * i2) / L2) * dt; vc += ((i1 - i2) / C) * dt;
+        if (n % 20 === 0) out.push(i2);
+      }
+      return out;
+    }
+    const KICK = { lcl: kick(false), lcld: kick(true) };
+    const cv = K.canvas(cfg.w || 640, 560);
+    const sch = K.s('svg', { viewBox: '0 0 380 150', style: 'width:380px;height:150px' });
+    const ro = K.readout('Ripple left (peak to peak)', 'big');
+    const ctl = [
+      K.seg({ label: 'Converter leg', options: [[2, '2-level'], [3, '3-level']], value: P.topo, onChange: (v) => { P.topo = v; draw(); } }),
+      K.seg({ label: 'Filter', options: [['l', 'L'], ['lcl', 'LCL'], ['lcld', 'LCL + R']], value: P.filt, onChange: (v) => { P.filt = v; draw(); } }),
+      K.seg({ label: 'Lower plot', options: [['ripple', 'ripple'], ['kick', 'a short kick']], value: P.view, onChange: (v) => { P.view = v; draw(); } }),
+    ];
+    host.classList.add('sim');
+    host.style.gridTemplateColumns = (cfg.w || 640) + 'px 1fr';
+    host.style.gap = '18px';
+    host.append(h('div', { class: 'sim-col' }, cv.el), h('div', { class: 'sim-col', style: { gap: '12px' } }, sch, ...ctl.map((c) => c.el), ro.el));
+    const coil = (x, y, n) => { let d = `M${x},${y}`; for (let i = 0; i < n; i++) d += ' c0,-16 18,-16 18,0'; return d; };
+    function drawSch() {
+      const st = 'stroke:var(--ink2);stroke-width:2.4;fill:none', tx = 'font:700 15px var(--font);fill:var(--ink);text-anchor:middle';
+      let g = `<rect x="6" y="40" width="74" height="54" rx="6" style="fill:var(--panel);${st}"/><text x="43" y="72" style="${tx}">converter</text>`;
+      g += `<circle cx="340" cy="67" r="27" style="fill:var(--panel);${st}"/><text x="340" y="72" style="${tx}">grid</text>`;
+      if (P.filt === 'l') {
+        g += `<path d="M80,52 H150 ${coil(150, 52, 4).slice(coil(150, 52, 4).indexOf(' '))} H340 V40" style="${st}"/><text x="186" y="26" style="${tx}">L</text>`;
+      } else {
+        g += `<path d="M80,52 H100 ${coil(100, 52, 3).slice(coil(100, 52, 3).indexOf(' '))} H230 ${coil(230, 52, 2).slice(coil(230, 52, 2).indexOf(' '))} H340 V40" style="${st}"/>`;
+        g += `<text x="127" y="26" style="${tx}">L₁</text><text x="248" y="26" style="${tx}">L₂</text>`;
+        g += `<circle cx="190" cy="52" r="3.5" style="fill:var(--ink2)"/><path d="M190,52 V78 M174,78 H206 M174,88 H206" style="${st}"/><text x="222" y="88" style="${tx}">C</text>`;
+        if (P.filt === 'lcld') g += `<path d="M190,88 V96 l-7,4 l14,6 l-14,6 l14,6 l-7,4 V132" style="stroke:var(--s2);stroke-width:2.6;fill:none"/><text x="210" y="122" style="${tx};fill:var(--s2)">R</text>`;
+        else g += `<path d="M190,88 V132" style="${st}"/>`;
+      }
+      g += `<path d="M43,94 V132 H340 V94" style="${st}"/>`;
+      sch.innerHTML = g;
+    }
+    function draw() {
+      drawSch();
+      const ctx = cv.ctx; cv.clear();
+      const rp = ripple(P.topo, P.filt), n = rp.y.length, ys = new Float64Array(n);
+      for (let q = 0; q < n; q++) ys[q] = I1 * Math.sin((TAU * q) / n) + rp.y[q];
+      const xt = [0, 5, 10, 15, 20].map((v) => [v, v + ' ms']);
+      const name = { l: 'L', lcl: 'LCL', lcld: 'LCL + R' }[P.filt];
+      K.plot(ctx, { x: 58, y: 30, w: cv.w - 72, h: 200 }, {
+        xlim: [0, 20], ylim: [-130, 130], yticks: [[-100, '−100'], [0, '0'], [100, '100']], xticks: xt,
+        series: [{ y: ys, x0: 0, dx: 20 / n, color: K.css('--s1'), width: 1.4 }],
+        title: `Grid current [A], one 50 Hz cycle (${P.topo}-level, ${name})`,
+      });
+      if (P.view === 'ripple') {
+        K.plot(ctx, { x: 58, y: 300, w: cv.w - 72, h: 220 }, {
+          xlim: [0, 20], ylim: [-5, 5], yticks: [[-4, '−4'], [-2, '−2'], [0, '0'], [2, '2'], [4, '4']], xticks: xt,
+          series: [{ y: rp.y, x0: 0, dx: 20 / n, color: K.css('--s2'), width: 1.2 }],
+          title: 'Ripple only: the current minus the clean sine [A]',
+        });
+      } else {
+        const dx = 2e-3 * 1000;
+        K.plot(ctx, { x: 58, y: 300, w: cv.w - 72, h: 220 }, {
+          xlim: [0, 3], ylim: [-1, 8], yticks: [[0, '0'], [2, '2'], [4, '4'], [6, '6'], [8, '8']], xticks: [0, 1, 2, 3].map((v) => [v, v + ' ms']),
+          series: [{ y: KICK.lcl, x0: 0, dx: dx / 1000, color: K.css('--s2'), width: 2.2 }, { y: KICK.lcld, x0: 0, dx: dx / 1000, color: K.css('--s1'), width: 3 }],
+          title: 'After a short kick at 0.5 ms [A]', legend: [['LCL: rings', K.css('--s2')], ['LCL + R: calm', K.css('--s1')]],
+        });
+      }
+      ro.set(rp.pp.toFixed(1) + ' A <small class="muted">on a 102 A sine</small>');
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; const o = {}; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) Object.assign(o, ST[key]); let ch = false;
+      if (o.topo != null && o.topo !== P.topo) { P.topo = o.topo; ctl[0].set(o.topo); ch = true; }
+      if (o.filt != null && o.filt !== P.filt) { P.filt = o.filt; ctl[1].set(o.filt); ch = true; }
+      if (o.view != null && o.view !== P.view) { P.view = o.view; ctl[2].set(o.view); ch = true; }
+      if (ch) draw(); } };
+  };
+
+  /* Current control, simple view: three phase currents (top) and the same currents seen from a frame that turns
+     with the grid (bottom): two flat lines i_d, i_q, each held by its own PI controller. */
+  SIMS.dqsimple = function (host, cfg) {
+    const L = 2e-3, R = 0.1, W = K.TAU * 50, E0 = 326.6, TS = 100e-6, DT = 2e-6, TEND = 0.04, BW = 400;
+    const wc = K.TAU * BW, kp = wc * L, ki = wc * R;
+    let id = 0, iq = 0, xd = 0, xq = 0, vd = E0, vq = 0, vdA = E0, vqA = 0, tNext = 0;
+    const o = { t: [], id: [], iq: [], idr: [], iqr: [], a: [], b: [], c: [] };
+    for (let n = 0, N = Math.round(TEND / DT); n <= N; n++) {
+      const t = n * DT, idr = t >= 0.005 ? 30 : 0, iqr = t >= 0.02 ? -15 : 0;
+      if (t >= tNext - 1e-12) {
+        tNext += TS;
+        const ud = kp * (idr - id) + xd + E0 - W * L * iq, uq = kp * (iqr - iq) + xq + W * L * id;
+        xd += ki * (idr - id) * TS; xq += ki * (iqr - iq) * TS;
+        vdA = vd; vqA = vq; vd = ud; vq = uq;
+      }
+      id += ((vdA - E0 - R * id + W * L * iq) / L) * DT; iq += ((vqA - R * iq - W * L * id) / L) * DT;
+      if (n % 10 === 0) {
+        const th = W * t; o.t.push(t * 1000); o.id.push(id); o.iq.push(iq); o.idr.push(idr); o.iqr.push(iqr);
+        for (const [k, s] of [['a', 0], ['b', 1], ['c', 2]]) { const x = th - (s * K.TAU) / 3; o[k].push(id * Math.cos(x) - iq * Math.sin(x)); }
+      }
+    }
+    const P = { dq: false };
+    const cv = K.canvas(cfg.w || 680, 560);
+    host.classList.add('sim');
+    host.append(cv.el);
+    function draw() {
+      const ctx = cv.ctx; cv.clear();
+      const xt = [0, 10, 20, 30, 40].map((v) => [v, v + ' ms']), c1 = K.css('--s1'), c2 = K.css('--s2'), c3 = K.css('--s3') || K.css('--good'), mut = K.css('--muted');
+      K.plot(ctx, { x: 58, y: 30, w: cv.w - 72, h: 210 }, {
+        xlim: [0, 40], ylim: [-40, 40], yticks: [[-30, '−30'], [0, '0'], [30, '30']], xticks: xt,
+        series: [{ x: o.t, y: o.a, color: c1, width: 2.2 }, { x: o.t, y: o.b, color: c2, width: 2.2 }, { x: o.t, y: o.c, color: c3, width: 2.2 }],
+        title: 'The three grid currents [A]: moving targets', legend: [['i_a', c1], ['i_b', c2], ['i_c', c3]],
+      });
+      const box = { x: 58, y: 310, w: cv.w - 72, h: 210 };
+      if (!P.dq) {
+        ctx.save(); ctx.strokeStyle = K.css('--line'); ctx.setLineDash([6, 6]); ctx.strokeRect(box.x, box.y, box.w, box.h); ctx.setLineDash([]);
+        ctx.fillStyle = mut; ctx.font = '600 18px ' + K.font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('…seen from a frame that turns with the grid?', box.x + box.w / 2, box.y + box.h / 2); ctx.restore();
+        return;
+      }
+      K.plot(ctx, box, {
+        xlim: [0, 40], ylim: [-30, 45], yticks: [[-15, '−15'], [0, '0'], [15, '15'], [30, '30']], xticks: xt,
+        series: [{ x: o.t, y: o.idr, color: c1, width: 1.8, dash: [6, 4] }, { x: o.t, y: o.iqr, color: c2, width: 1.8, dash: [6, 4] },
+          { x: o.t, y: o.id, color: c1, width: 3 }, { x: o.t, y: o.iq, color: c2, width: 3 }],
+        title: 'Seen from the turning frame: two flat lines [A]', legend: [['i_d (active)', c1], ['i_q (reactive)', c2], ['wanted', mut, [6, 4]]],
+      });
+    }
+    K.onTheme(draw);
+    draw();
+    const ST = cfg.steps;
+    return { step(k) { if (!ST) return; const s = {}; for (const key of Object.keys(ST).map(Number).sort((a, b) => a - b)) if (k >= key) Object.assign(s, ST[key]);
+      if (s.dq != null && s.dq !== P.dq) { P.dq = s.dq; draw(); } } };
+  };
+})();
