@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (28 slides, ≈ 59 min)
+## Outline: Running the levels: Modulate · Balance · Control (27 slides, ≈ 58.5 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -48,13 +48,12 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 19 | ★ Balancing the midpoint with a PI controller: measure ΔV, PI output is the offset r₀, the voltages come back, the I part handles a leak (simulation) | 3 |
 | 20 | Flying capacitor: two ways to make 0 V (10 / 01), one charges the capacitor and one discharges it, taking turns leaves an error, choosing by the error removes it (schematic + period-by-period plot) | 2 |
 | 21 | Grid step 1 of 4, what makes the current flow: equal voltages give no current; the leading side sends active power to the lagging side; the higher-voltage side sends reactive power (simulation with size and timing sliders) | 2.5 |
-| 22 | Grid step 2 of 4, let a PI controller set the voltage: set by hand it fails when the grid drops 5 %, the PI corrects it, but a small error stays on a sine (simulation) | 2.5 |
+| 22 | Grid step 2 of 4, the control structure block by block: PLL and abc→dq on the measurements, current PIs (i_d,ref, i_q,ref → v_d,ref, v_q,ref), outer voltage PI makes i_d,ref, dq→abc gives the modulation references, plus the midpoint PI (block diagram) | 3 |
 | 23 | Grid step 3 of 4, the dq transformation: the frame turns with the grid voltage (the reference, on the d axis), the sine currents become two constants, i_d for active and i_q for reactive power, one PI each (animation with sliders, P and Q readouts) | 2.5 |
 | 24 | Grid step 4 of 4, who decides the wanted current: the DC capacitor as a bucket, more power in makes it overflow, a PI on the DC voltage asks for more grid current (simulation) | 2 |
-| 25 | All together: three PI controllers (DC voltage, current, midpoint) in one block diagram | 1 |
-| 26 | Where multilevel converters are used (three cards) | 1 |
-| 27 | Three things to remember, handover to Elif | 1 |
-| 28 | References | |
+| 25 | Where multilevel converters are used (three cards) | 1 |
+| 26 | Three things to remember, handover to Elif | 1 |
+| 27 | References | |
 
 ## Simulation models: what to say if asked
 
@@ -62,7 +61,6 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 - **Neutral-point balancing (slide 19):** a switching-period average model, i<sub>O</sub> = Σ(1 − |r<sub>x</sub>|)·i<sub>x</sub>, with an ideal source holding v<sub>C1</sub> + v<sub>C2</sub>. The time constant is τ = πC/(6·I·K·|cos φ|) ≈ 33 ms at unity PF.
 - **Flying-capacitor balancing (slide 20):** a simple leg schematic that highlights the current path in state 10 or 01, and the capacitor voltage period by period after a −60 V disturbance, with the states alternated or chosen by the error.
 - **Grid basics (slide 21):** steady-state phasors, per phase: grid 327 V peak, L = 2 mH, no resistance; i = (v − e)/(jωL).
-- **PI current control (slide 22):** one phase, L = 2 mH, R = 0.1 Ω. By hand: the voltage that gives 30 A at the nominal grid. PI: measured grid voltage + PI correction, 400 Hz bandwidth. The grid drops 5 % at 50 ms.
 - **dq transformation (slide 23):** pure geometry: the current arrow is (i<sub>d</sub> + j·i<sub>q</sub>) turned by the grid angle; the phase currents are its projections. P = 3/2·e<sub>d</sub>·i<sub>d</sub>, Q = −3/2·e<sub>d</sub>·i<sub>q</sub> with e<sub>d</sub> = 327 V.
 - **DC voltage (slide 24):** energy balance of a 2 mF capacitor at 800 V, C·v·dv/dt = P<sub>in</sub> − P<sub>out</sub>; the current loop is taken as instant. PI: 0.5 A/V and 40 A/(V·s).
 - **Grid filter (slide 14):** the phase voltage of naturally sampled sine PWM (2-level, or 3-level PD; 400 V, 50 kVA, 800 V DC) is passed through the complex filter admittance by FFT and inverse FFT; the result is the ripple added to a clean 102 A sine. The kick view is a time-domain simulation of a 200 V, 20 µs pulse on the converter side, with and without the 1.5 Ω resistor in series with the capacitor.
@@ -80,4 +78,4 @@ To be written once the slides are final (see `../quiz/README.md`).
 
 - **Slides:** each slide is a `<section class="slide">` in `index.html`. Speaker notes are in its `<aside class="notes">`, and the time slot is in `data-min`.
 - **Build steps:** elements with `data-step="k"` appear on the k-th click.
-- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing; also a detailed dq sim, unused), `js/sim-mmc.js` (a detailed L/LCL sim and an MMC sorting sim, both unused), `js/sim-om.js` (overmodulation, states, PD/POD, midpoint ripple, flying capacitor, grid filter), `js/sim-grid.js` (grid basics, PI current control, dq transformation, DC voltage), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.
+- **Code:** `js/sim-basics.js` (SPWM basics; it also holds two sims from Sefer’s deck that are unused here), `js/sim-mod.js` (carrier lab, min-max, space vectors), `js/sim-ctl.js` (neutral-point balancing; also a detailed dq sim, unused), `js/sim-mmc.js` (a detailed L/LCL sim and an MMC sorting sim, both unused), `js/sim-om.js` (overmodulation, states, PD/POD, midpoint ripple, flying capacitor, grid filter), `js/sim-grid.js` (grid basics, dq transformation, DC voltage; also a PI-by-hand comparison, unused), `js/sim-leg.js` (leg explorer for the flying-capacitor slide), shared plotting and FFT code in `js/kit.js`, navigation in `js/deck.js`.
