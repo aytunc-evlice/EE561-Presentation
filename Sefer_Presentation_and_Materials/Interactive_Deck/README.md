@@ -10,6 +10,7 @@ Open `index.html` in Chrome or Edge. It runs offline, with no installation or in
 | Swipe left / right | Next / back on a phone or tablet (◀ ▶ buttons are also shown there) |
 | `←` `PgUp` | Back |
 | `N` | Speaker notes, slot time and running clock (opens below the slide) |
+| `L` or the **Lecture notes** button | Explanation of the current slide in a panel beside it, for readers. The button and the panel are hidden in fullscreen, so they never show while presenting |
 | `O` | Slide index (click a slide to jump) |
 | `P` | On a leg slide: flip the direction of the phase current |
 | `F` | Fullscreen |

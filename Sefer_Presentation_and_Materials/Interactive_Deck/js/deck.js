@@ -42,10 +42,14 @@
 
   // ---------- scaling ----------
   const notes = document.getElementById('notes');
+  const lecture = document.getElementById('lecture');
   function fit() {
     const avH = window.innerHeight - (notes.classList.contains('open') ? notes.offsetHeight : 0);
-    const sc = Math.min(window.innerWidth / 1600, avH / 900);
+    // the lecture-notes panel takes the right side of a wide window; on a narrow one it lies over the slide
+    const avW = window.innerWidth - (lecture.classList.contains('open') && window.innerWidth >= 900 ? lecture.offsetWidth : 0);
+    const sc = Math.min(avW / 1600, avH / 900);
     const top = avH / 2;
+    deck.style.left = avW / 2 + 'px';
     deck.style.top = top + 'px';
     deck.style.transform = 'translate(-50%, -50%) scale(' + sc + ')';
   }
@@ -122,7 +126,26 @@
     const mins = +(s.dataset.min || 0);
     nPlan.textContent = mins ? '  ·  slot ' + fmtT(mins * 60) + '  ·  part clock should read ≈ ' + fmtT(cum[cur] * 60) + ' at the end' : '';
     nBody.innerHTML = n ? n.innerHTML : '<p>No notes.</p>';
+    // the same text as lecture notes for a reader: without the time slot
+    lTitle.textContent = titleOf(s);
+    lNum.textContent = 'Slide ' + (cur + 1) + ' of ' + slides.length;
+    lBody.innerHTML = n ? n.innerHTML.replace(/<b>[\d.]+ (?:min|s)\.<\/b>\s*/, '').replace(/<b>[\d.]+ (?:min|s) — (\w)/, (m, c) => '<b>' + c.toUpperCase()) : '<p>No notes for this slide.</p>';
+    lBody.scrollTop = 0;
   }
+
+  // ---------- lecture notes: a reading panel beside the slide, with its own button; both hidden in fullscreen ----------
+  const lTitle = K.h('h3'), lNum = K.h('div', { class: 'ln' }), lBody = K.h('div', { class: 'lb' });
+  function toggleLecture(on) {
+    lecture.classList.toggle('open', typeof on === 'boolean' ? on : undefined);
+    lectureBtn.classList.toggle('on', lecture.classList.contains('open'));
+    fit();
+  }
+  const lectureBtn = K.btn('Lecture notes', toggleLecture);
+  lectureBtn.id = 'lecturebtn';
+  lectureBtn.title = 'Explanation of this slide (L). Hidden in fullscreen (F).';
+  document.body.append(lectureBtn);
+  lecture.append(K.h('div', { class: 'lh' }, K.h('div', null, lNum, lTitle), K.btn('✕', () => toggleLecture(false))), lBody);
+  document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement) toggleLecture(false); fit(); });
   setInterval(() => {
     if (!timer.t0) { nTime.textContent = '0:00'; return; }
     const el = (Date.now() - timer.t0) / 1000;
@@ -148,7 +171,7 @@
     col.append(a);
   });
   toc.append(K.h('div', { class: 'help', html:
-    '<kbd>→</kbd>/<kbd>Space</kbd>/<kbd>PgDn</kbd> next step · <kbd>←</kbd>/<kbd>PgUp</kbd> back · <kbd>N</kbd> speaker notes + timer · <kbd>O</kbd> this index · ' +
+    '<kbd>→</kbd>/<kbd>Space</kbd>/<kbd>PgDn</kbd> next step · <kbd>←</kbd>/<kbd>PgUp</kbd> back · <kbd>N</kbd> speaker notes + timer · <kbd>L</kbd> lecture notes (not in fullscreen) ·<kbd>O</kbd> this index · ' +
     '<kbd>P</kbd> play/pause simulation · <kbd>R</kbd> reset simulation · <kbd>F</kbd> fullscreen · <kbd>D</kbd> dark/light · <kbd>B</kbd> black screen · <kbd>T</kbd> restart timer · type a number + <kbd>Enter</kbd> to jump' }));
   function tocMark() { toc.querySelectorAll('a').forEach((a) => a.classList.toggle('cur', a._i === cur)); }
   function toggleToc() { toc.classList.toggle('open'); }
@@ -169,6 +192,7 @@
       case 'Home': go(0, 0); break;
       case 'End': go(slides.length - 1, 0); break;
       case 'n': case 'N': toggleNotes(); break;
+      case 'l': case 'L': if (!document.fullscreenElement) toggleLecture(); break;
       case 'o': case 'O': toggleToc(); break;
       case 'Escape': toc.classList.remove('open'); break;
       case 'f': case 'F': if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); break;
@@ -210,4 +234,5 @@
   const m = /^#(\d+)(?:\.(\d+))?/.exec(location.hash || '');
   go(m ? +m[1] - 1 : 0, m && m[2] ? +m[2] : 0);
   if (/[?&]notes/.test(location.search)) toggleNotes();
+  if (/[?&]lecture/.test(location.search)) toggleLecture(true);
 })();
