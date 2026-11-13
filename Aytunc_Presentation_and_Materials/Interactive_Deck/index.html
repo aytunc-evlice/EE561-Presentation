@@ -521,7 +521,7 @@
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="Grid basics: what makes the current flow">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 1 of 4</div><h2>Grid connection: what makes the current flow?</h2></div></div>
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 1 of 2</div><h2>Grid connection: what makes the current flow?</h2></div></div>
   <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
     <div class="stack" style="gap:18px">
       <div><h3 style="font-size:22px;margin:0">① Equal voltages: no current</h3><p class="small" style="font-size:20px">The converter (its average, slide 14) copies the grid voltage. Nothing across the inductor, nothing flows.</p></div>
@@ -542,16 +542,16 @@
 </section>
 
 <section class="slide" data-part="2" data-section="control" data-min="3" data-title="The control structure">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 2 of 4</div><h2>The control structure, block by block</h2></div></div>
-  <div class="body" style="grid-template-columns: 330px 1fr; gap:20px">
-    <div class="stack" style="gap:14px">
+  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 2 of 2</div><h2>The control structure, block by block</h2></div></div>
+  <div class="body" style="grid-template-columns: 330px 1fr; grid-template-rows: 1fr auto; gap:14px 20px">
+    <div class="stack" style="gap:12px">
       <div><h3 style="font-size:21px;margin:0">① Measure and transform</h3><p class="small" style="font-size:19px">The PLL locks onto the grid voltage and gives its angle θ. With θ, the grid currents become two constants, <span class="m">i</span><sub>d</sub> and <span class="m">i</span><sub>q</sub>.</p></div>
       <div data-step="1"><h3 style="font-size:21px;margin:0">② Current PIs</h3><p class="small" style="font-size:19px">Each compares its current with its reference and sets the voltage we need: <span class="m">v</span><sub>d,ref</sub>, <span class="m">v</span><sub>q,ref</sub>.</p></div>
       <div data-step="2"><h3 style="font-size:21px;margin:0">③ Outer voltage PI</h3><p class="small" style="font-size:19px">Keeps the DC link at 800 V. Its output is <span class="m">i</span><sub>d,ref</sub>: active power. <span class="m">i</span><sub>q,ref</sub> is the reactive power we want.</p></div>
       <div data-step="3"><h3 style="font-size:21px;margin:0">④ Back to three phases</h3><p class="small" style="font-size:19px">dq → abc with the same θ gives <span class="m">r</span><sub>a</sub>, <span class="m">r</span><sub>b</sub>, <span class="m">r</span><sub>c</sub>: the modulation references for the carriers.</p></div>
       <div data-step="4"><h3 style="font-size:21px;margin:0">⑤ Plus the midpoint PI</h3><p class="small" style="font-size:19px">Adds the offset <span class="m">r</span><sub>0</sub> (slide 19).</p></div>
     </div>
-    <div style="align-self:center"><svg class="bd ctl" viewBox="0 10 1130 510" style="width:1090px;height:491px" aria-label="Control structure">
+    <div style="align-self:center"><svg class="bd ctl" viewBox="0 10 1130 510" style="width:990px;height:446px" aria-label="Control structure">
 <defs><marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink2)"/></marker></defs>
 <style>.ctl .a4{stroke:var(--ink2);stroke-width:2.2;fill:none;marker-end:url(#arr4)} .ctl .l4{stroke:var(--ink2);stroke-width:2.2;fill:none} .ctl .sj{fill:var(--panel);stroke:var(--ink2);stroke-width:2.2} .ctl .dot{fill:var(--ink2)} .ctl .grid{fill:var(--panel);stroke:var(--s1);stroke-width:3} .ctl .gt{font:700 15px var(--font);fill:var(--ink);text-anchor:middle;dominant-baseline:middle} .ctl .sg{font:italic 700 17px var(--math);fill:var(--ink)} .ctl .nt2{font:600 13px var(--font);fill:var(--muted)} .ctl .mn{font:700 18px var(--font);fill:var(--bad)} .ctl .box text{font-size:17px}</style>
 <g data-step="0"><g class="box "><rect x="980" y="272" width="140" height="60"/><text x="1050.0" y="291.0">converter</text><text x="1050.0" y="315.0" class="nt" style="text-anchor:middle;font-size:14px">+ filter</text></g><path class="l4" d="M1050,332 V462"/><circle cx="1050" cy="487" r="25" class="grid"/><text x="1050" y="488" class="gt">grid</text><circle cx="1050" cy="362" r="4" class="dot"/><circle cx="1050" cy="418" r="4" class="dot"/><path class="a4" d="M1050,362 H902"/><text x="975" y="352" class="sg" style="text-anchor:middle">e<tspan baseline-shift="sub" font-size="13">abc</tspan></text><path class="a4" d="M1050,418 H602"/><text x="800" y="408" class="sg" style="text-anchor:middle">i<tspan baseline-shift="sub" font-size="13">abc</tspan></text><g class="box "><rect x="720" y="336" width="180" height="56"/><text x="810.0" y="353.0">PLL + abc→dq</text><text x="810.0" y="377.0" class="nt" style="text-anchor:middle;font-size:14px">grid voltage</text></g><g class="box "><rect x="420" y="392" width="180" height="56"/><text x="510.0" y="409.0">abc→dq</text><text x="510.0" y="433.0" class="nt" style="text-anchor:middle;font-size:14px">grid current</text></g><path class="a4" d="M720,364 H545 V390"/><text x="640" y="354" class="sg" style="text-anchor:middle">θ</text><path class="a4" d="M455,392 V330"/><text x="442" y="360" class="sg" style="text-anchor:end">i<tspan baseline-shift="sub" font-size="13">d</tspan></text><path class="a4" d="M500,392 V330"/><text x="512" y="360" class="sg" style="text-anchor:start">i<tspan baseline-shift="sub" font-size="13">q</tspan></text></g>
@@ -561,52 +561,21 @@
 <g data-step="4"><g class="box lv"><rect x="980" y="24" width="140" height="56"/><text x="1050.0" y="41.0">midpoint PI</text><text x="1050.0" y="65.0" class="nt" style="text-anchor:middle;font-size:14px">keep C1 = C2</text></g><path class="a4" d="M1050,80 V148"/><text x="1062" y="118" class="sg" style="text-anchor:start">r<tspan baseline-shift="sub" font-size="13">0</tspan></text></g>
 </svg>
 </div>
+    <div class="cols-3" style="grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,1fr); gap:16px">
+      <div class="card" style="padding:12px 16px"><h3 style="font-size:19px;margin:0 0 4px">Grid-following</h3><p class="small" style="font-size:17px;margin:0">The grid sets the voltage and the frequency. The converter follows it and pushes a current in step with it.</p></div>
+      <div class="card" style="padding:12px 16px"><h3 style="font-size:19px;margin:0 0 4px">PLL (phase-locked loop)</h3><p class="small" style="font-size:17px;margin:0">A small control loop that tracks the grid voltage. Output: its angle θ, where the sine is right now.</p></div>
+      <div class="card" style="padding:12px 16px"><h3 style="font-size:19px;margin:0 0 4px">abc → dq, and why</h3><p class="small" style="font-size:17px;margin:0">Turn the three signals along with θ: the 50 Hz sines become constants. A PI removes a constant error fully; a sine it always chases.</p></div>
+    </div>
   </div>
-  <aside class="notes"><p><b>3 min.</b> One block group per click. The next two slides zoom into the dq transformation and the voltage loop.</p>
+  <aside class="notes"><p><b>3 min.</b> One block group per click. The three cards at the bottom are the vocabulary: say them first.</p>
     <ul>
+      <li><b>Grid-following:</b> the converter acts as a controlled current source synchronised to the grid; it needs a grid voltage to lock onto. (Grid-forming converters set their own voltage and frequency instead; not covered here.)</li>
+      <li><b>Why dq:</b> a PI has zero steady-state error only for a constant reference. On a 50 Hz sine with a 400 Hz loop the error stays around 12 %. In dq the references are constant, so the integrator removes the error fully.</li>
       <li><b>①</b> Measured: grid voltage e<sub>abc</sub>, grid current i<sub>abc</sub>, DC voltage. The PLL makes e<sub>q</sub> = 0, so the grid voltage lies on the d axis: e<sub>d</sub> = 327 V peak.</li>
       <li><b>②</b> v<sub>d,ref</sub> = PI(i<sub>d,ref</sub> − i<sub>d</sub>) + e<sub>d</sub> − ωL·i<sub>q</sub>; v<sub>q,ref</sub> = PI(i<sub>q,ref</sub> − i<sub>q</sub>) + ωL·i<sub>d</sub>. The e<sub>d</sub> feed-forward and the ωL decoupling terms are not drawn. Gains K<sub>p</sub> = ω<sub>c</sub>L, K<sub>i</sub> = ω<sub>c</sub>R; bandwidth several hundred Hz.</li>
       <li><b>③</b> Outer loop 10–50 Hz, much slower than the current loop, so the two do not disturb each other. Power: P = 3/2·e<sub>d</sub>·i<sub>d</sub>, Q = −3/2·e<sub>d</sub>·i<sub>q</sub>.</li>
       <li><b>④</b> r<sub>x</sub> = v<sub>x,ref</sub> / (V<sub>dc</sub>/2) per phase; then min-max (slide 7) and the PD carriers (slide 11).</li>
       <li><b>⑤</b> The voltage PI holds the sum v<sub>C1</sub> + v<sub>C2</sub>, the midpoint PI the difference: they never fight.</li>
-    </ul></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="control" data-min="2.5" data-title="The dq transformation">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 3 of 4</div><h2>The dq transformation: sines become constants</h2></div></div>
-  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
-    <div class="stack" style="gap:16px">
-      <div><h3 style="font-size:22px;margin:0">① Three sines, one turning arrow</h3><p class="small" style="font-size:20px">Like the voltage arrow of slide 9: the three currents are one arrow, turning at 50 Hz.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② The grid voltage is the reference</h3><p class="small" style="font-size:20px">The dq frame turns with the grid voltage, which lies on the d axis. In this frame the currents are two constants.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ <span class="m">i</span><sub>d</sub>: active, <span class="m">i</span><sub>q</sub>: reactive</h3><p class="small" style="font-size:20px"><span class="m">i</span><sub>d</sub> is in phase with the grid voltage: active power. <span class="m">i</span><sub>q</sub> is 90° away: reactive power.</p></div>
-      <div data-step="3"><h3 style="font-size:22px;margin:0">④ One PI for each</h3><p class="small" style="font-size:20px">Constant targets: the error goes to zero. The two PI outputs are transformed back to three phases for the PWM.</p></div>
-    </div>
-    <div data-sim="dqframe" data-config='{"w":700,"steps":{"0":{"dq":false,"id":30,"iq":0},"1":{"dq":true},"2":{"iq":-15}}}'></div>
-  </div>
-  <aside class="notes"><p><b>2.5 min.</b> Press P to pause the arrows.</p>
-    <ul>
-      <li><b>①</b> The red sine in the bottom plot is phase a; the grey ones are b and c.</li>
-      <li><b>②</b> How it works: a PLL locks onto the measured grid voltage and gives its angle θ. With θ we transform the grid voltage and the currents (abc → dq, the Park transform). The grid voltage becomes e<sub>d</sub> = 327 V, e<sub>q</sub> = 0: that is what “reference” means.</li>
-      <li><b>③</b> P = 3/2 · e<sub>d</sub> · i<sub>d</sub> and Q = −3/2 · e<sub>d</sub> · i<sub>q</sub> (the sign of Q depends on the convention). Move the sliders: i<sub>d</sub> changes P only, i<sub>q</sub> changes Q only. In the top-left picture, i<sub>d</sub> makes the arrow longer along the grid voltage, i<sub>q</sub> turns it away from it.</li>
-      <li><b>④</b> The whole chain: measure → abc to dq → PI on i<sub>d</sub> and PI on i<sub>q</sub> → v<sub>d</sub>, v<sub>q</sub> → dq to abc → references for the carriers. The d and q axes are coupled through ωL; the controller cancels that term. The wanted i<sub>d</sub> comes from the DC-voltage PI (next slide); the wanted i<sub>q</sub> is the reactive power we want, often zero.</li>
-    </ul></aside>
-</section>
-
-<section class="slide" data-part="2" data-section="control" data-min="2" data-title="DC voltage: who decides the wanted current">
-  <div class="sh"><div><div class="kicker"><b>Grid</b> · step 4 of 4</div><h2>Who decides the wanted current? The DC voltage</h2></div></div>
-  <div class="body" style="grid-template-columns: 340px 1fr; gap:24px">
-    <div class="stack" style="gap:18px">
-      <div><h3 style="font-size:22px;margin:0">① The DC capacitor is a bucket</h3><p class="small" style="font-size:20px">Power in fills it, power out empties it. In = out: the voltage stays.</p></div>
-      <div data-step="1"><h3 style="font-size:22px;margin:0">② More comes in</h3><p class="small" style="font-size:20px">Same current to the grid: the voltage climbs until the converter trips.</p></div>
-      <div data-step="2"><h3 style="font-size:22px;margin:0">③ A PI watches the voltage</h3><p class="small" style="font-size:20px">Too high? It asks for more <span class="m">i</span><sub>d</sub>: more active power to the grid. The voltage comes back to 800 V.</p></div>
-    </div>
-    <div data-sim="dcbucket" data-config='{"w":640,"steps":{"0":{"ev":false,"mode":"fixed"},"1":{"ev":true},"2":{"mode":"pi"}}}'></div>
-  </div>
-  <aside class="notes"><p><b>2 min.</b> 2 mF at 800 V. Power in goes from 10 kW to 20 kW at 20 ms.</p>
-    <ul>
-      <li><b>②</b> 10 kW too much raises the voltage by about 6 V every millisecond: 900 V is reached 17 ms later.</li>
-      <li><b>③</b> The output of this PI is the wanted i<sub>d</sub> of the previous slide. It is much slower than the current loop (tens of Hz against several hundred Hz), so the two do not disturb each other.</li>
-      <li>This loop holds the sum of the two capacitor voltages; the midpoint PI of slide 19 holds their difference.</li>
     </ul></aside>
 </section>
 
