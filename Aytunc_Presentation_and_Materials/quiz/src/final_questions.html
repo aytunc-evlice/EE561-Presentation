@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EE561 Multilevel Converters: Running the Levels — Potential Final Questions</title>
+<link rel="stylesheet" href="handout.css">
+<style>
+  @page { size: A4; margin: 13mm 15mm 14mm; @bottom-right { content: "Potential final questions · page " counter(page) " of " counter(pages); font: 8pt Calibri, sans-serif; color: #666; } }
+  .q { break-inside: avoid; margin-bottom: 5mm; }
+  .sol { break-inside: avoid; }
+  .intro { font-size: 10pt; color: var(--ink2); border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--line); padding: 2mm 0; margin-bottom: 4mm; }
+  .figside { display: grid; grid-template-columns: 1fr 62mm; gap: 5mm; align-items: start; }
+  .fig .cap { font-size: 8.5pt; color: var(--muted); text-align: center; }
+  .chain { font-family: var(--math); font-size: 10pt; line-height: 1.6; margin: 1mm 0 1.5mm 3mm; }
+  .pfig text { font: 600 11px Calibri, Carlito, Arial, sans-serif; fill: #333; }
+  .pfig .m { font: italic 13px "Cambria Math", Cambria, "Times New Roman", serif; fill: #111; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="top"><img class="odtu" src="../../Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="../../Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="title">
+    <div class="c1">EE561 Advanced Static Power Conversion · Multilevel Converters module</div>
+    <div class="c2">Potential Final Questions: Running the Levels</div>
+    <div class="c3">Proposed by M. Aytunç Evlice for the final examination</div>
+  </div>
+  <div class="intro">Three questions for a closed-book exam, each designed for about 12 minutes and 25 points, on the fundamentals of the talk: three-phase modulation with min-max injection, the midpoint of a three-level NPC converter, and the control of a grid-connected converter. The numbers are simple and need no calculator; most parts ask for a short derivation, a sketch or one or two sentences. Solutions and a marking guide follow on the later pages.</div>
+
+  <!-- ===================================================== Q1 -->
+  <div class="q">
+    <div class="qh"><b>Question 1 · Three-phase modulation and min-max injection</b><span class="tag">fundamentals</span><span class="pts">25 pts</span></div>
+    <p>A two-level three-phase inverter has <span class="m">V</span><sub>dc</sub> = <b>800 V</b>. Each leg follows its reference <span class="m">r</span><sub>x</sub> (−1 ≤ <span class="m">r</span><sub>x</sub> ≤ 1) by sine-triangle PWM, so that its average voltage measured from the DC-link midpoint O is <span class="m">r</span><sub>x</sub>·<span class="m">V</span><sub>dc</sub>/2. At one instant the three references are</p>
+    <div class="eq">r<sub>a</sub> = 1.10, &nbsp; r<sub>b</sub> = −0.55, &nbsp; r<sub>c</sub> = −0.55.</div>
+    <ol class="parts" type="a">
+      <li>What happens to leg a at this instant with plain sine PWM, and what is this operation called? <span class="pp">[4]</span></li>
+      <li>Min-max injection adds <span class="m">r</span><sub>0</sub> = −(max + min)/2 to all three references. Compute <span class="m">r</span><sub>0</sub> and the three new references. Are they inside ±1? <span class="pp">[6]</span></li>
+      <li>Show that the average line voltage <span class="m">v</span><sub>ab</sub> is the same with and without <span class="m">r</span><sub>0</sub>, and give its value. <span class="pp">[5]</span></li>
+      <li>Give the largest peak of the fundamental <b>line-to-line</b> voltage in the linear range (no overmodulation) for sine PWM and for min-max injection, in terms of <span class="m">V</span><sub>dc</sub> and in volts. <span class="pp">[6]</span></li>
+      <li>Min-max injection gives the same switching pulses as which other modulation method? Explain in one sentence why. <span class="pp">[4]</span></li>
+    </ol>
+  </div>
+
+  <!-- ===================================================== Q2 -->
+  <div class="q">
+    <div class="qh"><b>Question 2 · The midpoint of a three-level NPC converter</b><span class="tag">fundamentals</span><span class="pts">25 pts</span></div>
+    <p>A three-level NPC converter has a split DC link: C1 on top, C2 below, and the midpoint O between them. Each leg connects its output to P (+<span class="m">V</span><sub>dc</sub>/2), O (0) or N (−<span class="m">V</span><sub>dc</sub>/2). For <span class="m">r</span> &gt; 0 the leg switches between P and O with a carrier from 0 to 1; for <span class="m">r</span> &lt; 0 between O and N with a carrier from −1 to 0 (PD).</p>
+    <ol class="parts" type="a">
+      <li>Show that, within one switching period, a leg with reference <span class="m">r</span> spends the fraction 1 − |<span class="m">r</span>| of the time at O. <span class="pp">[6]</span></li>
+      <li>A leg at O draws its phase current from the midpoint. The average current drawn from O is therefore <span class="m">i</span><sub>O</sub> = Σ (1 − |<span class="m">r</span><sub>x</sub>|)·<span class="m">i</span><sub>x</sub> over the three phases. Using <span class="m">i</span><sub>a</sub> + <span class="m">i</span><sub>b</sub> + <span class="m">i</span><sub>c</sub> = 0, show that <span class="m">i</span><sub>O</sub> = −Σ |<span class="m">r</span><sub>x</sub>|·<span class="m">i</span><sub>x</sub>. <span class="pp">[5]</span></li>
+      <li>In normal operation the capacitor voltages ripple at 150 Hz on a 50 Hz grid. Explain why the ripple is at three times the grid frequency. <span class="pp">[4]</span></li>
+      <li>The states POO and ONN give the same line voltages. Explain why, what is different for the midpoint, and how a PI controller uses this to keep <span class="m">v</span><sub>C1</sub> = <span class="m">v</span><sub>C2</sub>: what it measures, what its output is, and where that output is added. Why does the load not notice the controller? <span class="pp">[10]</span></li>
+    </ol>
+  </div>
+
+  <!-- ===================================================== Q3 -->
+  <div class="q">
+    <div class="qh"><b>Question 3 · Controlling a grid-connected converter</b><span class="tag">fundamentals</span><span class="pts">25 pts</span></div>
+    <p>A grid-following converter (average voltage phasor <span class="m">V</span>) feeds the grid (voltage phasor <span class="m">E</span>) through an inductor <span class="m">L</span>, so that <span class="m">V</span> = <span class="m">E</span> + jω<span class="m">L</span>·<span class="m">I</span>. A PV array feeds its DC link through a DC-DC stage.</p>
+    <ol class="parts" type="a">
+      <li>Sketch the phasor diagram for unity power factor (<span class="m">I</span> in phase with <span class="m">E</span>). Use it to state whether <span class="m">V</span> leads or lags <span class="m">E</span>, and whether |<span class="m">V</span>| is larger or smaller than |<span class="m">E</span>|. In general, what sets the active power and what sets the reactive power? <span class="pp">[8]</span></li>
+      <li>Draw the block diagram of the control: PLL, abc → dq of the currents, the two current PI controllers, the DC-voltage PI controller, dq → abc and the PWM. Label the signals between the blocks (<span class="m">θ</span>, <span class="m">i</span><sub>d</sub>, <span class="m">i</span><sub>q</sub>, <span class="m">i</span><sub>d,ref</sub>, <span class="m">i</span><sub>q,ref</sub>, <span class="m">v</span><sub>d,ref</sub>, <span class="m">v</span><sub>q,ref</sub>, <span class="m">r</span><sub>abc</sub>). <span class="pp">[10]</span></li>
+      <li>The sun comes out and the PV power doubles. Describe, step by step, how the controllers react until the DC voltage is back at its reference. <span class="pp">[7]</span></li>
+    </ol>
+  </div>
+
+  <!-- ===================================================== solutions -->
+  <h2 class="sec brk">Solutions and marking guide</h2>
+
+  <div class="qh"><b>Solution 1 · Three-phase modulation and min-max injection</b><span class="pts">25 pts</span></div>
+  <div class="sol">
+    <p><b>(a)</b> <span class="m">r</span><sub>a</sub> = 1.10 is above the carrier peak: leg a stays at +<span class="m">V</span><sub>dc</sub>/2 for the whole switching period and can only give 400 V instead of 440 V. This is <b>overmodulation</b>: the average is clipped and low-order harmonics appear. <span class="mark">[2 + 2]</span></p>
+    <p><b>(b)</b> max = 1.10, min = −0.55, so <span class="m">r</span><sub>0</sub> = −(1.10 − 0.55)/2 = <b>−0.275</b>. New references: <b>0.825, −0.825, −0.825</b>, all inside ±1. <span class="mark">[2 for r<sub>0</sub>, 3 for the references, 1 for “inside”]</span></p>
+    <p><b>(c)</b> ⟨<span class="m">v</span><sub>ab</sub>⟩ = (<span class="m">r</span><sub>a</sub> + <span class="m">r</span><sub>0</sub> − <span class="m">r</span><sub>b</sub> − <span class="m">r</span><sub>0</sub>)·<span class="m">V</span><sub>dc</sub>/2 = (<span class="m">r</span><sub>a</sub> − <span class="m">r</span><sub>b</sub>)·<span class="m">V</span><sub>dc</sub>/2: <span class="m">r</span><sub>0</sub> cancels. Value: (1.10 + 0.55)·400 = (0.825 + 0.825)·400 = <b>660 V</b>. <span class="mark">[3 + 2]</span></p>
+    <p><b>(d)</b> Sine PWM: phase peak <span class="m">V</span><sub>dc</sub>/2, line-to-line peak √3·<span class="m">V</span><sub>dc</sub>/2 ≈ 0.866·<span class="m">V</span><sub>dc</sub> ≈ <b>693 V</b>. Min-max: the phase references may reach 2/√3, so the line-to-line peak is <span class="m">V</span><sub>dc</sub> = <b>800 V</b>: the full DC link, 15 % more. <span class="mark">[3 + 3]</span></p>
+    <p><b>(e)</b> <b>Space-vector PWM</b> (centred, with symmetric switching). The min-max offset centres the three references, which splits the zero-vector time equally between NNN and PPP in every switching period, exactly as SVPWM does. <span class="mark">[2 + 2]</span></p>
+  </div>
+
+  <div class="qh"><b>Solution 2 · The midpoint of a three-level NPC converter</b><span class="pts">25 pts</span></div>
+  <div class="sol">
+    <p><b>(a)</b> For <span class="m">r</span> &gt; 0 the carrier runs linearly from 0 to 1 and spends equal time at every height. The leg is at P while the carrier is below <span class="m">r</span>: fraction <span class="m">r</span>; otherwise at O: fraction 1 − <span class="m">r</span>. For <span class="m">r</span> &lt; 0 it is at N for |<span class="m">r</span>| and at O for 1 − |<span class="m">r</span>|. Both cases: time at O = 1 − |<span class="m">r</span>|. (Same argument as d = (1 + r)/2 for a two-level leg.) <span class="mark">[equal time per height 3, both signs 3]</span></p>
+    <p><b>(b)</b> <span class="m">i</span><sub>O</sub> = Σ <span class="m">i</span><sub>x</sub> − Σ |<span class="m">r</span><sub>x</sub>|·<span class="m">i</span><sub>x</sub> = 0 − Σ |<span class="m">r</span><sub>x</sub>|·<span class="m">i</span><sub>x</sub>. <span class="mark">[expansion 3, use of the current sum 2]</span></p>
+    <p><b>(c)</b> |<span class="m">r</span><sub>x</sub>| and <span class="m">i</span><sub>x</sub> are the same waveforms in the three phases, each shifted by a third of a cycle. Their sum therefore repeats every third of a cycle: 3 × 50 Hz = 150 Hz. The midpoint current, and the capacitor voltages that integrate it, ripple at 150 Hz with zero average. <span class="mark">[symmetry 2, 150 Hz 2]</span></p>
+    <p><b>(d)</b> ONN is POO with every leg moved down one level: a common offset added to all three legs, so every line voltage is unchanged (+400 V, 0, −400 V). In POO legs b and c are at O and the current <span class="m">i</span><sub>a</sub> flows <b>into</b> O; in ONN leg a is at O and <span class="m">i</span><sub>a</sub> flows <b>out of</b> O: opposite effect on C1 and C2. The controller measures Δ<span class="m">v</span> = <span class="m">v</span><sub>C1</sub> − <span class="m">v</span><sub>C2</sub>, drives it to zero with a PI, and its output is a small common offset <span class="m">r</span><sub>0</sub> (with the sign of the power flow) added to <b>all three references</b> in the modulator. This shifts time between the upper and lower states (between “POO-like” and “ONN-like” states) and so moves charge into or out of O. The load does not notice because <span class="m">r</span><sub>0</sub> is common to the three phases and cancels in the line voltages, like the min-max offset. <span class="mark">[same line voltages 2, opposite midpoint current 2, measured Δv 2, output r<sub>0</sub> added to all references 2, load does not see it 2]</span></p>
+  </div>
+
+  <div class="qh"><b>Solution 3 · Controlling a grid-connected converter</b><span class="pts">25 pts</span></div>
+  <div class="sol">
+    <div class="figside">
+      <div>
+        <p><b>(a)</b> <span class="m">E</span> on the real axis, <span class="m">I</span> in phase with it, and jω<span class="m">L</span><span class="m">I</span> perpendicular to <span class="m">I</span>, pointing 90° ahead. <span class="m">V</span> = <span class="m">E</span> + jω<span class="m">L</span><span class="m">I</span> closes the triangle: <b><span class="m">V</span> leads <span class="m">E</span></b> by a small angle δ and is <b>slightly larger</b> than <span class="m">E</span> (the hypotenuse). In general the <b>angle</b> between <span class="m">V</span> and <span class="m">E</span> sets the active power (it flows from the leading to the lagging side) and the <b>magnitude difference</b> sets the reactive power (it flows from the higher to the lower voltage). <span class="mark">[diagram 3, leads 1, larger 1, angle → P 1.5, magnitude → Q 1.5]</span></p>
+      </div>
+      <div class="fig">
+        <svg class="pfig" viewBox="0 0 230 120" style="width:100%;height:auto;display:block" aria-label="Phasor diagram at unity power factor">
+          <defs><marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#111"/></marker>
+                <marker id="pr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#cf0a2c"/></marker>
+                <marker id="pb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f4e9c"/></marker></defs>
+          <line x1="20" y1="100" x2="190" y2="100" stroke="#111" stroke-width="2" marker-end="url(#pa)"/><text x="196" y="104" class="m">E</text>
+          <line x1="20" y1="100" x2="90" y2="100" stroke="#2e7d32" stroke-width="4" marker-end="url(#pa)"/><text x="66" y="116" class="m" style="fill:#2e7d32">I</text>
+          <line x1="190" y1="100" x2="190" y2="40" stroke="#1f4e9c" stroke-width="2" marker-end="url(#pb)"/><text x="196" y="72" class="m" style="fill:#1f4e9c">jωLI</text>
+          <line x1="20" y1="100" x2="190" y2="40" stroke="#cf0a2c" stroke-width="2.4" marker-end="url(#pr)"/><text x="98" y="62" class="m" style="fill:#cf0a2c">V</text>
+          <path d="M60,100 A40,40 0 0 0 58,87" fill="none" stroke="#666"/><text x="64" y="94">δ</text>
+        </svg>
+        <div class="cap">Unity power factor: V leads E and is slightly larger.</div>
+      </div>
+    </div>
+    <p><b>(b)</b> Expected structure (any clear drawing with these blocks and signals):</p>
+    <div class="chain">e<sub>abc</sub> → PLL → θ<br>
+      i<sub>abc</sub> → abc→dq (θ) → i<sub>d</sub>, i<sub>q</sub><br>
+      (v<sub>dc,ref</sub> − v<sub>dc</sub>) → DC-voltage PI (× −1 for i<sub>d</sub> &gt; 0 into the grid) → i<sub>d,ref</sub>; &nbsp; i<sub>q,ref</sub> from the wanted reactive power (often 0)<br>
+      (i<sub>d,ref</sub> − i<sub>d</sub>) → PI → v<sub>d,ref</sub>; &nbsp; (i<sub>q,ref</sub> − i<sub>q</sub>) → PI → v<sub>q,ref</sub><br>
+      v<sub>d,ref</sub>, v<sub>q,ref</sub> → dq→abc (θ) → r<sub>abc</sub> → PWM (carriers) → gate signals</div>
+    <p class="mark">Marking: PLL and θ to both transforms 2; abc→dq of the currents 1; current PIs with references and v<sub>d,ref</sub>, v<sub>q,ref</sub> 3; DC-voltage PI giving i<sub>d,ref</sub> 2; dq→abc and PWM 2. Feed-forward and decoupling terms not required.</p>
+    <p><b>(c)</b> More power flows into the DC link than leaves it, so the DC capacitor charges and <span class="m">v</span><sub>dc</sub> rises above 800 V → the DC-voltage PI sees the error and raises <span class="m">i</span><sub>d,ref</sub> → the fast current loop makes <span class="m">i</span><sub>d</sub> follow (the converter voltage moves slightly further ahead of the grid) → more active power goes into the grid → when power out equals power in, <span class="m">v</span><sub>dc</sub> stops rising, and the integrator brings it back to 800 V with the new, larger <span class="m">i</span><sub>d</sub>. <span class="m">i</span><sub>q</sub> is not affected. <span class="mark">[DC voltage rises 2, voltage PI raises i<sub>d,ref</sub> 2, current loop and more power out 2, back to 800 V by the integrator 1]</span></p>
+  </div>
+
+</div>
+<script src="keep_together.js"></script>
+</body>
+</html>
