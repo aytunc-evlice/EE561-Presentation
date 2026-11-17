@@ -12,16 +12,6 @@
 
 <!-- =========================================================== M. AYTUNÇ EVLICE: RUNNING THE LEVELS -->
 
-<section class="slide" data-part="2" data-min="0" data-title="Further reading">
-  <style>.fr-card{padding:20px 26px} .fr-card h3{font-size:25px;margin:0 0 12px} .fr-card ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px} .fr-card li{font-size:20px;line-height:1.35} .fr-card a{font-weight:600} .fr-src{color:var(--muted);font-size:17px} .fr-fav{color:var(--accent);font-weight:700;font-size:17px;white-space:nowrap} .fr-star::marker{content:"★  ";color:var(--accent)}</style>
-  <div class="sh"><div><div class="kicker">Running the levels · for later</div><h2>Further reading: videos and short notes</h2></div></div>
-  <div class="body" style="grid-template-columns:1fr 1fr; grid-auto-rows:min-content; gap:22px 26px; align-content:center">
-    <div class="card fr-card"><h3>▶ Videos: start here</h3><ul><li><a href="https://ocw.mit.edu/courses/6-622-power-electronics-spring-2023/resources/mit6_622s23_lecture_17_mp4/" target="_blank" rel="noopener">MIT 6.622, Lecture 17: Inverters, Part 1</a> <span class="fr-src">· MIT OpenCourseWare, full lecture</span></li><li><a href="https://ch.mathworks.com/videos/motor-control-part-4-understanding-field-oriented-control-1587967749983.html" target="_blank" rel="noopener">Understanding Field-Oriented Control (Clarke and Park)</a> <span class="fr-src">· MathWorks, 10 min</span></li><li class="fr-star"><a href="https://www.youtube.com/watch?v=Gj7qAlsq_m8" target="_blank" rel="noopener">Understanding Space Vector Modulation</a> <span class="fr-src">· MathWorks, YouTube</span> <span class="fr-fav">★ must watch</span></li></ul></div><div class="card fr-card"><h3>Modulation</h3><ul><li><a href="https://imperix.com/doc/TN146" target="_blank" rel="noopener">SVPWM vs SPWM modulation techniques</a> <span class="fr-src">· imperix note</span></li></ul></div><div class="card fr-card"><h3>Multilevel legs and balancing</h3><ul><li><a href="https://imperix.com/doc/implementation/npc-inverter" target="_blank" rel="noopener">NPC inverter for three-phase applications</a> <span class="fr-src">· imperix note</span></li><li><a href="https://docs.plexim.com/plecs-demos/power-supplies/npc-converter/" target="_blank" rel="noopener">Neutral-point clamped converter</a> <span class="fr-src">· PLECS demo model</span></li></ul></div><div class="card fr-card"><h3>Grid control and filters</h3><ul><li><a href="https://imperix.com/doc/TN106" target="_blank" rel="noopener">Vector current control (PLL, dq, PI)</a> <span class="fr-src">· imperix note</span></li><li><a href="https://imperix.com/doc/TN123" target="_blank" rel="noopener">Active damping of LCL filters</a> <span class="fr-src">· imperix note</span></li><li><a href="https://docs.plexim.com/tsp/rtbox-demos/power-generationdistribution/npc-solar-inverter-lcl-active-damping/" target="_blank" rel="noopener">3-level NPC solar inverter with LCL filter</a> <span class="fr-src">· PLECS demo: the whole talk in one model</span></li></ul></div>
-    <p class="tiny" style="grid-column:1 / -1;margin:0;font-size:17px">All free. Links open in a new tab; the slides themselves are at aytunc-evlice.github.io/EE561-Presentation.</p>
-  </div>
-  <aside class="notes"><p>Shown while people come in; not presented. Videos first, then short application notes per part of the talk. </p></aside>
-</section>
-
 <section class="slide title-slide no-chrome" data-part="2" data-min="0.5" data-title="Title">
   <div class="tlogos"><img class="odtu" src="img/odtu_logo.svg" alt="ODTÜ — Middle East Technical University"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>
   <div class="tcenter">
@@ -33,6 +23,16 @@
   </div>
   <div class="tfoot"><span>Department of Electrical and Electronics Engineering · METU PowerLab</span><span>Fall 2026</span></div>
   <aside class="notes"><p>30 s. Second of the three talks. Sefer built the legs and counted their states; this talk runs them: which level when, which state for that level, and how the converter is controlled from the grid side. Elif closes the module with the cascaded H-bridge.</p></aside>
+</section>
+
+<section class="slide" data-part="2" data-min="0" data-title="Further reading">
+  <style>.fr-card{padding:20px 26px} .fr-card h3{font-size:25px;margin:0 0 12px} .fr-card ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px} .fr-card li{font-size:20px;line-height:1.35} .fr-card a{font-weight:600} .fr-src{color:var(--muted);font-size:17px} .fr-fav{color:var(--accent);font-weight:700;font-size:17px;white-space:nowrap} .fr-star::marker{content:"★  ";color:var(--accent)}</style>
+  <div class="sh"><div><div class="kicker">Running the levels · for later</div><h2>Further reading: videos and short notes</h2></div></div>
+  <div class="body" style="grid-template-columns:1fr 1fr; grid-auto-rows:min-content; gap:22px 26px; align-content:center">
+    <div class="card fr-card"><h3>▶ Videos: start here</h3><ul><li><a href="https://ocw.mit.edu/courses/6-622-power-electronics-spring-2023/resources/mit6_622s23_lecture_17_mp4/" target="_blank" rel="noopener">MIT 6.622, Lecture 17: Inverters, Part 1</a> <span class="fr-src">· MIT OpenCourseWare, full lecture</span></li><li><a href="https://ch.mathworks.com/videos/motor-control-part-4-understanding-field-oriented-control-1587967749983.html" target="_blank" rel="noopener">Understanding Field-Oriented Control (Clarke and Park)</a> <span class="fr-src">· MathWorks, 10 min</span></li><li class="fr-star"><a href="https://www.youtube.com/watch?v=Gj7qAlsq_m8" target="_blank" rel="noopener">Understanding Space Vector Modulation</a> <span class="fr-src">· MathWorks, YouTube</span> <span class="fr-fav">★ must watch</span></li></ul></div><div class="card fr-card"><h3>Modulation</h3><ul><li><a href="https://imperix.com/doc/TN146" target="_blank" rel="noopener">SVPWM vs SPWM modulation techniques</a> <span class="fr-src">· imperix note</span></li></ul></div><div class="card fr-card"><h3>Multilevel legs and balancing</h3><ul><li><a href="https://imperix.com/doc/implementation/npc-inverter" target="_blank" rel="noopener">NPC inverter for three-phase applications</a> <span class="fr-src">· imperix note</span></li><li><a href="https://docs.plexim.com/plecs-demos/power-supplies/npc-converter/" target="_blank" rel="noopener">Neutral-point clamped converter</a> <span class="fr-src">· PLECS demo model</span></li></ul></div><div class="card fr-card"><h3>Grid control and filters</h3><ul><li><a href="https://imperix.com/doc/TN106" target="_blank" rel="noopener">Vector current control (PLL, dq, PI)</a> <span class="fr-src">· imperix note</span></li><li><a href="https://imperix.com/doc/TN123" target="_blank" rel="noopener">Active damping of LCL filters</a> <span class="fr-src">· imperix note</span></li><li><a href="https://docs.plexim.com/tsp/rtbox-demos/power-generationdistribution/npc-solar-inverter-lcl-active-damping/" target="_blank" rel="noopener">3-level NPC solar inverter with LCL filter</a> <span class="fr-src">· PLECS demo: the whole talk in one model</span></li></ul></div>
+    <p class="tiny" style="grid-column:1 / -1;margin:0;font-size:17px">All free. Links open in a new tab; the slides themselves are at aytunc-evlice.github.io/EE561-Presentation.</p>
+  </div>
+  <aside class="notes"><p>Show for a few seconds after the title: "links for later, the starred video is the best one". Not presented. Videos first, then short application notes per part of the talk. </p></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="modulate" data-min="0.5" data-title="Learning objectives">
@@ -609,7 +609,7 @@
     <div class="sub">Questions?</div>
     <div class="by">M. Aytunç Evlice</div>
   </div>
-  <div class="tfoot"><span>Further reading: first slide of this deck</span><span>Next: Elif · Cascaded H-bridge</span></div>
+  <div class="tfoot"><span>Further reading: slide 2 of this deck</span><span>Next: Elif · Cascaded H-bridge</span></div>
   <aside class="notes"><p>Take questions, then hand over to Elif.</p></aside>
 </section>
 

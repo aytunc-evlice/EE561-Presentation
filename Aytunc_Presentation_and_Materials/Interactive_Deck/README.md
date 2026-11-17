@@ -27,8 +27,8 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 
 | # | Slide | min |
 | --: | --- | --: |
-| 1 | Further reading: videos and short notes, grouped by part of the talk (shown before the start, not presented) | 0 |
-| 2 | Title | 0.5 |
+| 1 | Title | 0.5 |
+| 2 | Further reading: videos and short notes, grouped by part of the talk (shown briefly after the title, not presented) | 0 |
 | 3 | Learning objectives | 0.5 |
 | 4 | ★ Basics: one comparator, from DC-DC to sine PWM: carrier, DC reference (buck), comparator, average, then a sine reference (inverter leg) | 2.5 |
 | 5 | ★ One switching period: two leg voltages, what r is, why the on-time is (1 + r)/2, why the average is r·V<sub>dc</sub>/2 (figure, built step by step) | 3 |
