@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EE561 Multilevel Converters: Running the Levels — Quiz</title>
+<link rel="stylesheet" href="handout.css">
+<style>
+  .mc { list-style: none; padding-left: 0; margin: 0 0 2mm; display: grid; grid-template-columns: 1fr 1fr; gap: .6mm 6mm; }
+  .mc li { font-size: 10pt; margin: 0; }
+  .mc li b { display: inline-block; width: 5mm; }
+  .stem { margin: 0 0 1mm; }
+  .stem .n { font-weight: 700; margin-right: 1.5mm; }
+  .pfig text { font: 600 11px Calibri, Carlito, Arial, sans-serif; fill: #333; }
+  .pfig .m { font: italic 13px "Cambria Math", Cambria, "Times New Roman", serif; fill: #111; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="top"><img class="odtu" src="../../Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="../../Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="title">
+    <div class="c1">EE561 Advanced Static Power Conversion</div>
+    <div class="c2">Multilevel Converters: Running the Levels — Quiz</div>
+  </div>
+  <div class="fields"><span>Name:</span><span>Student ID:</span><span>Date:</span></div>
+  <div class="instr">Answer all three questions (total 50 points). Question 1 asks for a short derivation, Question 2 is multiple choice (circle one answer for each), Question 3 asks for short explanations in words. No calculator is needed.</div>
+
+  <div class="q" style="flex:1;display:flex;flex-direction:column">
+    <div class="qh"><b>Question 1 · One switching period</b><span class="tag">derivation</span><span class="pts">20 pts</span></div>
+    <div class="figq" style="grid-template-columns: 74mm 1fr">
+      <div class="fig">
+        <svg class="pfig" viewBox="-26 0 326 200" style="width:100%;height:auto;display:block" aria-label="Carrier, reference and leg voltage over one switching period">
+          <line x1="30" y1="60" x2="275" y2="60" stroke="#ccc"/>
+          <line x1="30" y1="14" x2="30" y2="106" stroke="#999"/>
+          <text x="24" y="24" text-anchor="end">+1</text><text x="24" y="64" text-anchor="end">0</text><text x="24" y="104" text-anchor="end">−1</text>
+          <polyline points="30,20 150,100 270,20" fill="none" stroke="#1f4e9c" stroke-width="2.2"/>
+          <text x="214" y="88" fill="#1f4e9c">carrier</text>
+          <line x1="30" y1="40" x2="270" y2="40" stroke="#cf0a2c" stroke-width="2.2" stroke-dasharray="6 4"/>
+          <text x="276" y="44" class="m" style="fill:#cf0a2c">r</text>
+          <line x1="60" y1="40" x2="60" y2="178" stroke="#999" stroke-dasharray="3 3"/>
+          <line x1="240" y1="40" x2="240" y2="178" stroke="#999" stroke-dasharray="3 3"/>
+          <line x1="30" y1="150" x2="275" y2="150" stroke="#ccc"/>
+          <line x1="30" y1="116" x2="30" y2="182" stroke="#999"/>
+          <polyline points="30,172 60,172 60,128 240,128 240,172 270,172" fill="none" stroke="#111" stroke-width="2.2"/>
+          <text x="24" y="132" text-anchor="end">+V<tspan font-size="8" dy="2">dc</tspan><tspan dy="-2">/2</tspan></text>
+          <text x="24" y="176" text-anchor="end">−V<tspan font-size="8" dy="2">dc</tspan><tspan dy="-2">/2</tspan></text>
+          <text x="282" y="132" class="m">v</text><text x="289" y="136" style="font-size:8px">aO</text>
+          <line x1="60" y1="190" x2="240" y2="190" stroke="#111" marker-start="url(#ah)" marker-end="url(#ah)"/>
+          <text x="150" y="187" text-anchor="middle" class="m">t</text><text x="155" y="189" style="font-size:8px">on</text>
+          <line x1="30" y1="10" x2="270" y2="10" stroke="#666"/>
+          <line x1="30" y1="6" x2="30" y2="14" stroke="#666"/><line x1="270" y1="6" x2="270" y2="14" stroke="#666"/>
+          <text x="150" y="8" text-anchor="middle" class="m">T</text><text x="157" y="10" style="font-size:8px">s</text>
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#111"/></marker></defs>
+        </svg>
+        <div class="cap">One carrier period <span class="m">T</span><sub>s</sub>. Upper switch on while <span class="m">r</span> is above the carrier.</div>
+      </div>
+      <div>
+        <p>A two-level leg connects its output a either to +<span class="m">V</span><sub>dc</sub>/2 or to −<span class="m">V</span><sub>dc</sub>/2, measured from the DC-link midpoint O. Its reference <span class="m">r</span> (−1 ≤ <span class="m">r</span> ≤ 1) is compared with a triangular carrier between −1 and +1. During one carrier period <span class="m">r</span> can be taken as constant.</p>
+        <ol class="parts" type="a">
+          <li>Using the figure, show that the upper switch is on for a fraction <span class="m">d</span> = <span class="m">t</span><sub>on</sub>/<span class="m">T</span><sub>s</sub> = (1 + <span class="m">r</span>)/2 of the period. <span class="pp">[8]</span></li>
+          <li>Show that the average of <span class="m">v</span><sub>aO</sub> over the period is <span class="m">r</span> · <span class="m">V</span><sub>dc</sub>/2. <span class="pp">[6]</span></li>
+          <li>Let <span class="m">r</span> = <span class="m">m</span><sub>a</sub> sin ω<span class="m">t</span> with <span class="m">V</span><sub>dc</sub> = 800 V. What is the peak of the fundamental phase voltage at <span class="m">m</span><sub>a</sub> = 1? What goes wrong when <span class="m">m</span><sub>a</sub> &gt; 1? <span class="pp">[6]</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="space" style="flex:1;min-height:60mm;margin-bottom:6mm"></div>
+  </div>
+  <div class="foot"><span>EE561 · Multilevel Converters · Running the Levels · Quiz</span><span>page 1 of 2</span></div>
+</div>
+
+<div class="page">
+  <div class="top"><img class="odtu" src="../../Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="../../Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="q">
+    <div class="qh"><b>Question 2 · Modulation and balancing</b><span class="tag">multiple choice</span><span class="pts">15 pts</span></div>
+    <p class="stem"><span class="n">(a)</span>Min-max injection adds the same offset <span class="m">r</span><sub>0</sub> = −(max + min)/2 to all three references. Why does the load not see this offset? <span class="pp" style="color:#666;font-size:9pt">[5]</span></p>
+    <ul class="mc">
+      <li><b>A</b> The LCL filter removes it.</li>
+      <li><b>B</b> It is the same in all three phases, so it cancels in the line-to-line voltages.</li>
+      <li><b>C</b> It averages to zero in every switching period.</li>
+      <li><b>D</b> The current controller cancels it.</li>
+    </ul>
+    <p class="stem"><span class="n">(b)</span>A three-level leg uses two carriers, one for each half. Why is phase disposition (PD, the two carriers in phase) preferred over the mirrored arrangement (POD)? <span class="pp" style="color:#666;font-size:9pt">[5]</span></p>
+    <ul class="mc">
+      <li><b>A</b> PD needs fewer switches.</li>
+      <li><b>B</b> PD keeps the midpoint balanced by itself.</li>
+      <li><b>C</b> With PD two phases do not switch at the same instant, so the line voltage steps by <span class="m">V</span><sub>dc</sub>/2, not <span class="m">V</span><sub>dc</sub>: less ripple.</li>
+      <li><b>D</b> PD gives a larger fundamental voltage.</li>
+    </ul>
+    <p class="stem"><span class="n">(c)</span>In a three-level NPC converter, the states POO and ONN are both possible. Which statement is true? <span class="pp" style="color:#666;font-size:9pt">[5]</span></p>
+    <ul class="mc">
+      <li><b>A</b> They give different line voltages, but the same midpoint current.</li>
+      <li><b>B</b> They give the same line voltages, but the midpoint current has the opposite sign.</li>
+      <li><b>C</b> Neither of them connects a leg to the midpoint.</li>
+      <li><b>D</b> They differ only in switching losses.</li>
+    </ul>
+  </div>
+
+  <div class="q" style="flex:1;display:flex;flex-direction:column;margin-top:3mm">
+    <div class="qh"><b>Question 3 · Connecting to the grid</b><span class="tag">short answers</span><span class="pts">15 pts</span></div>
+    <p>A converter (voltage <span class="m">v</span>, the average of its pulses) is connected to the grid (voltage <span class="m">e</span>) through an inductor <span class="m">L</span>. Answer in one or two sentences each.</p>
+    <ol class="parts" type="a">
+      <li>The converter voltage has the same size as the grid voltage but leads it by a few degrees. In which direction does active power flow? What would you change to make the converter send reactive power instead? <span class="pp">[5]</span></li>
+      <li>The controller transforms the measured grid currents to the dq frame, using the angle of the grid voltage from a PLL, before the PI controllers. Why? <span class="pp">[5]</span></li>
+      <li>In the control structure, which controller produces <span class="m">i</span><sub>d,ref</sub>, and what does <span class="m">i</span><sub>q,ref</sub> stand for? <span class="pp">[5]</span></li>
+    </ol>
+    <div class="space" style="flex:1;min-height:40mm;margin-bottom:6mm"></div>
+  </div>
+  <div class="foot"><span>EE561 · Multilevel Converters · Running the Levels · Quiz · M. Aytunç Evlice</span><span>page 2 of 2</span></div>
+</div>
+
+</body>
+</html>

@@ -6,7 +6,7 @@ Sefer İdacı, Mustafa Aytunç Evlice and Elif Topaloğlu Kurmaç.
 | Folder | Contents |
 |---|---|
 | [`Interactive_Deck/`](Interactive_Deck/) | Slides for this part: an offline HTML deck with live simulations (25 slides, about 52 minutes). Open `Interactive_Deck/index.html` in Chrome or Edge; keys and outline in its [README](Interactive_Deck/README.md). |
-| [`quiz/`](quiz/) | Quiz and exam questions: to be written once the slides are final (template in `quiz/src/`). |
+| [`quiz/`](quiz/) | Printed quiz (2 pages, 50 points) and its answer key; sources in `quiz/src/`. |
 
 Topics: sine-triangle PWM from the basics (one switching period, m_a, overmodulation), min-max injection, switching
 states and space-vector PWM (and why min-max gives the same pulses), multilevel carrier PWM (PD vs POD),

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EE561 Multilevel Converters: Running the Levels — Quiz Answer Key</title>
+<link rel="stylesheet" href="handout.css">
+<style>
+  @page { size: A4; margin: 13mm 15mm 14mm; @bottom-right { content: "Answer key · page " counter(page) " of " counter(pages); font: 8pt Calibri, sans-serif; color: #666; } }
+  .sol { break-inside: avoid; }
+  .ans { font-weight: 700; color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="top"><img class="odtu" src="../../Interactive_Deck/img/odtu_logo.svg" alt="ODTÜ"><img class="pl" src="../../Interactive_Deck/img/powerlab_logo.png" alt="METU PowerLab"></div>
+  <div class="title">
+    <div class="c1">EE561 Advanced Static Power Conversion</div>
+    <div class="c2">Multilevel Converters: Running the Levels — Quiz Answer Key</div>
+    <div class="c3">M. Aytunç Evlice · for the presenter and the instructor · not for distribution to students</div>
+  </div>
+
+  <div class="qh"><b>Question 1 · One switching period</b><span class="pts">20 pts</span></div>
+  <div class="sol">
+    <p><b>(a)</b> The carrier is a straight line between −1 and +1, so within one period it spends <b>equal time at every height</b>. The upper switch is on while the carrier is below <span class="m">r</span>, i.e. while the carrier is in the band from −1 up to <span class="m">r</span>. That band has height <span class="m">r</span> − (−1) = 1 + <span class="m">r</span>, out of the full height 2, so</p>
+    <div class="eq">d = t<sub>on</sub> / T<sub>s</sub> = (1 + r) / 2.</div>
+    <p>Equivalent with the line equation: on the falling half the carrier is <span class="m">c</span>(<span class="m">t</span>) = 1 − 4<span class="m">t</span>/<span class="m">T</span><sub>s</sub>, which drops below <span class="m">r</span> at <span class="m">t</span> = (1 − <span class="m">r</span>)<span class="m">T</span><sub>s</sub>/4. The switch is off for that time at each end of the period, so <span class="m">t</span><sub>on</sub> = <span class="m">T</span><sub>s</sub> − 2·(1 − <span class="m">r</span>)<span class="m">T</span><sub>s</sub>/4 = (1 + <span class="m">r</span>)<span class="m">T</span><sub>s</sub>/2. Checks: <span class="m">r</span> = 1 → always on, <span class="m">r</span> = 0 → half, <span class="m">r</span> = −1 → never.</p>
+    <p><b>(b)</b> The output is +<span class="m">V</span><sub>dc</sub>/2 for the fraction <span class="m">d</span> and −<span class="m">V</span><sub>dc</sub>/2 for 1 − <span class="m">d</span>:</p>
+    <div class="eq">⟨v<sub>aO</sub>⟩ = d·V<sub>dc</sub>/2 − (1 − d)·V<sub>dc</sub>/2 = (2d − 1)·V<sub>dc</sub>/2 = r · V<sub>dc</sub>/2.</div>
+    <p><b>(c)</b> The local average follows <span class="m">m</span><sub>a</sub> sin ω<span class="m">t</span> · <span class="m">V</span><sub>dc</sub>/2, so the fundamental peak is <span class="m">m</span><sub>a</sub>·<span class="m">V</span><sub>dc</sub>/2 = <b>400 V</b> at <span class="m">m</span><sub>a</sub> = 1 (≈ 283 V rms phase). For <span class="m">m</span><sub>a</sub> &gt; 1 (<b>overmodulation</b>) the reference leaves the carrier near its peaks: the switch stays on (or off) for whole periods, pulses are lost and the average becomes a <b>clipped (flat-topped) sine</b>. Low-order harmonics (3rd, 5th, 7th, …) appear (the 3rd cancels in the line voltages), and the fundamental no longer grows in proportion to <span class="m">m</span><sub>a</sub>; it approaches the square-wave limit 4/π · 400 ≈ 509 V only as <span class="m">m</span><sub>a</sub> → ∞. (Bonus mention: min-max injection reaches 2/√3 · 400 ≈ 462 V while staying linear.)</p>
+    <p class="mark">Marking: (a) idea of equal time per height or the line equation 5, result 3; (b) weighted average 4, result 2; (c) 400 V 2, overmodulation named 1, clipping / lost pulses 2, low-order harmonics or nonlinear growth 1.</p>
+  </div>
+
+  <div class="qh"><b>Question 2 · Modulation and balancing</b><span class="pts">15 pts</span></div>
+  <div class="sol">
+    <table class="key"><tr><th>Part</th><th>(a)</th><th>(b)</th><th>(c)</th></tr><tr><td>Answer</td><td class="ans">B</td><td class="ans">C</td><td class="ans">B</td></tr></table>
+    <p><b>(a) B.</b> A three-wire load only sees the line voltages, e.g. <span class="m">v</span><sub>ab</sub> = <span class="m">v</span><sub>aO</sub> − <span class="m">v</span><sub>bO</sub>. An offset added to all three references moves all three leg voltages by the same amount and cancels in every difference (slide 8). It does not average to zero within a switching period (C): it changes slowly (at 150 Hz), so within one period it is practically constant.</p>
+    <p><b>(b) C.</b> With POD the lower carrier is the mirror of the upper one, so when phase a goes to P, phase b goes to N at the same instant and <span class="m">v</span><sub>ab</sub> jumps by the full 800 V. With PD the carriers have the same timing, the two legs switch at different instants and <span class="m">v</span><sub>ab</sub> steps by 400 V: smaller ripple and lower line-voltage THD for the same fundamental (slide 13). PD does not change the number of switches or the fundamental, and it does not balance the midpoint by itself.</p>
+    <p><b>(c) B.</b> ONN is POO with every leg moved down one level: a common offset, so the line voltages are identical (+400 V, 0, −400 V). The midpoint current is different: in POO legs b and c are at O and the current −(<span class="m">i</span><sub>b</sub> + <span class="m">i</span><sub>c</sub>) = <span class="m">i</span><sub>a</sub> flows into O; in ONN leg a is at O and <span class="m">i</span><sub>a</sub> flows out of O. One charges C1 and discharges C2, the other does the opposite; this is the free choice the midpoint controller uses (slides 16–20).</p>
+    <p class="mark">Marking: 5 points per correct choice; no negative marking.</p>
+  </div>
+
+  <div class="qh"><b>Question 3 · Connecting to the grid</b><span class="pts">15 pts</span></div>
+  <div class="sol">
+    <p><b>(a)</b> Active power flows from the <b>leading</b> side to the lagging side, so <b>from the converter into the grid</b>. To send reactive power, change the <b>size</b> of the converter voltage: make it larger than the grid voltage (the higher-voltage side sends reactive power), keeping the angle near zero. In short: the angle sets P, the magnitude sets Q (slide 22).</p>
+    <p><b>(b)</b> Using the grid-voltage angle θ from the PLL, the 50 Hz currents become <b>constants</b> in the dq frame (they turn together with the frame). A PI controller with its integrator drives the error to <b>zero for a constant reference</b>, but it always lags behind a sine. In dq the references are constants, so the steady-state error disappears; also <span class="m">i</span><sub>d</sub> (in phase with the grid voltage) maps to active power and <span class="m">i</span><sub>q</sub> to reactive power, so P and Q can be set separately (slide 23).</p>
+    <p><b>(c)</b> <span class="m">i</span><sub>d,ref</sub> comes from the outer <b>DC-voltage PI</b>, which keeps the DC link at its reference (800 V): if the DC voltage rises, it asks for more <span class="m">i</span><sub>d</sub>, sending more power to the grid. <span class="m">i</span><sub>q,ref</sub> is the <b>reactive power</b> we want to exchange with the grid, often zero (unity power factor).</p>
+    <p class="mark">Marking: (a) direction 2, magnitude for Q 3; (b) constants in dq 2, PI zero error for constants / lags a sine 3 (P/Q decoupling accepted for 1 of these); (c) DC-voltage PI 3, reactive power 2.</p>
+  </div>
+
+</div>
+<script src="keep_together.js"></script>
+</body>
+</html>
