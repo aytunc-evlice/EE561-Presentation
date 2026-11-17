@@ -32,7 +32,7 @@
     <div class="card fr-card"><h3>▶ Videos: start here</h3><ul><li><a href="https://ocw.mit.edu/courses/6-622-power-electronics-spring-2023/resources/mit6_622s23_lecture_17_mp4/" target="_blank" rel="noopener">MIT 6.622, Lecture 17: Inverters, Part 1</a> <span class="fr-src">· MIT OpenCourseWare, full lecture</span></li><li><a href="https://ch.mathworks.com/videos/motor-control-part-4-understanding-field-oriented-control-1587967749983.html" target="_blank" rel="noopener">Understanding Field-Oriented Control (Clarke and Park)</a> <span class="fr-src">· MathWorks, 10 min</span></li><li class="fr-star"><a href="https://www.youtube.com/watch?v=Gj7qAlsq_m8" target="_blank" rel="noopener">Understanding Space Vector Modulation</a> <span class="fr-src">· MathWorks, YouTube</span> <span class="fr-fav">★ must watch</span></li></ul></div><div class="card fr-card"><h3>Modulation</h3><ul><li><a href="https://imperix.com/doc/TN146" target="_blank" rel="noopener">SVPWM vs SPWM modulation techniques</a> <span class="fr-src">· imperix note</span></li></ul></div><div class="card fr-card"><h3>Multilevel legs and balancing</h3><ul><li><a href="https://imperix.com/doc/implementation/npc-inverter" target="_blank" rel="noopener">NPC inverter for three-phase applications</a> <span class="fr-src">· imperix note</span></li><li><a href="https://docs.plexim.com/plecs-demos/power-supplies/npc-converter/" target="_blank" rel="noopener">Neutral-point clamped converter</a> <span class="fr-src">· PLECS demo model</span></li></ul></div><div class="card fr-card"><h3>Grid control and filters</h3><ul><li><a href="https://imperix.com/doc/TN106" target="_blank" rel="noopener">Vector current control (PLL, dq, PI)</a> <span class="fr-src">· imperix note</span></li><li><a href="https://imperix.com/doc/TN123" target="_blank" rel="noopener">Active damping of LCL filters</a> <span class="fr-src">· imperix note</span></li><li><a href="https://docs.plexim.com/tsp/rtbox-demos/power-generationdistribution/npc-solar-inverter-lcl-active-damping/" target="_blank" rel="noopener">3-level NPC solar inverter with LCL filter</a> <span class="fr-src">· PLECS demo: the whole talk in one model</span></li></ul></div>
     <p class="tiny" style="grid-column:1 / -1;margin:0;font-size:17px">All free. Links open in a new tab; the slides themselves are at aytunc-evlice.github.io/EE561-Presentation.</p>
   </div>
-  <aside class="notes"><p>Show for a few seconds after the title: "links for later, the starred video is the best one". Not presented. Videos first, then short application notes per part of the talk. </p></aside>
+  <aside class="notes"><p>Show for a few seconds after the title: "links for later, the starred video is the best one". Not presented. The papers are on the References slide at the end. Videos first, then short application notes per part of the talk. </p></aside>
 </section>
 
 <section class="slide" data-part="2" data-section="modulate" data-min="0.5" data-title="Learning objectives">
@@ -590,18 +590,6 @@
     </ul></aside>
 </section>
 
-<section class="slide" data-part="2" data-section="outlook" data-min="1" data-title="Four things to remember">
-  <div class="sh"><div><div class="kicker">Summary</div><h2>Four things to remember</h2></div></div>
-  <div class="body" style="align-content:center; gap:18px">
-    <div class="card" data-step="1"><p class="lead"><b>1 · Pulses make an average.</b> Compare the reference with a carrier: the average follows it. Min-max gives 15 % more and equals SVPWM.</p></div>
-    <div class="card" data-step="2"><p class="lead"><b>2 · More levels, more carriers.</b> One carrier per step, in phase (PD). Smaller jumps, so the filter has an easier job.</p></div>
-    <div class="card" data-step="3"><p class="lead"><b>3 · Two ways to make the same output.</b> They push the capacitors opposite ways; a PI picks the one that keeps them balanced.</p></div>
-    <div class="card" data-step="4"><p class="lead"><b>4 · In dq, the controller sees constants.</b> PLL and dq turn the sines into flat targets; PIs hold the current and the DC link.</p></div>
-    <div class="callout" data-step="5"><b>Next talk:</b> Elif’s cascaded H-bridge, where every cell has its own isolated source.</div>
-  </div>
-  <aside class="notes"><p><b>1 min.</b> One card per click, one sentence each. Then hand over to Elif.</p></aside>
-</section>
-
 <section class="slide title-slide no-chrome" data-part="2" data-min="0" data-title="Thank you, questions">
   <div class="tlogos"><img class="odtu" src="img/odtu_logo.svg" alt="ODTÜ — Middle East Technical University"><img class="pl" src="img/powerlab_logo.png" alt="METU PowerLab"></div>
   <div class="tcenter">
@@ -611,6 +599,33 @@
   </div>
   <div class="tfoot"><span>Further reading: slide 2 of this deck</span><span>Next: Elif · Cascaded H-bridge</span></div>
   <aside class="notes"><p>Take questions, then hand over to Elif.</p></aside>
+</section>
+
+<section class="slide" data-part="2" data-section="outlook" data-min="0" data-title="References">
+  <div class="sh"><div><h2>References</h2></div></div>
+  <div class="body cols-2" style="gap:30px; align-content:start">
+    <ul class="small" style="gap:6px; font-size:17px">
+      <li>B. Wu, M. Narimani, <i>High-Power Converters and AC Drives</i>, 2nd ed., Wiley-IEEE Press, 2017.</li>
+      <li>D. G. Holmes, T. A. Lipo, <i>Pulse Width Modulation for Power Converters</i>, Wiley-IEEE Press, 2003.</li>
+      <li>N. Mohan, T. M. Undeland, W. P. Robbins, <i>Power Electronics: Converters, Applications, and Design</i>, 3rd ed., Wiley, 2003.</li>
+      <li>K. Zhou, D. Wang, “Relationship between space-vector modulation and three-phase carrier-based PWM: a comprehensive analysis,” <i>IEEE TIE</i>, 49(1), 2002.</li>
+      <li>B. P. McGrath, D. G. Holmes, T. A. Lipo, “Optimized space vector switching sequences for multilevel inverters,” <i>IEEE TPEL</i>, 18(6), 2003.</li>
+      <li>N. Celanovic, D. Boroyevich, “A comprehensive study of neutral-point voltage balancing problem in three-level NPC VSI PWM inverters,” <i>IEEE TPEL</i>, 15(2), 2000.</li>
+      <li>T. A. Meynard, H. Foch, “Multi-level conversion: high voltage choppers and voltage-source inverters,” <i>IEEE PESC</i>, 1992.</li>
+      <li>T. Brückner, S. Bernet, H. Güldner, “The active NPC converter and its loss-balancing control,” <i>IEEE TIE</i>, 52(3), 2005.</li>
+      
+    </ul>
+    <ul class="small" style="gap:6px; font-size:17px">
+      <li>M. Liserre, F. Blaabjerg, S. Hansen, “Design and control of an LCL-filter-based three-phase active rectifier,” <i>IEEE TIA</i>, 41(5), 2005.</li>
+      <li>R. Peña-Alzola et al., “Analysis of the passive damping losses in LCL-filter-based grid converters,” <i>IEEE TPEL</i>, 28(6), 2013.</li>
+      <li>J. Rodríguez, J.-S. Lai, F. Z. Peng, “Multilevel inverters: a survey of topologies, controls, and applications,” <i>IEEE TIE</i>, 49(4), 2002.</li>
+      <li>S. Kouro et al., “Recent advances and industrial applications of multilevel converters,” <i>IEEE TIE</i>, 57(8), 2010.</li>
+      <li>IEEE Std 519-2014, <i>Recommended Practice and Requirements for Harmonic Control in Electric Power Systems</i>.</li>
+      <li>ABB, ACS1000 and ACS2000 medium-voltage drive documentation; Infineon, hybrid ANPC EasyPACK 2B for 1500 V PV, 2019.</li>
+      <li>imperix application notes: NPC inverter, SPWM vs SVPWM, vector current control.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Simulation models in this deck are simplified teaching models (ideal switches, average models, illustrative device data); state that if asked.</p></aside>
 </section>
 
 </div>
