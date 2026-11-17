@@ -21,7 +21,7 @@ Second of three talks: Sefer’s talk ([`../../Sefer_Presentation_and_Materials/
 | `T` | Restart the clock |
 | number + `Enter` | Jump to that slide |
 
-## Outline: Running the levels: Modulate · Balance · Control (26 slides, ≈ 54.5 min)
+## Outline: Running the levels: Modulate · Balance · Control (25 slides, ≈ 53 min)
 
 Theory slides are marked ★; new in the November 2026 rework marked (new).
 
@@ -50,9 +50,8 @@ Theory slides are marked ★; new in the November 2026 rework marked (new).
 | 21 | Flying capacitor: two ways to make 0 V (10 / 01), one charges the capacitor and one discharges it, taking turns leaves an error, choosing by the error removes it (schematic + period-by-period plot) | 2 |
 | 22 | Grid step 1 of 2, what makes the current flow: equal voltages give no current; the leading side sends active power to the lagging side; the higher-voltage side sends reactive power (simulation with size and timing sliders) | 2.5 |
 | 23 | Grid step 2 of 2, the control structure block by block: PLL and abc→dq on the measurements, current PIs (i_d,ref, i_q,ref → v_d,ref, v_q,ref), outer voltage PI makes i_d,ref, dq→abc gives the modulation references, plus the midpoint PI; three cards explain grid-following, the PLL, and abc→dq and why (block diagram) | 3 |
-| 24 | Putting it together, a 1500 V PV inverter: power stage, modulator (min-max, PD), midpoint PI and grid control in one diagram, each block pointing back to its slide | 1.5 |
-| 25 | Four things to remember (modulation, carriers, balancing, dq control), handover to Elif | 1 |
-| 26 | References | |
+| 24 | Four things to remember (modulation, carriers, balancing, dq control), handover to Elif | 1 |
+| 25 | References | |
 
 ## Simulation models: what to say if asked
 
