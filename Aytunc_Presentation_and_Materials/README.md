@@ -7,7 +7,7 @@ Sefer İdacı, Mustafa Aytunç Evlice and Elif Topaloğlu Kurmaç.
 |---|---|
 | [`Interactive_Deck/`](Interactive_Deck/) | Slides for this part: an offline HTML deck with live simulations (25 slides, about 52 minutes). Open `Interactive_Deck/index.html` in Chrome or Edge; keys and outline in its [README](Interactive_Deck/README.md). |
 | [`quiz/`](quiz/) | Printed quiz (2 pages, 50 points) with its answer key, and three potential final exam questions with solutions; sources in `quiz/src/`. |
-| [`simulations/`](simulations/) | PLECS model for a live demo: three-phase three-level NPC, open loop (`npc_3phase.plecs`), with the script that writes it. The ▶ PLECS lines in the speaker notes say when to show what. |
+| [`simulations/`](simulations/) | PLECS model for a live demo: three-phase three-level NPC, open loop (`npc_3phase.plecs`), with the script that writes it. The orange ▶ PLECS tags on the slides say when to show what. |
 
 Topics: sine-triangle PWM from the basics (one switching period, m_a, overmodulation), min-max injection, switching
 states and space-vector PWM (and why min-max gives the same pulses), multilevel carrier PWM (PD vs POD),

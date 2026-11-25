@@ -338,3 +338,9 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 #notes .plecs-cue { border-left: 3px solid #f0a500; background: rgba(240, 165, 0, .14); color: #fff; padding: 6px 10px; margin: 0 0 10px; border-radius: 3px; }
 #notes .plecs-cue b { color: #f0a500; }
 #notes .plecs-cue code { font-family: var(--mono, monospace); background: rgba(255, 255, 255, .1); padding: 0 4px; border-radius: 3px; }
+
+/* PLECS demo cue on the slide itself, in the footer row */
+.plecs-tag { position: absolute; right: 120px; bottom: 9px; z-index: 5; font: 600 16px/1 var(--font); color: #7a4a00; background: #fff4dc; border: 1.5px solid #f0a500; border-radius: 999px; padding: 7px 14px; white-space: nowrap; }
+.plecs-tag b { color: #b45309; margin-right: 6px; }
+.plecs-tag code { font: 600 15px var(--mono, monospace); background: rgba(240, 165, 0, .18); padding: 1px 5px; border-radius: 4px; }
+:root[data-theme="dark"] .plecs-tag { color: #ffd98a; background: #2a2008; }

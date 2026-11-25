@@ -25,8 +25,8 @@ The scope plots are in the order of the demo, top to bottom:
 | 5 | `m_index = 0.9`, `zs = 0` | 5 → 6 | 150 Hz midpoint current, capacitor ripple |
 | 6 | `dv0 = 40` | 6 | the 80 V gap does not come back by itself |
 
-In the deck, the speaker notes of slides 7, 8, 12, 13, 15, 17 and 18 start with an orange **▶ PLECS** line: what to
-set and which plot to show at that point of the talk.
+In the deck, slides 7, 8, 12, 13, 15, 17 and 18 carry an orange **▶ PLECS** tag in the footer row: what to set and
+which plot to show at that point of the talk (the same cue is the first line of their speaker notes).
 
 ## Things to try
 
