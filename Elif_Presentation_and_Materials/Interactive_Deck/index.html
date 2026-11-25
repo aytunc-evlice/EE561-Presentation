@@ -466,7 +466,7 @@ ol.refs li{margin-bottom:12px; padding-left:8px}
       <ul class="say"><li>Cell outputs are unipolar.</li><li>Upper band → S1, lower band → S3.</li></ul>
     </div>
   </div>
-  <aside class="notes">H1 takes the outer bands, H3 the inner bands. The upper carrier of a pair gives S1 of that cell, the lower one gives S3. Each cell output is 0 or +E in the positive half cycle and 0 or −E in the negative half, so it is unipolar. Counting pulses: the cells switch at 240, 180 and 120 Hz, average 180 Hz = 1080/6.</aside>
+  <aside class="notes">H1 takes the outer bands, H3 the inner bands. The upper carrier of a pair gives S1 of that cell, the lower one gives S3. Each cell output is 0 or +E in the positive half cycle and 0 or −E in the negative half, so it is unipolar. Counting pulses and averaging S1 and S3 in each cell: the cells switch at 210, 180 and 150 Hz, average 180 Hz = 1080/6.</aside>
 </section>
 
 <!-- 17 LS rotation -->
@@ -1107,7 +1107,9 @@ D.register('ps', el => {
 D.register('psh', el => {
   let mode = 'an'; const H = 3, ma = 0.8, mf = 10, N = 8192, R = psPWM(H, ma, mf, N);
   const ab = R.vA.map((v, i) => v - R.vB[i]), sig = { h1: R.cell[0], an: R.vA, ab };
-  const sp = {}, T = {}; Object.keys(sig).forEach(k => { sp[k] = spec(sig[k]); T[k] = thd(sig[k]); });
+  // fundamental phase of each waveform (vAB leads vAN by 30°), so the dashed fundamental lines up
+  const ph1 = s => { const re = Float64Array.from(s), im = new Float64Array(s.length); fft(re, im); return Math.atan2(im[1], re[1]); };
+  const sp = {}, T = {}, P = {}; Object.keys(sig).forEach(k => { sp[k] = spec(sig[k]); T[k] = thd(sig[k]); P[k] = ph1(sig[k]); });
   const ghost = { h1: null, an: 'h1', ab: 'an' }, gname = { h1: 'H1', an: 'AN', ab: 'AB' };
   const info = {
     h1: { lv: 3, pk: 1, say: ['Three levels: +E, 0, −E.', 'Harmonics around 2m<sub>f</sub> (20th).'] },
@@ -1126,7 +1128,7 @@ D.register('psh', el => {
     else if (mode === 'an') stack(ctx, [R.vA], [D.col('ink2')], x, y, W, hh, -Rg, Rg);
     else stack(ctx, [ab], [D.col('ink2')], x, y, W, hh, -Rg, Rg);
     const a = sp[mode];
-    line(ctx, Float64Array.from({ length: 800 }, (_, i) => a[1] * Math.sin(TAU * i / 799)), x, y, W, hh, -Rg, Rg, ink, 2, [6, 5]);
+    line(ctx, Float64Array.from({ length: 800 }, (_, i) => a[1] * Math.cos(TAU * i / 799 + P[mode])), x, y, W, hh, -Rg, Rg, ink, 2, [6, 5]);
     sub(ctx, 'v', gname[mode], 0, y + hh / 2 + 6, { color: ink, weight: 600, size: 20 });
     const pl = pk === 1 ? 'E' : pk + 'E';
     text(ctx, '+' + pl, x - 10, ym(pk, -Rg, Rg, y, hh) + 6, { align: 'right', size: 14 }); text(ctx, '−' + pl, x - 10, ym(-pk, -Rg, Rg, y, hh) + 6, { align: 'right', size: 14 });
@@ -1202,7 +1204,8 @@ D.register('lsarr', el => {
 /* ================= level-shifted waveforms ================= */
 D.register('ls', el => {
   let sel = 0; const H = 3, ma = 0.8, mf = 18, N = 8192, R = lsPWM(H, ma, mf, N);
-  const fsw = R.g1.map(g => edges(g) * 60), cv = el.querySelector('#lsCv'), svg = el.querySelector('#lsSvg');
+  // per cell: average of S1 and S3 pulses per cycle × 60 Hz (even mf gives them different counts)
+  const fsw = R.g1.map((g, k) => (edges(g) + edges(R.g3[k])) / 2 * 60), cv = el.querySelector('#lsCv'), svg = el.querySelector('#lsSvg');
   // schematic: one phase, three cells
   let s = `<circle cx="115" cy="14" r="6" fill="var(--paper)" class="w"/><text class="lbl" x="132" y="21">A</text>`;
   s += `<path class="w" d="M115 20 V40 M115 200 V224 M115 384 V408 M115 568 V584"/>`;
