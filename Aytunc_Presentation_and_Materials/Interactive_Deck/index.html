@@ -194,7 +194,7 @@
       </table>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Open <code>npc_3phase.plecs</code>, set <code>m_index = 1.1</code>, run. Plot 1: the reference goes above the carriers near its peaks; plot 4: the currents get flat-topped. (The model is three-level; the idea is the same.)</p>
     <p><b>3 min.</b> One question per click, asked out loud.</p>
     <ul>
       <li><b>① “What happens to (1 + r)/2 when r = 1.2?”</b> It says 110 %: impossible. The switch is simply on all period.</li>
@@ -223,7 +223,7 @@
     </div>
     <div data-sim="minmax" data-config='{"m":1.1,"th":0,"w":620,"h":400,"onStep":3}'></div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Keep <code>m_index = 1.1</code>, set <code>zs = 1</code>, run. Plot 1: the references are back inside ±1; plot 3: the line voltage keeps the same shape; plot 4: clean currents. Then set back <code>m_index = 0.9</code>, <code>zs = 0</code>. (The model adds a 1/6 third harmonic, which has the same 15 % limit as min-max.)</p>
     <p><b>3 min.</b> One question per click.</p>
     <ul>
       <li><b>① “What changes with three phases?”</b> Nothing per leg: each leg still follows its own reference.</li>
@@ -327,7 +327,7 @@
     </div>
     <div data-sim="carrier" data-config='{"n":3,"arr":"PD","w":620,"simple":true,"noPS":true,"sig":"a","onlyA":true,"steps":{"0":{"arr":"PD","sig":"a","onlyA":true,"n":3},"3":{"arr":"POD","sig":"a","onlyA":true,"n":3}}}'></div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Default settings (<code>m_index = 0.9</code>, <code>pod = 0</code>, <code>zs = 0</code>), run. Plot 1: one reference, two carriers; plot 2: v<sub>aO</sub> has three levels, +400, 0, −400 V.</p>
     <p><b>2.5 min.</b> Only leg a is shown. Click 3 switches the lower carrier from shifted (PD) to mirrored (POD).</p>
     <ul>
       <li><b>① “Why not one carrier?”</b> One comparator answers yes or no: two levels. Three levels need a second answer.</li>
@@ -350,7 +350,7 @@
     </div>
     <div data-sim="pdpod" data-config='{"arr":"POD","th":60,"w":680,"steps":{"0":"POD","3":"PD"}}'></div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Plot 3, v<sub>ab</sub> steps by 400 V (five levels). Then <code>pod = 1</code>, run: plot 1 shows the mirrored lower carrier, plot 3 jumps 0 ↔ 800 V, plot 4 has more ripple. Set back <code>pod = 0</code>.</p>
     <p><b>3 min.</b> Three carrier periods at θ = 60°. Clicks 0–2 show POD, click 3 switches to PD.</p>
     <ul>
       <li><b>① “Does each phase get its own carriers?”</b> No: one set, shared. That is what makes the comparison between phases possible.</li>
@@ -395,7 +395,7 @@
     </div>
     <div data-sim="gridfilter" data-config='{"w":640,"steps":{"0":{"topo":2,"filt":"l","view":"ripple","cur":false},"1":{"cur":true},"2":{"topo":3},"3":{"filt":"lcl"},"4":{"filt":"lcld","view":"kick"}}}'></div>
   </div>
-  <aside class="notes"><p><b>2.5 min.</b> 400 V, 50 kVA (102 A peak), 800 V DC, 10 kHz. L = 1.3 mH; LCL: 1 mH + 0.3 mH with 10 µF; R = 1.5 Ω.</p><ul>
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Plot 2 (pulses) against plot 4 (the load currents, sines with a small ripple): the load inductance keeps the average.</p><p><b>2.5 min.</b> 400 V, 50 kVA (102 A peak), 800 V DC, 10 kHz. L = 1.3 mH; LCL: 1 mH + 0.3 mH with 10 µF; R = 1.5 Ω.</p><ul>
     <li><b>①</b> The top plot is the phase voltage of the converter (line to neutral): fast pulses; the dashed line is its average, the sine we asked the modulator for.</li>
     <li><b>②</b> This is why the following slides can draw sine currents: from here on, “the converter voltage” means the average, and the filter takes care of the rest.</li>
     <li>Numbers: ripple about 7 A peak to peak (2-level, L) → 3.4 A (3-level, L) → below 1 A (LCL).</li>
@@ -437,7 +437,7 @@
     </div>
     <div data-sim="npripple" data-config='{"w":680,"simple":true}'></div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Default settings: plot 5, the midpoint current, three humps per cycle (150 Hz) with zero average; plot 6, v<sub>C1</sub> and v<sub>C2</sub> ripple about 18 V peak to peak, in opposite directions.</p>
     <p><b>1.5 min.</b> One output cycle, 20 ms; 50 A, m = 0.8, unity power factor.</p>
     <ul>
       <li><b>①</b> Just show the shape. No formula needed.</li>
@@ -458,7 +458,7 @@
     </div>
     <div data-sim="npbal" data-config='{"dv0":0,"on":false,"simple":true,"w":640,"steps":{"0":{"bleed":0},"1":{"bleed":1}}}'></div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="plecs-cue"><b>▶ PLECS</b> · Set <code>dv0 = 40</code>, run. Plot 6: the capacitors start 80 V apart and the gap does not come back by itself: the model has no midpoint controller. Set back <code>dv0 = 0</code>.</p>
     <p><b>2 min.</b> No balancing in this simulation; we only watch the two capacitor voltages (2 × 4.7 mF, 50 A peak, unity power factor, speed ×0.1).</p>
     <ul>
       <li><b>①</b> Point at the two lines: the 150 Hz wiggle of the last slide, no trend.</li>

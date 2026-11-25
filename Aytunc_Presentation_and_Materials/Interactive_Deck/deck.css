@@ -333,3 +333,8 @@ input[type="range"] { width: 100%; accent-color: var(--ink2); height: 26px; curs
 .btn.figzoom-x { position: absolute; right: 24px; top: 20px; font-size: 20px; padding: 6px 14px; }
 .btn.figzoom-btn { position: absolute; z-index: 40; display: none; font-size: 20px; line-height: 1; padding: 6px 10px; opacity: .85; }
 .btn.figzoom-btn.on { display: block; }
+
+/* PLECS demo cues in the speaker notes */
+#notes .plecs-cue { border-left: 3px solid #f0a500; background: rgba(240, 165, 0, .14); color: #fff; padding: 6px 10px; margin: 0 0 10px; border-radius: 3px; }
+#notes .plecs-cue b { color: #f0a500; }
+#notes .plecs-cue code { font-family: var(--mono, monospace); background: rgba(255, 255, 255, .1); padding: 0 4px; border-radius: 3px; }
